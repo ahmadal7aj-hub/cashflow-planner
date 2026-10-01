@@ -64,6 +64,6 @@ jobs:
         run: npm audit --omit=dev --audit-level=high
       - name: Dependency review (PRs only)
         if: github.event_name == 'pull_request'
-        uses: actions/dependency-review-action@v4
+        uses: actions/dependency-review-action@v5
         with:
           fail-on-severity: high
