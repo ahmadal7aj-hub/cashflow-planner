@@ -1,0 +1,35 @@
+# dependencies
+node_modules/
+
+# secrets - never commit; .env.example (names only) is allowed
+.env
+.env.*
+!.env.example
+
+# expo / build output
+.expo/
+dist/
+build/
+web-build/
+ios/
+android/
+
+# logs and OS files
+*.log
+npm-debug.*
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/
+
+# coverage
+coverage/
+
+# private business documents - keep local only, never publish
+docs/source/
+docs/private/
+*.docx
+*.pdf
+.review/
