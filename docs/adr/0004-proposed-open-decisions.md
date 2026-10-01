@@ -1,0 +1,23 @@
+# ADR 0004: Proposed answers to the PRD open decisions (section 16)
+
+- Status: **Proposed**. Not binding until the product owner confirms or changes each item.
+- Date: 2026-10-01
+- Needed before: Phase 2 (Core Alpha). Items marked "after interviews" should be re-checked against evidence.
+
+## Proposals
+
+| # | Open decision | Proposal | Why | Revisit |
+|---|---|---|---|---|
+| 1 | Product name and identity | Keep the working name until interviews finish. Do not buy domains or register store identifiers yet. | Bundle ids and store listings are hard to change. | After interviews |
+| 2 | Planning horizon | Default to **until the day before next payday**, with the app computing `horizonDays` from a stored payday. Add "calendar month" as a user option only if interviews show people think in months (hypothesis H4). | Matches the "safe to spend before payday" job-to-be-done; the prototype already uses it. | After interviews |
+| 3 | Safety buffer policy | The user sets it. The app **pre-fills a configurable default** (suggested: 10% of monthly income, rounded) and labels it a starting setting, not advice. The default lives in server-side config, not in UI code. | PRD says business policy must not be hard-coded in UI; avoids looking like financial advice before legal review. | After legal review |
+| 4 | Multiple accounts in Alpha | **One combined spendable balance** in Alpha. Keep the `accounts` table and `include_in_safe_spend` flag in the schema so multi-account is an additive change later. | Least input effort; fewer ways to get the forecast wrong. | If interviewees hold several accounts and ask for it |
+| 5 | PDF/CSV statement import | **Do not build yet.** Ask about it in interviews (Q7 in `docs/VALIDATION.md`) and, if demand is strong, run a manual "concierge" test before writing an importer. | A competitor already offers imports; build only if it is the adoption blocker. | After interviews |
+| 6 | Pricing and Pro boundary | **No price yet.** Ask willingness-to-pay questions in interviews. Working hypothesis for the boundary: core forecast and safe-to-spend free; scenarios, goals and notifications Pro. Export and delete are never paywalled (PRD P6-02). | Price needs evidence; the boundary rule for export/delete is already fixed. | After interviews |
+| 7 | Minimum age and legal wording | **18+** as a working assumption; final wording only from UAE counsel. | Conservative default; legal review is required before production. | At legal review |
+| 8 | Data hosting region and processors | **Do not choose yet.** Decide with UAE counsel (PDPL cross-border rules), then pick the Supabase region and list processors in `docs/PRIVACY-DATA-MAP.md`. | A wrong early choice is costly to migrate; the BRD requires this review first. | At legal review |
+
+## Consequences
+
+- Phase 2 can start on items 2, 3 and 4 as proposed without waiting on legal or pricing work.
+- Items 1, 5, 6, 7 and 8 stay explicitly open and must not be decided implicitly in code.
