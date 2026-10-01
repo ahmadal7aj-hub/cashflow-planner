@@ -22,7 +22,7 @@ A mobile-first personal cash-flow planning app for UAE residents. Its core job i
 ```bash
 cd mobile
 npm ci            # install locked dependencies
-npm start         # start Expo; scan the QR code with Expo Go
+npm start         # start Expo; scan the QR code with Expo Go (runs the clickable prototype)
 ```
 
 ## Common commands (run in `mobile/`)
