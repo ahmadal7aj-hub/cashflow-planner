@@ -13,12 +13,27 @@ A mobile-first personal cash-flow planning app for UAE residents. Its core job i
 ## Prerequisites
 
 - Git
-- Node.js LTS (not yet installed on the founder machine) and a package manager
-- Expo / EAS tooling (added in the app shell step)
+- Node.js LTS (24.x) and npm
+- JDK 17 (only for Maestro E2E tests, P0-05)
+- Expo Go on a phone to run the app (no emulator needed for the prototype)
 
 ## Setup
 
-Setup commands will be documented here once the Expo app shell lands (P0-01 follow-up).
+```bash
+cd mobile
+npm ci            # install locked dependencies
+npm start         # start Expo; scan the QR code with Expo Go
+```
+
+## Common commands (run in `mobile/`)
+
+| Command | Purpose |
+|---|---|
+| `npm run check` | format check + lint + typecheck + tests (what CI runs) |
+| `npm run format` | auto-format with Prettier |
+| `npm run lint` | ESLint |
+| `npm run typecheck` | TypeScript (strict) |
+| `npm test` | Jest unit/component tests |
 
 ## Environments
 
@@ -28,6 +43,7 @@ Setup commands will be documented here once the Expo app shell lands (P0-01 foll
 
 ```
 AGENTS.md            rules for coding agents
+mobile/              Expo + TypeScript app
 docs/                project documentation (see docs/README.md)
 docs/adr/            architecture decision records
 docs/source/         original BRD / PRD (.docx)
