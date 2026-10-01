@@ -12,10 +12,16 @@ Use with `docs/INTERVIEW-ONE-PAGER.md`. The prototype uses made-up numbers and s
 
 ## What the sample data looks like (so you can spot misunderstandings)
 
-Spendable balance AED 8,200 - savings AED 500 - safety buffer AED 300 - planned spending AED 200 - payday in
-12 days - rent AED 3,500 (in 4 days), DEWA AED 450 (6), car loan AED 1,300 (9), gym AED 200 (11).
-Expected: **Safe to spend AED 1,750.00**, **AED 145.83 per day**, **expected balance AED 2,050.00**,
-one "due soon" heads-up for rent.
+Spendable balance AED 12,000 - safety buffer AED 300 - payday in 12 days - savings set aside AED 1,200
+(emergency fund 500, gold 300, summer travel 400). Bills due before payday total AED 7,080: rent AED 3,500
+(in 4 days), DEWA 450 (6), internet and mobile 380 (8), car loan 1,300 (9), health insurance 250 (10),
+money sent home 1,000 (11), gym 200 (11). Essential everyday budgets (groceries, fuel, Salik, parking) still
+expected: AED 1,650. Dining, delivery, shopping and entertainment come out of the safe-to-spend figure.
+Expected: **Safe to spend AED 1,770.00**, **AED 147.50 per day**, **expected balance AED 2,070.00**,
+one "due soon" heads-up for rent. The what-if laptop (AED 3,000) shows a **AED 1,230.00** shortfall.
+
+Participants can also edit this data: tap any item on the "Your income and expenses" screen, or add their own
+(for example Salik, parking, chiller, school fees). Safe to spend updates immediately.
 
 ## Say to the participant
 
@@ -26,7 +32,7 @@ confusing, that is useful for me. Please say what you are thinking out loud."
 
 | Task | Say | Watch for | Success |
 |---|---|---|---|
-| T1 | "Set up your starting numbers and get to your forecast." | Hesitation on the three fields; confusion about "safety buffer" | Reaches the dashboard unaided |
+| T1 | "Set up your starting numbers and get to your forecast." | Hesitation on the two fields; confusion about "safety buffer" | Reaches the dashboard unaided |
 | T2 | "In your own words, what does 'Safe to spend' mean?" | Do they mention commitments, savings, buffer, payday? | Explains it as money left until payday |
 | T3 | "Why is the rent heads-up showing?" | Do they tap the card and read the reason? | Can describe the reason |
 | T4 | "How was the safe-to-spend number worked out?" | Do they tap the big number? | Opens the explanation and follows the inputs |

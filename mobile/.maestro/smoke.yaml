@@ -31,7 +31,7 @@ appId: host.exp.exponent
     id: 'commitments-continue'
 - assertVisible:
     id: 'dashboard-screen'
-- assertVisible: 'AED 1,750.00'
+- assertVisible: 'AED 1,770.00'
 
 # Explanation is reachable from the headline number
 - tapOn:

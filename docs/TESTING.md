@@ -21,7 +21,7 @@ CI (`.github/workflows/ci.yml`) additionally runs `expo-doctor`, a JS bundle exp
 
 ## E2E smoke test (Maestro, P0-05)
 
-Flow: `mobile/.maestro/smoke.yaml` walks welcome -> onboarding -> commitments -> dashboard (checks the hand-verified AED 1,750.00), opens the explanation, and runs the what-if.
+Flow: `mobile/.maestro/smoke.yaml` walks welcome -> onboarding -> commitments -> dashboard (checks the hand-verified AED 1,770.00), opens the explanation, and runs the what-if.
 
 Run it as a **documented pre-merge mobile E2E job** (it needs an emulator or phone, so it is not in the cloud CI yet):
 

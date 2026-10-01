@@ -15,13 +15,13 @@ describe('BalanceChart', () => {
     expect(screen.getAllByTestId(/^balance-bar-/)).toHaveLength(12);
     const plot = screen.getByTestId('balance-chart-plot');
     expect(plot.props.accessibilityLabel).toBe(
-      'Projected balance falls from AED 8,200.00 today to AED 2,750.00 on day 12. AED 1,000.00 is kept aside for savings, buffer and planned spending.',
+      'Projected balance falls from AED 12,000.00 today to AED 4,920.00 on day 12. AED 3,150.00 is kept aside for savings, buffer and everyday spending.',
     );
   });
 
   it('labels the kept-aside line directly', async () => {
     await render(<BalanceChart timeline={buildBalanceTimeline(sample)} />);
-    expect(screen.getByText('Kept aside AED 1,000.00')).toBeTruthy();
+    expect(screen.getByText('Kept aside AED 3,150.00')).toBeTruthy();
   });
 
   it('offers a table view with every day, and can hide it again', async () => {
@@ -30,9 +30,9 @@ describe('BalanceChart', () => {
 
     await fireEvent.press(screen.getByTestId('balance-table-toggle'));
     expect(screen.getByTestId('balance-table')).toBeTruthy();
-    expect(screen.getByLabelText('Day 3: AED 8,200.00')).toBeTruthy(); // before rent
-    expect(screen.getByLabelText('Day 4: AED 4,700.00')).toBeTruthy(); // after rent
-    expect(screen.getByLabelText('Day 6: AED 4,250.00')).toBeTruthy(); // after DEWA
+    expect(screen.getByLabelText('Day 3: AED 12,000.00')).toBeTruthy(); // before rent
+    expect(screen.getByLabelText('Day 4: AED 8,500.00')).toBeTruthy(); // after rent
+    expect(screen.getByLabelText('Day 6: AED 8,050.00')).toBeTruthy(); // after DEWA
 
     await fireEvent.press(screen.getByTestId('balance-table-toggle'));
     expect(screen.queryByTestId('balance-table')).toBeNull();
@@ -56,21 +56,21 @@ describe('BreakdownBar', () => {
       'Commitments',
       'Savings',
       'Safety buffer',
-      'Planned spending',
+      'Everyday spending',
     ]) {
       expect(screen.getByText(label)).toBeTruthy();
     }
-    expect(screen.getByLabelText('Commitments: AED 5,450.00, 66%')).toBeTruthy();
-    expect(screen.getByLabelText('Safe to spend: AED 1,750.00, 21%')).toBeTruthy();
+    expect(screen.getByLabelText('Commitments: AED 7,080.00, 59%')).toBeTruthy();
+    expect(screen.getByLabelText('Safe to spend: AED 1,770.00, 15%')).toBeTruthy();
     expect(screen.queryByTestId('breakdown-shortfall')).toBeNull();
   });
 
   it('shows a labelled shortfall instead of a safe-to-spend segment', async () => {
-    const f = computeForecast({ ...SAMPLE_INPUT, plannedExpenses: aedToFils(3200) });
+    const f = computeForecast({ ...SAMPLE_INPUT, plannedExpenses: aedToFils(5000) });
     await render(<BreakdownBar breakdown={buildBreakdown(f)} />);
 
     expect(screen.getByTestId('breakdown-shortfall')).toBeTruthy();
-    expect(screen.getByText(/Shortfall: this plan needs AED 1,250.00 more/)).toBeTruthy();
+    expect(screen.getByText(/Shortfall: this plan needs AED 1,580.00 more/)).toBeTruthy();
     expect(screen.queryByText('Safe to spend')).toBeNull();
   });
 });

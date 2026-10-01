@@ -25,6 +25,7 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding" options={{ title: t.onboarding.title }} />
         <Stack.Screen name="commitments" options={{ title: t.commitments.title }} />
+        <Stack.Screen name="edit/[kind]/[id]" options={{ title: t.edit.titleEdit }} />
         <Stack.Screen name="dashboard" options={{ title: t.dashboard.title }} />
         <Stack.Screen name="warning/[id]" options={{ title: t.warning.title }} />
         <Stack.Screen name="explain/[metric]" options={{ title: t.explain.title }} />
