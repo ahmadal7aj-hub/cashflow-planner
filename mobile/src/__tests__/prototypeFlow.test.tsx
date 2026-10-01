@@ -3,6 +3,7 @@ import { fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-li
 import { clearRecordedEvents, getRecordedEvents } from '../analytics/events';
 import Commitments from '../app/commitments';
 import Dashboard from '../app/dashboard';
+import EditItem from '../app/edit/[kind]/[id]';
 import Explain from '../app/explain/[metric]';
 import RootLayout from '../app/_layout';
 import Index from '../app/index';
@@ -21,6 +22,7 @@ const routes = {
   settings: Settings,
   'warning/[id]': Warning,
   'explain/[metric]': Explain,
+  'edit/[kind]/[id]': EditItem,
 };
 
 beforeEach(clearRecordedEvents);
@@ -54,9 +56,9 @@ describe('prototype journey (P1-01)', () => {
     await fireEvent.press(screen.getByTestId('commitments-continue'));
     await waitFor(() => expect(getPathname()).toBe('/dashboard'));
 
-    expect(screen.getByText('AED 1,750.00')).toBeTruthy(); // safe to spend
-    expect(screen.getByText('AED 145.83 per day')).toBeTruthy();
-    expect(screen.getByText('AED 2,050.00')).toBeTruthy(); // forecast balance
+    expect(screen.getByText('AED 1,770.00')).toBeTruthy(); // safe to spend
+    expect(screen.getByText('AED 147.50 per day')).toBeTruthy();
+    expect(screen.getByText('AED 2,070.00')).toBeTruthy(); // forecast balance
   });
 
   it('rejects invalid onboarding input with an accessible error and does not advance', async () => {
@@ -72,20 +74,20 @@ describe('prototype journey (P1-01)', () => {
   it('recomputes the dashboard from edited numbers', async () => {
     const { getPathname } = await openApp('/onboarding');
 
-    await fireEvent.changeText(screen.getByTestId('input-balance'), '10000');
+    await fireEvent.changeText(screen.getByTestId('input-balance'), '14000');
     await fireEvent.press(screen.getByTestId('onboarding-continue'));
     await waitFor(() => expect(getPathname()).toBe('/commitments'));
     await fireEvent.press(screen.getByTestId('commitments-continue'));
     await waitFor(() => expect(getPathname()).toBe('/dashboard'));
 
-    expect(screen.getByText('AED 3,550.00')).toBeTruthy(); // 1,750 + 1,800 more cash
+    expect(screen.getByText('AED 3,770.00')).toBeTruthy(); // 1,770 + 2,000 more cash
   });
 
   it('opens a warning and explains why (P3-04 preview)', async () => {
     const { getPathname } = await openApp('/dashboard');
 
-    await fireEvent.press(screen.getByTestId('warning-due-rent'));
-    await waitFor(() => expect(getPathname()).toBe('/warning/due-rent'));
+    await fireEvent.press(screen.getByTestId('warning-due-rent-d4'));
+    await waitFor(() => expect(getPathname()).toBe('/warning/due-rent-d4'));
 
     expect(screen.getByText('Commitment due soon')).toBeTruthy();
     expect(screen.getByText('AED 3,500.00')).toBeTruthy();
@@ -103,7 +105,7 @@ describe('prototype journey (P1-01)', () => {
 
     expect(screen.getByText('What went in')).toBeTruthy();
     expect(screen.getByText('Reserved commitments')).toBeTruthy();
-    expect(screen.getByText('-AED 5,450.00')).toBeTruthy();
+    expect(screen.getByText('-AED 7,080.00')).toBeTruthy();
   });
 
   it('shows a shortfall for a what-if purchase and leaves the real plan unchanged', async () => {
@@ -114,9 +116,9 @@ describe('prototype journey (P1-01)', () => {
     await fireEvent.press(screen.getByTestId('scenario-toggle'));
 
     expect(screen.getByTestId('scenario-result')).toBeTruthy();
-    expect(screen.getByText(/Short by AED 1,250.00/)).toBeTruthy();
+    expect(screen.getByText(/Short by AED 1,230.00/)).toBeTruthy();
     // Baseline card still shows the untouched plan.
-    expect(screen.getAllByText('AED 1,750.00').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('AED 1,770.00').length).toBeGreaterThan(0);
 
     // Leaving the scenario discards it; the dashboard still shows the real plan.
     await fireEvent.press(screen.getByTestId('scenario-toggle'));
@@ -136,7 +138,7 @@ describe('prototype journey (P1-01)', () => {
       'onboarding_started',
       'onboarding_completed',
     ]);
-    expect(serialized).not.toMatch(/8200|15000|820000|salary|balance/i);
+    expect(serialized).not.toMatch(/12000|15000|1200000|salary|balance/i);
   });
 
   it('settings shows assumptions and a never-blocked data section', async () => {

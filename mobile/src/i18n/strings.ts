@@ -9,9 +9,9 @@ export const t = {
 
   onboarding: {
     title: 'Your starting point',
-    intro: 'We use these three numbers to plan until your next payday. You can change them later.',
+    intro:
+      'We use these two numbers with your income and expenses to plan until your next payday. You can change them later.',
     balance: 'Spendable balance (AED)',
-    savings: 'Monthly savings to set aside (AED)',
     buffer: 'Safety buffer to keep (AED)',
     bufferHint: 'A cushion we never count as spendable.',
     errorEmpty: 'Please enter an amount, or 0.',
@@ -19,12 +19,51 @@ export const t = {
   },
 
   commitments: {
-    title: 'Your regular commitments',
-    intro: 'Rent, bills and loans we will reserve money for. Sample items shown.',
+    title: 'Your income and expenses',
+    intro:
+      'Tap any item to change it, or add your own. These feed your forecast: change them and your safe-to-spend updates. Sample items shown.',
     essential: 'Essential',
     optional: 'Optional',
     toDashboard: 'See my forecast',
     due: (days: number) => dueLabel(days),
+    sectionIncome: 'Income',
+    sectionFixed: 'Bills and fixed expenses',
+    sectionVariable: 'Everyday budgets',
+    sectionVariableHint:
+      'What you expect to spend this cycle (payday to payday). Essentials such as groceries, fuel and Salik are set aside; dining and shopping come out of your safe to spend.',
+    addIncome: 'Add income',
+    addFixed: 'Add a bill',
+    addVariable: 'Add an everyday budget',
+    spentOf: (spent: string, budget: string) => `${spent} spent of ${budget}`,
+    nextIn: (days: number) => (days === 0 ? 'next today' : `next in ${days} days`),
+    perFrequency: (amount: string, frequency: string) => `${amount} · ${frequency}`,
+    reset: 'Reset to sample data',
+  },
+
+  edit: {
+    titleNew: 'Add item',
+    titleEdit: 'Edit item',
+    name: 'Name',
+    category: 'Category',
+    amount: 'Amount (AED)',
+    budgetAmount: 'Budget for this cycle (AED)',
+    frequency: 'How often',
+    nextDue: 'Next due in (days)',
+    nextIncome: 'Next payment in (days)',
+    spentSoFar: 'Already spent this cycle (AED)',
+    essentialLabel: 'Is it essential?',
+    essentialYes: 'Essential',
+    essentialNo: 'Optional',
+    stableLabel: 'Is this income predictable?',
+    stableYes: 'Predictable',
+    stableNo: 'Varies',
+    save: 'Save',
+    delete: 'Delete',
+    errorName: 'Please give it a name.',
+    errorAmount: 'Use numbers only, for example 1500 or 1500.50.',
+    errorDays: 'Enter a whole number of days from 0 to 365.',
+    notFound: 'This item no longer exists.',
+    salaryNote: 'Your salary date sets how far ahead the plan looks.',
   },
 
   dashboard: {
@@ -57,7 +96,7 @@ export const t = {
     tableDay: 'Day',
     tableBalance: 'Balance',
     summary: (start: string, end: string, days: number, kept: string) =>
-      `Projected balance falls from ${start} today to ${end} on day ${days}. ${kept} is kept aside for savings, buffer and planned spending.`,
+      `Projected balance falls from ${start} today to ${end} on day ${days}. ${kept} is kept aside for savings, buffer and everyday spending.`,
     breakdownTitle: 'Where your money goes',
     breakdownCaption: 'Everything you have available until payday, split into its parts.',
     segments: {
@@ -65,7 +104,7 @@ export const t = {
       commitments: 'Commitments',
       savings: 'Savings',
       buffer: 'Safety buffer',
-      planned: 'Planned spending',
+      planned: 'Everyday spending',
     },
     percent: (n: number) => `${n}%`,
     shortfall: (amount: string) => `Shortfall: this plan needs ${amount} more than you have.`,
@@ -84,13 +123,13 @@ export const t = {
     },
     reasons: {
       shortfall:
-        'After your commitments, savings, buffer and planned spending, this plan needs more than the cash you have.',
+        'After your commitments, savings, buffer and everyday spending, this plan needs more than the cash you have.',
       'tight-buffer': 'What is left to spend is smaller than the safety buffer you chose to keep.',
       'commitment-due-soon': (name: string) => `${name} is coming up soon and is already reserved.`,
     },
     actions: {
       shortfall:
-        'You could delay the purchase, lower the savings amount, or move a planned expense.',
+        'You could delay the purchase, lower the savings amount, or lower an everyday budget.',
       'tight-buffer': 'You could spend a little less per day, or revisit the buffer you set.',
       'commitment-due-soon':
         'Nothing to do if the money is in place. It is already set aside for you.',
@@ -110,10 +149,10 @@ export const t = {
       forecast: 'Expected balance',
     },
     formulas: {
-      safe: 'Cash + expected income - reserved commitments - savings - safety buffer - planned spending. Never shown below zero; a shortfall is shown separately.',
+      safe: 'Cash + expected income - reserved commitments - savings - safety buffer - expected everyday spending. Never shown below zero; a shortfall is shown separately.',
       daily: 'Safe to spend divided by the number of days in the plan (today counts).',
       forecast:
-        'Cash + expected income - reserved commitments - planned spending - savings, on the last day before payday.',
+        'Cash + expected income - reserved commitments - expected everyday spending - savings, on the last day before payday.',
     },
     assumptionsText:
       'The plan runs from today until the day before your next payday, so the payday salary is not counted yet. This rule is a prototype assumption we want your feedback on.',
@@ -123,7 +162,7 @@ export const t = {
       commitments: 'Reserved commitments',
       savings: 'Savings set aside',
       buffer: 'Safety buffer',
-      planned: 'Planned spending',
+      planned: 'Expected everyday spending',
       days: 'Days in plan',
       result: 'Result',
     },

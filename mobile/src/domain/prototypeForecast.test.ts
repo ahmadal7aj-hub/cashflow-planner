@@ -16,27 +16,35 @@ describe('computeForecast: sample data (hand-calculated fixture)', () => {
   const f = computeForecast(SAMPLE_INPUT);
 
   it('reserves only commitments due inside the 12-day horizon', () => {
-    // 3500 + 450 + 1300 + 200 = 5450; school fees (day 40) are outside.
-    expect(f.reservedCommitments).toBe(aedToFils(5450));
-    expect(f.upcoming.map((c) => c.id)).toEqual(['rent', 'dewa', 'car', 'gym']);
+    // 3500 + 450 + 380 + 1300 + 250 + 1000 + 200 = 7080; school fees (day 40) are outside.
+    expect(f.reservedCommitments).toBe(aedToFils(7080));
+    expect(f.upcoming.map((c) => c.id)).toEqual([
+      'rent-d4',
+      'dewa-d6',
+      'internet-d8',
+      'car-d9',
+      'health-d10',
+      'remit-d11',
+      'gym-d11',
+    ]);
   });
 
-  it('safe-to-spend = 8200 - 5450 - 500 - 300 - 200 = 1750', () => {
-    expect(f.rawSafeToSpend).toBe(aedToFils(1750));
-    expect(f.safeToSpend).toBe(aedToFils(1750));
+  it('safe-to-spend = 12000 - 7080 - 1200 - 300 - 1650 = 1770', () => {
+    expect(f.rawSafeToSpend).toBe(aedToFils(1770));
+    expect(f.safeToSpend).toBe(aedToFils(1770));
     expect(f.shortfall).toBe(0);
   });
 
-  it('daily safe amount floors to whole fils: 175000 / 12 = 14583', () => {
-    expect(f.dailySafe).toBe(14583);
+  it('daily safe amount: 177000 / 12 = 14750 fils', () => {
+    expect(f.dailySafe).toBe(14750);
   });
 
-  it('forecast balance excludes the safety buffer: 8200 - 5450 - 200 - 500 = 2050', () => {
-    expect(f.forecastBalance).toBe(aedToFils(2050));
+  it('forecast balance excludes the safety buffer: 12000 - 7080 - 1650 - 1200 = 2070', () => {
+    expect(f.forecastBalance).toBe(aedToFils(2070));
   });
 
   it('flags only rent as due soon', () => {
-    expect(f.warnings.map((w) => w.id)).toEqual(['due-rent']);
+    expect(f.warnings.map((w) => w.id)).toEqual(['due-rent-d4']);
   });
 
   it('records the calculation version', () => {

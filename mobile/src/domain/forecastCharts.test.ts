@@ -16,21 +16,24 @@ describe('buildBalanceTimeline (sample fixture)', () => {
 
   it('starts at today balance and steps down only on due days', () => {
     const b = (d: number) => tl.days[d]?.balance;
-    expect(b(0)).toBe(aedToFils(8200));
-    expect(b(3)).toBe(aedToFils(8200));
-    expect(b(4)).toBe(aedToFils(4700)); // rent 3,500
-    expect(b(6)).toBe(aedToFils(4250)); // DEWA 450
-    expect(b(9)).toBe(aedToFils(2950)); // car loan 1,300
-    expect(b(11)).toBe(aedToFils(2750)); // gym 200
+    expect(b(0)).toBe(aedToFils(12000));
+    expect(b(3)).toBe(aedToFils(12000));
+    expect(b(4)).toBe(aedToFils(8500)); // rent 3,500
+    expect(b(6)).toBe(aedToFils(8050)); // DEWA 450
+    expect(b(8)).toBe(aedToFils(7670)); // internet 380
+    expect(b(9)).toBe(aedToFils(6370)); // car loan 1,300
+    expect(b(10)).toBe(aedToFils(6120)); // health insurance 250
+    expect(b(11)).toBe(aedToFils(4920)); // remittance 1,000 + gym 200
   });
 
   it('names commitments on their due day', () => {
     expect(tl.days[4]?.dueNames).toEqual(['Rent']);
     expect(tl.days[5]?.dueNames).toEqual([]);
+    expect(tl.days[11]?.dueNames).toEqual(['Money sent home', 'Gym membership']);
   });
 
-  it('keeps aside savings + buffer + planned = 1,000', () => {
-    expect(tl.keptAside).toBe(aedToFils(1000));
+  it('keeps aside savings + buffer + everyday spending = 1,200 + 300 + 1,650', () => {
+    expect(tl.keptAside).toBe(aedToFils(3150));
   });
 
   it('final balance minus kept aside equals the raw safe-to-spend', () => {
@@ -55,17 +58,17 @@ describe('buildBalanceTimeline (sample fixture)', () => {
 describe('buildBreakdown (sample fixture)', () => {
   const bd = buildBreakdown(sample);
 
-  it('splits the 8,200 available into the five parts and sums to it exactly', () => {
+  it('splits the 12,000 available into the five parts and sums to it exactly', () => {
     const byKey = Object.fromEntries(bd.segments.map((s) => [s.key, s.amount]));
     expect(byKey).toEqual({
-      commitments: aedToFils(5450),
-      savings: aedToFils(500),
+      commitments: aedToFils(7080),
+      savings: aedToFils(1200),
       buffer: aedToFils(300),
-      planned: aedToFils(200),
-      safe: aedToFils(1750),
+      planned: aedToFils(1650),
+      safe: aedToFils(1770),
     });
-    expect(bd.segments.reduce((sum, s) => sum + s.amount, 0)).toBe(aedToFils(8200));
-    expect(bd.total).toBe(aedToFils(8200));
+    expect(bd.segments.reduce((sum, s) => sum + s.amount, 0)).toBe(aedToFils(12000));
+    expect(bd.total).toBe(aedToFils(12000));
     expect(bd.shortfall).toBe(0);
   });
 
@@ -75,10 +78,10 @@ describe('buildBreakdown (sample fixture)', () => {
   });
 
   it('widens the bar to the money spoken for and reports the shortfall', () => {
-    const f = computeForecast({ ...SAMPLE_INPUT, plannedExpenses: aedToFils(3200) });
+    const f = computeForecast({ ...SAMPLE_INPUT, plannedExpenses: aedToFils(5000) });
     const b = buildBreakdown(f);
-    expect(b.shortfall).toBe(aedToFils(1250));
+    expect(b.shortfall).toBe(aedToFils(1580));
     expect(b.segments.map((s) => s.key)).not.toContain('safe');
-    expect(b.total).toBe(aedToFils(9450)); // 5450 + 500 + 300 + 3200
+    expect(b.total).toBe(aedToFils(13580)); // 7080 + 1200 + 300 + 5000
   });
 });

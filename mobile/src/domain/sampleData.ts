@@ -1,33 +1,142 @@
-import type { Commitment, ForecastInput } from './prototypeForecast';
 import { aedToFils } from './money';
+import type { ExpenseItem, IncomeItem, Plan, SavingsGoal } from './budgetModel';
+import { deriveForecastInput } from './budgetModel';
+import { getExpenseCategory } from './uaeCategories';
 
 /** Fictional sample data only. Never put real user data in fixtures. */
-export const SAMPLE_COMMITMENTS: readonly Commitment[] = [
-  { id: 'rent', name: 'Rent', amount: aedToFils(3500), dueInDays: 4, essential: true },
-  { id: 'dewa', name: 'DEWA (utilities)', amount: aedToFils(450), dueInDays: 6, essential: true },
-  { id: 'car', name: 'Car loan', amount: aedToFils(1300), dueInDays: 9, essential: true },
-  { id: 'gym', name: 'Gym membership', amount: aedToFils(200), dueInDays: 11, essential: false },
+
+function fixed(
+  id: string,
+  categoryId: string,
+  name: string,
+  aed: number,
+  nextDueInDays: number,
+  frequency: ExpenseItem['frequency'] = 'monthly',
+): ExpenseItem {
+  const c = getExpenseCategory(categoryId);
+  return {
+    id,
+    name,
+    categoryId,
+    amount: aedToFils(aed),
+    frequency,
+    nextDueInDays,
+    kind: 'fixed',
+    essential: c.essential,
+    spentSoFar: 0,
+  };
+}
+
+function budget(
+  id: string,
+  categoryId: string,
+  name: string,
+  aed: number,
+  spent: number,
+): ExpenseItem {
+  const c = getExpenseCategory(categoryId);
+  return {
+    id,
+    name,
+    categoryId,
+    amount: aedToFils(aed),
+    frequency: 'monthly',
+    nextDueInDays: 0,
+    kind: 'variable',
+    essential: c.essential,
+    spentSoFar: aedToFils(spent),
+  };
+}
+
+export const SAMPLE_INCOME: readonly IncomeItem[] = [
   {
-    id: 'school',
-    name: 'School fees (term)',
-    amount: aedToFils(9000),
-    dueInDays: 40,
-    essential: true,
+    id: 'salary',
+    name: 'Monthly salary',
+    kind: 'salary',
+    amount: aedToFils(15000),
+    frequency: 'monthly',
+    nextInDays: 12,
+    stable: true,
+  },
+  {
+    id: 'side',
+    name: 'Side work',
+    kind: 'freelance',
+    amount: aedToFils(1500),
+    frequency: 'monthly',
+    nextInDays: 20,
+    stable: false,
+  },
+  {
+    id: 'bonus',
+    name: 'Annual bonus',
+    kind: 'bonus',
+    amount: aedToFils(15000),
+    frequency: 'annual',
+    nextInDays: 200,
+    stable: false,
   },
 ];
 
-export const SAMPLE_SALARY = aedToFils(15000);
-export const SAMPLE_DAYS_UNTIL_PAYDAY = 12;
+export const SAMPLE_EXPENSES: readonly ExpenseItem[] = [
+  fixed('rent', 'rent', 'Rent', 3500, 4),
+  fixed('dewa', 'dewa', 'DEWA (utilities)', 450, 6),
+  fixed('internet', 'internet', 'Internet and mobile', 380, 8),
+  fixed('car', 'car_loan', 'Car loan', 1300, 9),
+  fixed('health', 'health_ins', 'Health insurance', 250, 10),
+  fixed('remit', 'remittance', 'Money sent home', 1000, 11),
+  fixed('gym', 'gym', 'Gym membership', 200, 11),
+  fixed('school', 'school', 'School fees (term)', 9000, 40, 'quarterly'),
+  fixed('carreg', 'car_cost', 'Car insurance and registration', 2800, 95, 'annual'),
+  fixed('visa', 'visa', 'Visa and Emirates ID fees', 1500, 200, 'annual'),
+  budget('groceries', 'groceries', 'Groceries', 1800, 650),
+  budget('fuel', 'fuel', 'Fuel', 500, 160),
+  budget('salik', 'salik', 'Salik', 150, 62),
+  budget('parking', 'parking', 'Parking', 120, 48),
+  budget('dining', 'dining', 'Dining out', 600, 340),
+  budget('delivery', 'delivery', 'Food delivery', 300, 180),
+  budget('shopping', 'shopping', 'Shopping', 500, 120),
+  budget('entertainment', 'entertainment', 'Entertainment', 250, 60),
+];
 
-export const SAMPLE_INPUT: ForecastInput = {
-  availableCash: aedToFils(8200),
-  expectedIncome: 0,
-  daysUntilPayday: SAMPLE_DAYS_UNTIL_PAYDAY,
-  commitments: SAMPLE_COMMITMENTS,
-  savingsReserve: aedToFils(500),
+export const SAMPLE_GOALS: readonly SavingsGoal[] = [
+  {
+    id: 'emergency',
+    name: 'Emergency fund',
+    target: aedToFils(45000),
+    saved: aedToFils(18000),
+    monthlyContribution: aedToFils(500),
+    enabled: true,
+  },
+  {
+    id: 'gold',
+    name: 'Gold savings',
+    target: aedToFils(10000),
+    saved: aedToFils(3200),
+    monthlyContribution: aedToFils(300),
+    enabled: true,
+  },
+  {
+    id: 'travel',
+    name: 'Summer travel',
+    target: aedToFils(8000),
+    saved: aedToFils(2400),
+    monthlyContribution: aedToFils(400),
+    enabled: true,
+    targetInDays: 150,
+  },
+];
+
+export const SAMPLE_PLAN: Plan = {
+  availableCash: aedToFils(12000),
   safetyBuffer: aedToFils(300),
-  plannedExpenses: aedToFils(200),
+  income: SAMPLE_INCOME,
+  expenses: SAMPLE_EXPENSES,
+  goals: SAMPLE_GOALS,
 };
+
+/** Forecast input derived from the sample plan. */
+export const SAMPLE_INPUT = deriveForecastInput(SAMPLE_PLAN);
 
 export const SCENARIO_PRESET = {
   label: 'New laptop',

@@ -12,3 +12,4 @@ User-visible changes per release. Format: Keep a Changelog.
 - Privacy-minimized prototype analytics with an allow-list (P1-02).
 - Validation hypotheses, interview guide and usability tasks (P1-03).
 - Richer dashboard: day-by-day balance chart to payday with a kept-aside line, and a stacked breakdown of where the money goes, with table view and accessible labels (P1-01).
+- Editable income and expenses with standard UAE categories (rent, DEWA, du/e&, Salik, parking, fuel, school fees, remittances, car registration, visa fees...). Edits feed the forecast (P1-01).
