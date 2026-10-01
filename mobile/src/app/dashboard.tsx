@@ -4,6 +4,8 @@ import { Pressable, StyleSheet, Text } from 'react-native';
 
 import { track } from '../analytics/events';
 import { Body, Button, Card, Heading, Row, Screen } from '../components/ui';
+import { BalanceChart, BreakdownBar } from '../components/charts';
+import { buildBalanceTimeline, buildBreakdown } from '../domain/forecastCharts';
 import { formatAed } from '../domain/money';
 import { t } from '../i18n/strings';
 import { usePrototype } from '../state/PrototypeContext';
@@ -62,6 +64,9 @@ export default function Dashboard() {
           <Body muted>{t.dashboard.forecastOn(f.horizonDays)}</Body>
         </Pressable>
       </Card>
+
+      <BalanceChart timeline={buildBalanceTimeline(f)} />
+      <BreakdownBar breakdown={buildBreakdown(f)} />
 
       <Heading>{t.dashboard.warnings}</Heading>
       {f.warnings.length === 0 ? (
