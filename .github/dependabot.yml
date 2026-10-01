@@ -1,0 +1,21 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /mobile
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    # Expo SDK packages must move together; upgrade them deliberately with `npx expo install --fix`.
+    ignore:
+      - dependency-name: expo
+        update-types: ['version-update:semver-major']
+      - dependency-name: react
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
+      - dependency-name: react-native
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
+      - dependency-name: react-test-renderer
+        update-types: ['version-update:semver-major', 'version-update:semver-minor']
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

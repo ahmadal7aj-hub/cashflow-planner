@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, staging]
+  push:
+    branches: [main, staging]
+
+# Least privilege: CI only needs to read the repo.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: mobile
+
+jobs:
+  quality:
+    name: Quality (format, lint, typecheck, tests, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - name: Install (locked)
+        run: npm ci
+      - name: Format check
+        run: npm run format:check
+      - name: Lint
+        run: npm run lint
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Unit/component tests + coverage
+        run: npm run test:ci
+      - name: Validate Expo configuration
+        run: npx expo-doctor
+      - name: Build (JS bundle export)
+        run: npx expo export --platform android --output-dir "$RUNNER_TEMP/export"
+
+  security:
+    name: Security (dependencies)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - name: Install (locked)
+        run: npm ci
+      # Blocks high/critical advisories in production dependencies (BRD section 9).
+      # Moderate advisories in Expo build tooling are tracked in ADR 0002.
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+      - name: Dependency review (PRs only)
+        if: github.event_name == 'pull_request'
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
