@@ -1,0 +1,48 @@
+# P0-05 E2E smoke flow for the Phase 1 prototype.
+# Runs against Expo Go for now (no store identifiers are decided yet). Switch `appId` to the
+# development-build id once the product name / bundle id are final.
+#
+# Run (see docs/TESTING.md):
+#   1. cd mobile && npm start            # open the project in Expo Go on the emulator/device
+#   2. maestro test .maestro/smoke.yaml
+appId: host.exp.exponent
+---
+- launchApp:
+    clearState: false
+# Open the running dev server from Expo Go's home screen if it is not already in the foreground.
+- assertVisible:
+    id: 'home-screen'
+- assertVisible: 'UAE Cash-Flow Planner'
+
+# Welcome -> onboarding
+- tapOn:
+    id: 'start-button'
+- assertVisible:
+    id: 'onboarding-screen'
+
+# Onboarding -> commitments (sample numbers are pre-filled and valid)
+- tapOn:
+    id: 'onboarding-continue'
+- assertVisible:
+    id: 'commitments-screen'
+
+# Commitments -> dashboard with the hand-verified sample result
+- tapOn:
+    id: 'commitments-continue'
+- assertVisible:
+    id: 'dashboard-screen'
+- assertVisible: 'AED 1,750.00'
+
+# Explanation is reachable from the headline number
+- tapOn:
+    id: 'metric-safe'
+- assertVisible: 'What went in'
+- back
+
+# What-if shows a shortfall and leaves the real plan alone
+- tapOn:
+    id: 'open-scenario'
+- tapOn:
+    id: 'scenario-toggle'
+- assertVisible:
+    id: 'scenario-result'
