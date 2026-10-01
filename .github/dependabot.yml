@@ -5,16 +5,16 @@ updates:
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
-    # Expo SDK packages must move together; upgrade them deliberately with `npx expo install --fix`.
+    # Expo SDK 57 pins exact versions of react, react-dom, react-test-renderer and react-native.
+    # Bumping them independently breaks `npm ci` (peer conflicts) and the SDK. Upgrade them together
+    # with the Expo SDK via `npx expo install --fix` instead. See ADR 0002.
     ignore:
       - dependency-name: expo
         update-types: ['version-update:semver-major']
       - dependency-name: react
-        update-types: ['version-update:semver-major', 'version-update:semver-minor']
-      - dependency-name: react-native
-        update-types: ['version-update:semver-major', 'version-update:semver-minor']
+      - dependency-name: react-dom
       - dependency-name: react-test-renderer
-        update-types: ['version-update:semver-major', 'version-update:semver-minor']
+      - dependency-name: react-native
   - package-ecosystem: github-actions
     directory: /
     schedule:
