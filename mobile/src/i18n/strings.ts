@@ -44,6 +44,33 @@ export const t = {
     tapToExplain: 'Tap for how this is calculated',
   },
 
+  charts: {
+    balanceTitle: 'Your balance until payday',
+    balanceCaption:
+      'Projected after your commitments. The dashed line is money kept aside; the gap above it is your safe to spend.',
+    today: 'Today',
+    inDays: (n: number) => `In ${n} days`,
+    keptAside: (amount: string) => `Kept aside ${amount}`,
+    billDue: 'Bill due',
+    showTable: 'Show as a table',
+    hideTable: 'Hide the table',
+    tableDay: 'Day',
+    tableBalance: 'Balance',
+    summary: (start: string, end: string, days: number, kept: string) =>
+      `Projected balance falls from ${start} today to ${end} on day ${days}. ${kept} is kept aside for savings, buffer and planned spending.`,
+    breakdownTitle: 'Where your money goes',
+    breakdownCaption: 'Everything you have available until payday, split into its parts.',
+    segments: {
+      safe: 'Safe to spend',
+      commitments: 'Commitments',
+      savings: 'Savings',
+      buffer: 'Safety buffer',
+      planned: 'Planned spending',
+    },
+    percent: (n: number) => `${n}%`,
+    shortfall: (amount: string) => `Shortfall: this plan needs ${amount} more than you have.`,
+  },
+
   warning: {
     title: 'Why you are seeing this',
     when: 'When',

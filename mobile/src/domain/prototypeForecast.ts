@@ -47,6 +47,8 @@ export interface ForecastResult {
   calculationVersion: string;
   horizonDays: number;
   availableCash: Fils;
+  /** Income expected inside the horizon (assumed received on day 0). */
+  expectedIncome: Fils;
   reservedCommitments: Fils;
   /** Commitments that fall inside the horizon, soonest first. */
   upcoming: readonly Commitment[];
@@ -129,6 +131,7 @@ export function computeForecast(input: ForecastInput): ForecastResult {
     calculationVersion: CALCULATION_VERSION,
     horizonDays,
     availableCash: input.availableCash,
+    expectedIncome: input.expectedIncome,
     reservedCommitments,
     upcoming,
     savingsReserve: input.savingsReserve,
