@@ -10,9 +10,11 @@ sent) is built and tested. Backend, accounts and the real forecast engine wait f
 
 ## What the prototype shows
 
-Five tabs: **Overview** (safe to spend until payday, balance chart, what-if), **Spending**, **Savings**,
-**Income** and **Insights**. Income, bills, everyday budgets and goals are editable, using standard UAE categories
-(rent, DEWA, du / e&, Salik, parking, school fees, money sent home...). Every headline number can be explained.
+Five tabs: **Overview** (safe to spend until payday, balance chart, what-if), **Spending**, **Savings** (with a
+current savings balance and an Investments screen), **Income** and **Insights**. Income, bills, everyday budgets,
+goals and investments are editable, with real due dates and bill reminders and standard UAE categories (rent, DEWA,
+du / e&, Salik, parking, school fees, money sent home, or an Other bill you name). Navy and gold theme in light and
+dark mode. Every headline number can be explained.
 
 ## Source of truth
 
@@ -49,7 +51,7 @@ npm start         # start Expo; scan the QR code with Expo Go
 | `npm run format` | auto-format with Prettier |
 | `npm run lint` | ESLint |
 | `npm run typecheck` | TypeScript (strict) |
-| `npm test` | Jest tests (258 at the time of writing) |
+| `npm test` | Jest tests (475 at the time of writing) |
 | `node scripts/audit-gate.js` | dependency audit gate (high / critical block) |
 
 ## Environments

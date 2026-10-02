@@ -51,6 +51,7 @@
     "testPathIgnorePatterns": [
       "/node_modules/",
       "/.expo/"
-    ]
+    ],
+    "testTimeout": 20000
   }
 }

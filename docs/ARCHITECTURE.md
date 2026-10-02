@@ -13,14 +13,15 @@ mobile/src/
   app/            screens and navigation (Expo Router, file based)
     (tabs)/       Overview, Spending, Savings, Income, Insights (bottom tab bar)
     commitments   "Your income and expenses" list
-    edit/[kind]/[id]   add / edit / delete form (income, bills, budgets, goals, employment)
-    onboarding, explain/[metric], warning/[id], scenario, settings, index (welcome)
-  components/     ui kit (ui.tsx), forms, charts, dashboard parts
-  domain/         PURE functions only: money, plan model, forecast, spending / savings / income / insight analytics,
-                  UAE categories, sample data
-  state/          PrototypeContext: the in-memory plan and CRUD actions
+    edit/[kind]/[id]   add / edit / delete form (income, bills, budgets, goals, investments, savings, employment)
+    investments   the Investments screen (opened from the Savings tab)
+    onboarding, explain/[metric], warning/[id], scenario, settings (incl. Appearance), index (welcome)
+  components/     ui kit (ui.tsx), forms, dates (calendar picker), ReminderPicker, charts, dashboard parts
+  domain/         PURE functions only: money, dates, plan model, forecast, reminders, savings balance, investment /
+                  spending / savings / income / insight analytics, UAE categories, sample data
+  state/          PrototypeContext: the in-memory plan, today's date, and the CRUD actions
   i18n/strings.ts all user-facing text
-  theme/tokens.ts colours, spacing, chart colours
+  theme/          palettes.ts (light + dark), ThemeProvider (follows the phone or a manual choice), tokens.ts (layout)
   analytics/      allow-listed, privacy-safe event recorder (memory only)
   config/         environment resolution (development / staging / production)
 mobile/scripts/   audit-gate.js and exception-watch.js (CI tooling, with tests)
@@ -29,10 +30,13 @@ mobile/scripts/   audit-gate.js and exception-watch.js (CI tooling, with tests)
 ### Layering rules (enforced by review and tests)
 
 1. **`domain/` is pure.** No React, no I/O, no clocks, no random. Same input gives the same output. It is where every
-   formula lives.
+   formula lives. The one exception is `todayISO()` in `dates.ts`, called once at the edge of the app; everything else
+   takes today's date as an argument.
 2. **Screens never do money maths.** They call a `domain/` function and render the result. No duplicated formulas.
 3. **Money is integer fils.** Floats are never used for money. Formatting is display-only (`formatAed`).
-4. **All text comes from `i18n/strings.ts`**, and all colours and spacing from `theme/tokens.ts`.
+4. **All text comes from `i18n/strings.ts`**; colours come from the theme (`useTheme` / `makeStyles`, never a
+   hard-coded hex in a screen) and spacing from `theme/tokens.ts`. Every text and background pair is contrast-tested
+   in both light and dark mode.
 5. **Status is never colour alone.** A symbol and written label always accompany colour.
 6. **Analytics are allow-listed.** Unknown event properties are dropped, so a financial value cannot be recorded.
 
@@ -42,13 +46,15 @@ mobile/scripts/   audit-gate.js and exception-watch.js (CI tooling, with tests)
 sample data (domain/sampleData)
         |
         v
-PrototypeContext (plan: balance, buffer, income[], expenses[], goals[], employment)
+PrototypeContext (raw plan: balance, buffer, income[], expenses[], goals[], investments[], savings, employment)
+        |  resolvePlan(plan, today)            -> real dates become relative days
         |  deriveForecastInput(plan)           -> ForecastInput
         |  computeForecast(input)              -> ForecastResult (baseline)
         |  + what-if purchase                  -> ForecastResult (scenario, never mutates the plan)
         v
 screens read: baseline / scenario / plan, and call pure analytics:
-  spendingInsights, savingsInsights, incomeInsights, insights, forecastCharts
+  spendingInsights, savingsInsights, savingsBalance, investmentInsights, incomeInsights, insights, reminders,
+  forecastCharts
 ```
 
 ### Planning model (prototype, ADR 0003)
@@ -59,6 +65,14 @@ screens read: baseline / scenario / plan, and call pure analytics:
   everyday essentials. Clamped at zero; a shortfall is reported separately.
 - **Essentials vs discretionary:** the remaining budget of essential everyday categories (groceries, fuel, Salik,
   parking...) is deducted. Dining, shopping and similar are funded *from* safe to spend, not deducted.
+- **Dates:** bills, income and goal deadlines can have real dates. They are resolved to relative days for `today` in
+  one pure function, so all the maths is unchanged. Recurring dates roll forward by calendar month, keeping the day
+  of month.
+- **Money set aside:** savings goal contributions plus planned investment contributions are reserved each cycle.
+  Investment income counts in monthly income but not in the payday forecast.
+- **Savings balance:** a separate pot that goals earmark parts of. It changes by deposits, withdrawals (never more
+  than saved) and an end-of-cycle result (typical income minus typical spending), applied once per cycle on request.
+- **Reminders:** stored as days before a bill's due date, so they repeat with the bill; in-app only.
 - **Version:** every result carries `calculationVersion` (`prototype-0.1`).
 
 ## 2. Target (later phases, not built)

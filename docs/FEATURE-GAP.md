@@ -28,10 +28,12 @@ What the prototype does today, what competing apps offer, and where this app cou
 | Capability | This app | Competitor evidence |
 |---|---|---|
 | Category budgets, budget vs spent | **Built** | Common to all |
-| UAE categories (Salik, Nol, DEWA, school fees, rent) | **Built** (30 categories, editable) | **Already offered by YooToo.** Table stakes, not a differentiator |
+| UAE categories (Salik, Nol, DEWA, school fees, rent) | **Built** (31 categories incl. an Other bill you name yourself, editable) | **Already offered by YooToo.** Table stakes, not a differentiator |
 | Month-end or cycle projection | **Built** (until next payday) | YooToo: month-end projection. Monarch: forecasting (Plus) |
-| Recurring bills and reminders | **Built** (manual); reminders **Planned** (P5-01) | YooToo detects and reminds. Monarch and Copilot detect |
+| Recurring bills with real due dates and reminders | **Built** (manual entry; calendar date picker; reminders in-app). **Phone notifications Planned** (P5-01) | YooToo detects and reminds. Monarch and Copilot detect |
 | Savings goals | **Built** | YNAB, Monarch; debt-payoff in YNAB and Monarch |
+| Current savings balance (add, take out, end-of-cycle result) | **Built** | Not mentioned on the pages checked |
+| Dark mode | **Built** (match phone, light or dark) | Not checked |
 | Sinking funds for yearly and termly bills | **Built** (Big bills planner) | Not mentioned on the pages checked |
 | What-if purchase scenario | **Built** | Not mentioned on the pages checked (Monarch models life events) |
 | Income by source, steadiness | **Built** | Not mentioned on the pages checked |
@@ -41,7 +43,8 @@ What the prototype does today, what competing apps offer, and where this app cou
 | Receipt scanning, payslip upload | **Idea** | YooToo |
 | Arabic and right-to-left | **Deferred** | Wally reported to support it; **FinArt and Pocket Clear pages do not mention it**; YooToo is English only |
 | Multi-currency, remittances | **Deferred** | FinArt, Pocket Clear and Wally all advertise it (vendor pages and listings) |
-| Net worth, investments | **Idea** | YNAB, Monarch, Copilot |
+| Investment tracking (type, amount, worth, profit, income) | **Built** (tracking only, values typed by the user, not advice) | Copilot advertises investments with live performance; Monarch has investments (Plus) |
+| Net worth (assets and liabilities), live prices | **Idea** | YNAB, Monarch, Copilot |
 | Shared household budgets | **Idea** | YNAB (up to six), Monarch (free) |
 | Rollover budgets | **Idea** | Copilot |
 | AI categorisation | **Deferred** | Copilot. BRD: AI must never be the source of financial arithmetic |
