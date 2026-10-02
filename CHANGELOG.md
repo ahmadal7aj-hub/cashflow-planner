@@ -16,3 +16,4 @@ User-visible changes per release. Format: Keep a Changelog.
 - Bottom tab bar (Overview, Spending) and a Spending dashboard: budgets vs spent with on-track / ahead / over status, monthly cost by type, UAE driving costs (Salik, parking, fuel), room left for dining and shopping, and a 6-cycle trend (P1-01).
 - Savings dashboard: goal progress with written status and deadline check, emergency-fund cover in months of essential spending, big-bills planner (monthly amount to set aside to be ready on time), unallocated monthly surplus, illustrative end-of-service gratuity estimate, and a 6-cycle saving trend (P1-01).
 - Income dashboard (sources and shares, predictable vs irregular income, 60-day arrivals, steadiness, 6-cycle trends) and an Insights tab of plain, non-judgmental notes that link to the numbers behind them (P1-01).
+- Feature-gap and roadmap document (built vs planned vs deferred; competitor claims marked unverified).
