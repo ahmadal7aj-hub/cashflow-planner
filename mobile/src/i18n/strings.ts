@@ -3,6 +3,11 @@ export const t = {
   appName: 'UAE Cash-Flow Planner',
   tagline: 'Know what is safe to spend before your next payday.',
   prototypeNote: 'Prototype: sample data only. Nothing is saved or sent.',
+  welcome: {
+    benefit1: 'See what is safe to spend until your next payday.',
+    benefit2: 'Never miss a bill, with reminders you choose.',
+    benefit3: 'Understand every number, and try a what-if before you spend.',
+  },
   start: 'Get started',
   continue: 'Continue',
   back: 'Back',
@@ -467,6 +472,11 @@ export const t = {
     export: 'Export my data',
     delete: 'Delete my account',
     notAvailable: 'Not available in the prototype. Both will always be free and never blocked.',
+    appearance: 'Appearance',
+    appearanceHint: 'Match your phone, or always use light or dark.',
+    appearanceSystem: 'Match my phone',
+    appearanceLight: 'Light',
+    appearanceDark: 'Dark',
     exportMessage:
       'Export is not available in this prototype yet. In the real app you will be able to download all of your own data.',
     deleteMessage:

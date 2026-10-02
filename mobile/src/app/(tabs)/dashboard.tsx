@@ -1,21 +1,43 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { Pressable, StyleSheet, Text } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { track } from '../../analytics/events';
-import { Body, Button, Card, Heading, Row, Screen } from '../../components/ui';
 import { BalanceChart, BreakdownBar } from '../../components/charts';
-import { buildBalanceTimeline, buildBreakdown } from '../../domain/forecastCharts';
+import { Body, Button, Card, Heading, HeroCard, Row, Screen } from '../../components/ui';
 import { formatDate, relativeDays } from '../../domain/dates';
+import { buildBalanceTimeline, buildBreakdown } from '../../domain/forecastCharts';
 import { formatAed } from '../../domain/money';
 import { t } from '../../i18n/strings';
 import { usePrototype } from '../../state/PrototypeContext';
-import { colors, fontSize, minTouchTarget } from '../../theme/tokens';
+import { makeStyles, useTheme } from '../../theme/ThemeProvider';
+import { fontSize, minTouchTarget, spacing } from '../../theme/tokens';
 
 const MAX_UPCOMING = 5;
 
+const useStyles = makeStyles(({ colors }) => ({
+  metric: { minHeight: minTouchTarget, gap: 4 },
+  heroTop: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  heroLabel: { fontSize: fontSize.body, fontWeight: '600', color: colors.heroMuted },
+  heroValue: {
+    fontSize: fontSize.hero,
+    fontWeight: '800',
+    color: colors.heroText,
+    letterSpacing: -1,
+  },
+  heroSub: { fontSize: fontSize.body, color: colors.heroMuted },
+  heroShortfall: { fontSize: fontSize.body, fontWeight: '700', color: colors.heroGold },
+  heroHint: { fontSize: fontSize.caption, color: colors.heroMuted, marginTop: spacing.xs },
+  pair: { flexDirection: 'row', gap: spacing.md },
+  pairItem: { flex: 1, minHeight: minTouchTarget, gap: 4 },
+  pairValue: { fontSize: fontSize.title, fontWeight: '800', color: colors.text },
+}));
+
 export default function Dashboard() {
   const router = useRouter();
+  const styles = useStyles();
+  const { colors } = useTheme();
   const { baseline: f, reminders } = usePrototype();
   const active = reminders.filter((r) => r.active);
 
@@ -25,7 +47,7 @@ export default function Dashboard() {
 
   return (
     <Screen testID="dashboard-screen">
-      <Card tone="info" testID="safe-to-spend-card">
+      <HeroCard testID="safe-to-spend-card">
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`${t.dashboard.safeToSpend}: ${formatAed(f.safeToSpend)}, ${t.dashboard.horizon(f.horizonDays)}`}
@@ -34,37 +56,45 @@ export default function Dashboard() {
           style={styles.metric}
           testID="metric-safe"
         >
-          <Body muted>{t.dashboard.safeToSpend}</Body>
-          <Text style={styles.hero}>{formatAed(f.safeToSpend)}</Text>
-          <Body muted>{t.dashboard.horizon(f.horizonDays)}</Body>
+          <View style={styles.heroTop} importantForAccessibility="no-hide-descendants">
+            <Ionicons name="shield-checkmark" size={20} color={colors.heroGold} />
+            <Text style={styles.heroLabel}>{t.dashboard.safeToSpend}</Text>
+          </View>
+          <Text style={styles.heroValue}>{formatAed(f.safeToSpend)}</Text>
+          <Text style={styles.heroSub}>{t.dashboard.horizon(f.horizonDays)}</Text>
+          <Text style={styles.heroHint}>{t.dashboard.tapToExplain}</Text>
         </Pressable>
-        {f.shortfall > 0 && <Body>{t.dashboard.shortfall(formatAed(f.shortfall))}</Body>}
-      </Card>
+        {f.shortfall > 0 && (
+          <Text style={styles.heroShortfall}>{t.dashboard.shortfall(formatAed(f.shortfall))}</Text>
+        )}
+      </HeroCard>
 
       <Card>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`${t.dashboard.daily}: ${t.dashboard.perDay(formatAed(f.dailySafe))}`}
-          accessibilityHint={t.dashboard.tapToExplain}
-          onPress={() => router.push('/explain/daily')}
-          style={styles.metric}
-          testID="metric-daily"
-        >
-          <Body muted>{t.dashboard.daily}</Body>
-          <Heading>{t.dashboard.perDay(formatAed(f.dailySafe))}</Heading>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`${t.dashboard.forecast}: ${formatAed(f.forecastBalance)}, ${t.dashboard.forecastOn(f.horizonDays)}`}
-          accessibilityHint={t.dashboard.tapToExplain}
-          onPress={() => router.push('/explain/forecast')}
-          style={styles.metric}
-          testID="metric-forecast"
-        >
-          <Body muted>{t.dashboard.forecast}</Body>
-          <Heading>{formatAed(f.forecastBalance)}</Heading>
-          <Body muted>{t.dashboard.forecastOn(f.horizonDays)}</Body>
-        </Pressable>
+        <View style={styles.pair}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`${t.dashboard.daily}: ${t.dashboard.perDay(formatAed(f.dailySafe))}`}
+            accessibilityHint={t.dashboard.tapToExplain}
+            onPress={() => router.push('/explain/daily')}
+            style={styles.pairItem}
+            testID="metric-daily"
+          >
+            <Body muted>{t.dashboard.daily}</Body>
+            <Heading>{t.dashboard.perDay(formatAed(f.dailySafe))}</Heading>
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`${t.dashboard.forecast}: ${formatAed(f.forecastBalance)}, ${t.dashboard.forecastOn(f.horizonDays)}`}
+            accessibilityHint={t.dashboard.tapToExplain}
+            onPress={() => router.push('/explain/forecast')}
+            style={styles.pairItem}
+            testID="metric-forecast"
+          >
+            <Body muted>{t.dashboard.forecast}</Body>
+            <Heading>{formatAed(f.forecastBalance)}</Heading>
+            <Body muted>{t.dashboard.forecastOn(f.horizonDays)}</Body>
+          </Pressable>
+        </View>
       </Card>
 
       {active.length > 0 && (
@@ -115,11 +145,13 @@ export default function Dashboard() {
 
       <Button
         label={t.dashboard.whatIf}
+        icon="flask"
         onPress={() => router.push('/scenario')}
         testID="open-scenario"
       />
       <Button
         label={t.dashboard.settings}
+        icon="settings-outline"
         variant="secondary"
         onPress={() => router.push('/settings')}
         testID="open-settings"
@@ -127,8 +159,3 @@ export default function Dashboard() {
     </Screen>
   );
 }
-
-const styles = StyleSheet.create({
-  metric: { minHeight: minTouchTarget, gap: 4 },
-  hero: { fontSize: fontSize.hero, fontWeight: '800', color: colors.primary },
-});

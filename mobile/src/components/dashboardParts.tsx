@@ -1,8 +1,9 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { formatAed, formatAedShort, type Fils } from '../domain/money';
 import type { PaceStatus } from '../domain/spendingInsights';
-import { chartColors, colors, fontSize, radius, spacing } from '../theme/tokens';
+import { fontSize, radius, spacing } from '../theme/tokens';
+import { makeStyles } from '../theme/ThemeProvider';
 import { Body, Card, Heading } from './ui';
 
 /** A headline number with a label and a supporting line. */
@@ -17,6 +18,7 @@ export function StatTile({
   note?: string;
   testID?: string;
 }) {
+  const styles = useStyles();
   return (
     <View
       style={styles.tile}
@@ -57,6 +59,7 @@ export function BudgetBar({
   status: PaceStatus;
   testID?: string;
 }) {
+  const styles = useStyles();
   const used = budget > 0 ? Math.min(1, spent / budget) : 0;
   return (
     <View
@@ -99,6 +102,7 @@ export function GoalBar({
   onPress?: () => void;
   testID?: string;
 }) {
+  const styles = useStyles();
   return (
     <Pressable
       accessibilityRole={onPress ? 'button' : 'text'}
@@ -134,6 +138,7 @@ export function HorizontalBars({
   items: readonly BarItem[];
   testID?: string;
 }) {
+  const styles = useStyles();
   const max = Math.max(1, ...items.map((i) => i.value));
   const total = items.reduce((s, i) => s + i.value, 0);
   return (
@@ -178,6 +183,7 @@ export function TrendBars({
   summary: string;
   testID?: string;
 }) {
+  const styles = useStyles();
   const max = Math.max(1, ...values);
   return (
     <Card testID={testID}>
@@ -210,7 +216,7 @@ export function TrendBars({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles(({ colors, chart: chartColors }) => ({
   tile: {
     flex: 1,
     minWidth: 140,
@@ -237,7 +243,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   fill: { height: 10, borderRadius: 5, backgroundColor: chartColors.bar },
-  fillOver: { backgroundColor: '#d03b3b' },
+  fillOver: { backgroundColor: chartColors.critical },
   paceTick: {
     position: 'absolute',
     top: 0,
@@ -259,7 +265,7 @@ const styles = StyleSheet.create({
   trendValue: { fontSize: 10, color: colors.textMuted },
   trendBar: { width: '70%', borderTopLeftRadius: 4, borderTopRightRadius: 4 },
   trendLatest: { backgroundColor: chartColors.bar },
-  trendMuted: { backgroundColor: '#9ec5f4' },
+  trendMuted: { backgroundColor: chartColors.barMuted },
   axisRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: spacing.xs },
   axisLabel: { fontSize: fontSize.caption, color: colors.textMuted },
-});
+}));

@@ -1,14 +1,38 @@
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-  type KeyboardTypeOptions,
-} from 'react-native';
+import { Pressable, Text, TextInput, View, type KeyboardTypeOptions } from 'react-native';
 
-import { colors, fontSize, minTouchTarget, radius, spacing } from '../theme/tokens';
+import { makeStyles, useTheme } from '../theme/ThemeProvider';
+import { fontSize, minTouchTarget, radius, spacing } from '../theme/tokens';
 import { Body } from './ui';
+
+const useStyles = makeStyles(({ colors }) => ({
+  field: { gap: spacing.xs },
+  label: { fontSize: fontSize.body, fontWeight: '600', color: colors.text },
+  input: {
+    minHeight: minTouchTarget,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    fontSize: fontSize.body,
+    backgroundColor: colors.surface,
+    color: colors.text,
+  },
+  inputError: { borderColor: colors.dangerText, borderWidth: 1.5 },
+  error: { color: colors.dangerText, fontSize: fontSize.caption },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  chip: {
+    minHeight: 42,
+    paddingHorizontal: spacing.md,
+    justifyContent: 'center',
+    borderRadius: radius.pill,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  chipSelected: { borderColor: colors.primary, borderWidth: 1.5, backgroundColor: colors.infoBg },
+  chipText: { fontSize: fontSize.body, color: colors.text },
+  chipTextSelected: { fontWeight: '700', color: colors.primary },
+}));
 
 export function Field({
   label,
@@ -27,6 +51,8 @@ export function Field({
   keyboardType?: KeyboardTypeOptions;
   testID: string;
 }) {
+  const styles = useStyles();
+  const { colors } = useTheme();
   return (
     <View style={styles.field}>
       <Text style={styles.label}>{label}</Text>
@@ -38,6 +64,8 @@ export function Field({
         keyboardType={keyboardType}
         accessibilityLabel={label}
         accessibilityHint={error}
+        placeholderTextColor={colors.textMuted}
+        selectionColor={colors.primary}
         style={[styles.input, error ? styles.inputError : null]}
       />
       {error ? (
@@ -54,7 +82,7 @@ export interface ChipOption<T extends string> {
   label: string;
 }
 
-/** Single-choice chips (a radio group). Selection is shown by weight and a check, not color alone. */
+/** Single-choice chips (a radio group). Selection is shown by weight and a check, not colour alone. */
 export function ChipGroup<T extends string>({
   label,
   options,
@@ -68,6 +96,7 @@ export function ChipGroup<T extends string>({
   onChange: (v: T) => void;
   testID: string;
 }) {
+  const styles = useStyles();
   return (
     <View style={styles.field} accessibilityRole="radiogroup" accessibilityLabel={label}>
       <Text style={styles.label}>{label}</Text>
@@ -94,33 +123,3 @@ export function ChipGroup<T extends string>({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  field: { gap: spacing.xs },
-  label: { fontSize: fontSize.body, fontWeight: '600', color: colors.text },
-  input: {
-    minHeight: minTouchTarget,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    fontSize: fontSize.body,
-    backgroundColor: colors.surface,
-    color: colors.text,
-  },
-  inputError: { borderColor: colors.dangerText },
-  error: { color: colors.dangerText, fontSize: fontSize.caption },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  chip: {
-    minHeight: 40,
-    paddingHorizontal: spacing.md,
-    justifyContent: 'center',
-    borderRadius: radius.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-  },
-  chipSelected: { borderColor: colors.primary, backgroundColor: colors.infoBg },
-  chipText: { fontSize: fontSize.body, color: colors.text },
-  chipTextSelected: { fontWeight: '700', color: colors.primary },
-});
