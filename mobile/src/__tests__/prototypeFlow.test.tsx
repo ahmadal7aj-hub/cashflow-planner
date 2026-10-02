@@ -2,7 +2,9 @@ import { fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-li
 
 import { clearRecordedEvents, getRecordedEvents } from '../analytics/events';
 import Commitments from '../app/commitments';
-import Dashboard from '../app/dashboard';
+import TabsLayout from '../app/(tabs)/_layout';
+import Dashboard from '../app/(tabs)/dashboard';
+import Spending from '../app/(tabs)/spending';
 import EditItem from '../app/edit/[kind]/[id]';
 import Explain from '../app/explain/[metric]';
 import RootLayout from '../app/_layout';
@@ -17,7 +19,9 @@ const routes = {
   index: Index,
   onboarding: Onboarding,
   commitments: Commitments,
-  dashboard: Dashboard,
+  '(tabs)/_layout': TabsLayout,
+  '(tabs)/dashboard': Dashboard,
+  '(tabs)/spending': Spending,
   scenario: Scenario,
   settings: Settings,
   'warning/[id]': Warning,

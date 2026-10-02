@@ -110,6 +110,45 @@ export const t = {
     shortfall: (amount: string) => `Shortfall: this plan needs ${amount} more than you have.`,
   },
 
+  tabs: {
+    overview: 'Overview',
+    spending: 'Spending',
+    savings: 'Savings',
+    income: 'Income',
+  },
+
+  spending: {
+    title: 'Spending',
+    cycleNote: (elapsedPct: number, daysLeft: number) =>
+      `${elapsedPct}% of this pay cycle has passed. ${daysLeft} days to payday.`,
+    tileEveryday: 'Everyday spending',
+    tileEverydayNote: (spent: string, budget: string) => `${spent} of ${budget} budgeted`,
+    tileBills: 'Bills before payday',
+    tileBillsNote: (count: number) => (count === 1 ? '1 bill to pay' : `${count} bills to pay`),
+    tileFlex: 'Left for dining, shopping and fun',
+    tileFlexNote: 'Remaining non-essential budgets',
+    headroomOk: (amount: string) =>
+      `Those budgets fit inside your safe to spend, with ${amount} to spare.`,
+    headroomShort: (amount: string) =>
+      `Those budgets would go ${amount} beyond what you can safely spend. Consider trimming one.`,
+    budgetsTitle: 'Budgets this cycle',
+    budgetsCaption:
+      'The bar shows what you have spent. The thin line shows where an even pace would be by today.',
+    groupsTitle: 'Where your money goes each month',
+    groupsCaption: 'Average monthly cost by type, including yearly and termly bills spread out.',
+    drivingTitle: 'Driving in the UAE',
+    drivingBody: (spent: string, budget: string) =>
+      `Salik, parking and fuel: ${spent} spent of ${budget} this cycle.`,
+    drivingTip: 'Keep your Salik account topped up so tolls never fail to charge.',
+    trendTitle: 'Spending, last 6 cycles',
+    trendCaption: 'Sample history. The darker bar is your most recent cycle.',
+    trendFirst: '6 cycles ago',
+    trendLast: 'Last cycle',
+    trendSummary: (first: string, last: string) =>
+      `Spending over the last six cycles, from ${first} to ${last}.`,
+    editExpenses: 'Edit my expenses',
+  },
+
   warning: {
     title: 'Why you are seeing this',
     when: 'When',

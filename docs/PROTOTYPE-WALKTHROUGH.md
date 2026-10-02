@@ -23,6 +23,10 @@ one "due soon" heads-up for rent. The what-if laptop (AED 3,000) shows a **AED 1
 Participants can also edit this data: tap any item on the "Your income and expenses" screen, or add their own
 (for example Salik, parking, chiller, school fees). Safe to spend updates immediately.
 
+The **Spending** tab shows each everyday budget with a written status (on track, ahead of pace, over budget), the
+monthly cost by type, and the room left for dining and shopping. In the sample data, Entertainment is over
+budget (AED 275 of 250) and Food delivery is ahead of pace.
+
 ## Say to the participant
 
 "This is an early test version with made-up numbers. There are no right or wrong answers; if something is

@@ -94,9 +94,9 @@ export const SAMPLE_EXPENSES: readonly ExpenseItem[] = [
   budget('salik', 'salik', 'Salik', 150, 62),
   budget('parking', 'parking', 'Parking', 120, 48),
   budget('dining', 'dining', 'Dining out', 600, 340),
-  budget('delivery', 'delivery', 'Food delivery', 300, 180),
+  budget('delivery', 'delivery', 'Food delivery', 300, 260),
   budget('shopping', 'shopping', 'Shopping', 500, 120),
-  budget('entertainment', 'entertainment', 'Entertainment', 250, 60),
+  budget('entertainment', 'entertainment', 'Entertainment', 250, 275),
 ];
 
 export const SAMPLE_GOALS: readonly SavingsGoal[] = [
@@ -135,6 +135,12 @@ export const SAMPLE_PLAN: Plan = {
   goals: SAMPLE_GOALS,
 };
 
+/** Fictional last six pay cycles (oldest first). Used for trend charts only. */
+export const SAMPLE_HISTORY = {
+  spending: [13900, 14300, 15100, 14200, 14900, 14600].map(aedToFils),
+  income: [17000, 17500, 16800, 19000, 17400, 17750].map(aedToFils),
+  saved: [1500, 900, 600, 1400, 1200, 1200].map(aedToFils),
+} as const;
 /** Forecast input derived from the sample plan. */
 export const SAMPLE_INPUT = deriveForecastInput(SAMPLE_PLAN);
 
