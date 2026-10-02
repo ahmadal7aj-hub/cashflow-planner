@@ -115,6 +115,7 @@ export const t = {
     spending: 'Spending',
     savings: 'Savings',
     income: 'Income',
+    insights: 'Insights',
   },
 
   spending: {
@@ -201,6 +202,77 @@ export const t = {
     trendCaption: 'Sample history. The darker bar is your most recent cycle.',
     trendSummary: (first: string, last: string) =>
       `Amount saved each cycle over the last six cycles, from ${first} to ${last}.`,
+  },
+
+  income: {
+    title: 'Income',
+    tileTotal: 'Income each month',
+    tileTotalNote: 'Average, including yearly and irregular income',
+    tileStable: 'Predictable income',
+    tileStableNote: (pct: number) => `${pct}% of your income`,
+    tileCover: 'Covers your spending',
+    tileCoverNote: 'Predictable income vs average monthly spending',
+    sourcesTitle: 'Where your income comes from',
+    sourcesCaption: 'Average monthly value of each source, yearly and quarterly income spread out.',
+    predictable: 'Predictable',
+    varies: 'Varies',
+    sourceLine: (kind: string, frequency: string, next: string) =>
+      `${kind} · ${frequency} · ${next}`,
+    addIncome: 'Add income',
+    upcomingTitle: 'Money coming in',
+    upcomingCaption: 'The next 60 days.',
+    inDays: (n: number) => (n === 0 ? 'today' : n === 1 ? 'tomorrow' : `in ${n} days`),
+    noUpcoming: 'No income expected in the next 60 days.',
+    stabilityTitle: 'How steady is it?',
+    stabilityGap: (coverage: number, gap: string) =>
+      `Your predictable income covers ${coverage}% of your average spending. After savings, about ${gap} a month comes from irregular income. That is common; a little extra buffer helps in months it comes in lower.`,
+    stabilityOk: (spare: string) =>
+      `Your predictable income covers your average spending and savings, with about ${spare} a month to spare.`,
+    rangeTitle: 'Last 6 cycles',
+    rangeBody: (min: string, max: string, avg: string) =>
+      `Your income ranged from ${min} to ${max}, averaging ${avg}.`,
+    trendTitle: 'Income, last 6 cycles',
+    netTitle: 'Left after spending, last 6 cycles',
+    trendCaption: 'Sample history. The darker bar is your most recent cycle.',
+    trendSummary: (first: string, last: string) =>
+      `Income each cycle over the last six cycles, from ${first} to ${last}.`,
+    netSummary: (first: string, last: string) =>
+      `Money left after spending each cycle over the last six cycles, from ${first} to ${last}.`,
+  },
+
+  insights: {
+    title: 'Insights',
+    intro: 'Plain-language notes from your plan. Tap one to see the numbers behind it.',
+    empty: 'Nothing needs your attention right now.',
+    severity: {
+      attention: '⚠ Needs attention',
+      'heads-up': '▲ Heads-up',
+      info: '• Good to know',
+    },
+    shortfallTitle: 'This plan is short before payday',
+    shortfallBody: (amount: string) =>
+      `The plan needs ${amount} more than you have. Delaying a purchase or trimming a budget would close the gap.`,
+    overTitle: (name: string) => `${name} is over budget`,
+    overBody: (amount: string) =>
+      `You are ${amount} past the budget you set. You could move money from another budget or raise this one.`,
+    aheadTitle: (name: string) => `${name} is ahead of pace`,
+    aheadBody: (amount: string) =>
+      `${amount} is left for the rest of the cycle. A slightly slower pace keeps you inside the budget.`,
+    billTitle: (name: string) => `${name} is coming up`,
+    billBody: (days: number, perMonth: string) =>
+      `Due in ${days} days. Setting aside ${perMonth} a month from now would have it covered.`,
+    tightTitle: 'Your fun budgets are bigger than what is safe to spend',
+    tightBody: (amount: string) =>
+      `They would go ${amount} beyond what you can safely spend this cycle. Trimming one would help.`,
+    cashTitle: 'Your emergency fund is small',
+    cashBody: (amount: string) =>
+      `Three months of essential spending is a common goal and you are ${amount} away. Even a small monthly top-up helps.`,
+    goalTitle: (name: string) => `${name} needs a bigger monthly amount`,
+    goalBody: (amount: string) =>
+      `To finish on time it needs ${amount} a month. You can raise the amount or move the deadline.`,
+    gapTitle: 'You rely on irregular income',
+    gapBody: (amount: string) =>
+      `Your predictable income falls ${amount} short of spending plus savings each month. Irregular income fills the gap, so a little extra buffer is wise.`,
   },
 
   warning: {

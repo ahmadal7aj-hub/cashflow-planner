@@ -5,6 +5,8 @@ import RootLayout from '../app/_layout';
 import Commitments from '../app/commitments';
 import TabsLayout from '../app/(tabs)/_layout';
 import Dashboard from '../app/(tabs)/dashboard';
+import Income from '../app/(tabs)/income';
+import Insights from '../app/(tabs)/insights';
 import Savings from '../app/(tabs)/savings';
 import Spending from '../app/(tabs)/spending';
 import EditItem from '../app/edit/[kind]/[id]';
@@ -22,6 +24,8 @@ const routes = {
   commitments: Commitments,
   '(tabs)/_layout': TabsLayout,
   '(tabs)/dashboard': Dashboard,
+  '(tabs)/income': Income,
+  '(tabs)/insights': Insights,
   '(tabs)/savings': Savings,
   '(tabs)/spending': Spending,
   scenario: Scenario,

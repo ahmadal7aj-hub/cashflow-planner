@@ -47,6 +47,22 @@ export default function TabsLayout() {
           tabBarButtonTestID: 'tab-savings',
         }}
       />
+      <Tabs.Screen
+        name="income"
+        options={{
+          title: t.tabs.income,
+          tabBarIcon: glyph('\u2197'),
+          tabBarButtonTestID: 'tab-income',
+        }}
+      />
+      <Tabs.Screen
+        name="insights"
+        options={{
+          title: t.tabs.insights,
+          tabBarIcon: glyph('\u2726'),
+          tabBarButtonTestID: 'tab-insights',
+        }}
+      />
     </Tabs>
   );
 }
