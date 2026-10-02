@@ -28,10 +28,20 @@ import {
 import { t } from '../../../i18n/strings';
 import { usePrototype } from '../../../state/PrototypeContext';
 
-type Kind = 'income' | 'fixed' | 'variable' | 'goal' | 'employment';
+type Kind = 'income' | 'fixed' | 'variable' | 'goal' | 'employment' | 'savings-in' | 'savings-out';
+
+const KINDS: readonly string[] = [
+  'income',
+  'fixed',
+  'variable',
+  'goal',
+  'employment',
+  'savings-in',
+  'savings-out',
+];
 
 function isKind(v: string | undefined): v is Kind {
-  return v === 'income' || v === 'fixed' || v === 'variable' || v === 'goal' || v === 'employment';
+  return v !== undefined && KINDS.includes(v);
 }
 
 const toInput = (fils: Fils) => formatAed(fils).replace('AED ', '').replace(/,/g, '');
@@ -53,6 +63,9 @@ export default function EditItem() {
 
   if (!isKind(kind)) return <NotFound />;
   if (kind === 'employment') return <EmploymentForm existing={store.plan.employment} />;
+  if (kind === 'savings-in' || kind === 'savings-out') {
+    return <SavingsMoveForm direction={kind === 'savings-in' ? 'in' : 'out'} />;
+  }
 
   const existing =
     kind === 'income'
@@ -524,6 +537,56 @@ function EmploymentForm({ existing }: { existing?: Employment | undefined }) {
         onChangeText={setBasic}
         error={errors.basic}
         keyboardType="decimal-pad"
+      />
+      <Button label={t.edit.save} onPress={save} testID="edit-save" />
+    </Screen>
+  );
+}
+
+/** Add money to current savings, or take some out. */
+function SavingsMoveForm({ direction }: { direction: 'in' | 'out' }) {
+  const router = useRouter();
+  const { plan, addToSavings, takeFromSavings } = usePrototype();
+  const [amount, setAmount] = useState('');
+  const [note, setNote] = useState('');
+  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+
+  const save = () => {
+    const a = parseAmountToFils(amount);
+    if (!a.ok || a.fils <= 0) {
+      setErrors({ amount: t.edit.errorAmount });
+      return;
+    }
+    if (direction === 'in') {
+      addToSavings(a.fils, note);
+    } else {
+      const result = takeFromSavings(a.fils, note);
+      if (result !== 'ok') {
+        setErrors({ amount: t.savings.errorInsufficient(formatAed(plan.savings.balance)) });
+        return;
+      }
+    }
+    router.back();
+  };
+
+  return (
+    <Screen testID="edit-screen">
+      <Heading>{direction === 'in' ? t.savings.formTitleIn : t.savings.formTitleOut}</Heading>
+      <Body muted>{`${t.savings.currentTitle}: ${formatAed(plan.savings.balance)}`}</Body>
+      <Field
+        label={t.savings.formAmount}
+        testID="amount"
+        value={amount}
+        onChangeText={setAmount}
+        error={errors.amount}
+        keyboardType="decimal-pad"
+      />
+      <Field
+        label={t.savings.formNote}
+        hint={t.savings.formNoteHint}
+        testID="note"
+        value={note}
+        onChangeText={setNote}
       />
       <Button label={t.edit.save} onPress={save} testID="edit-save" />
     </Screen>
