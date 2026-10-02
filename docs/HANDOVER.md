@@ -1,6 +1,6 @@
 # Project handover
 
-**Snapshot date:** 2026-10-02 · **Stage:** Validation / pre-build (BRD) · **App:** clickable prototype on sample data
+**Snapshot date:** 2026-10-03 · **Stage:** Validation / pre-build (BRD) · **App:** clickable prototype on sample data
 
 This is the one document to read to pick the project up cold. It says what exists, what is done, what is
 not, and exactly what to do next. Anything that needs a person's decision is marked **OWNER**.
@@ -18,7 +18,7 @@ not, and exactly what to do next. Anything that needs a person's decision is mar
   memory**: nothing is saved or sent. There is no backend, no accounts and no real forecast engine yet.
 - **The gate:** the BRD says **do not build Phase 2 (accounts, database, real engine) until 20 to 30 interviews show
   recurring demand.** Those interviews have **not started**. That is the single most important next step.
-- **Engineering health:** all work went through pull requests with CI. `main` is protected. 258 automated tests pass.
+- **Engineering health:** all work went through pull requests with CI. `main` is protected. 475 automated tests pass.
 - **One time-limited risk:** a security exception (node-forge) **expires 2026-11-01** (section 7).
 
 ---
@@ -46,10 +46,13 @@ Five tabs plus supporting screens. All numbers are hand-verified in tests.
 |---|---|
 | **Overview** | Safe to spend until payday, daily safe amount, expected balance, upcoming bills, warnings, a day-by-day balance chart with a kept-aside line (and table view), a stacked "where your money goes" bar, a what-if purchase scenario, and an explanation screen for every headline number |
 | **Spending** | Everyday budgets with a written status (on track, ahead of pace, over budget), monthly cost by type, Salik / parking / fuel together, room left for dining and shopping, 6-cycle trend |
-| **Savings** | Goals with deadline checks, emergency fund in months of essential spending, a big-bills planner (monthly amount to be ready on time), unallocated monthly surplus, an **illustrative** gratuity estimate, 6-cycle trend |
-| **Income** | Income by source, predictable vs irregular, money arriving in the next 60 days, how steady income is, income and net trends |
-| **Insights** | Short, neutral notes (shortfall, budget over, big bill coming, small emergency fund...) that open the screen with the numbers |
-| **Editing** | Add, edit and delete income, bills, everyday budgets and goals, using **30 standard UAE categories** (rent, chiller, DEWA, du / e&, Salik, parking, fuel, school fees, nanny, money sent home, car registration, visa fees...). Edits change the forecast immediately |
+| **Savings** | **Current savings balance** you can add to, take out of, and update with an end-of-pay-cycle result (up if you saved, down if you spent more than you earned); goals with deadline checks; emergency fund in months of essential spending; a big-bills planner; unallocated monthly surplus; an **illustrative** gratuity estimate; recent activity; 6-cycle trend |
+| **Investments** (screen, opened from Savings) | Type of investment (stocks, funds and ETFs, gold, crypto, real estate, sukuk/bonds/deposits, business, other), amount put in, what it is worth now, **profit or loss**, income received (dividends, rent, interest), allocation by type, and a planned monthly contribution that is set aside in the forecast. **Tracking only, not advice** |
+| **Income** | Income by source (including investment income), predictable vs irregular, money arriving in the next 60 days, how steady income is, income and net trends |
+| **Insights** | Short, neutral notes (shortfall, budget over, big bill coming, bill reminder, small emergency fund...) that open the screen with the numbers |
+| **Editing** | Add, edit and delete income, bills, everyday budgets, goals and investments, using **31 standard UAE categories** (rent, chiller, DEWA, du / e&, Salik, parking, fuel, school fees, nanny, money sent home, car registration, visa fees, **Other bill: name it yourself**...). Edits change the forecast immediately |
+| **Due dates and reminders** | A calendar date picker for bill due dates, next payment dates and goal deadlines. Bills can have a reminder: on the day, 1 day, 3 days, 1 week or 2 weeks before, or an exact date. Active reminders show on the Overview and in Insights. **In-app only; no phone notifications yet** |
+| **Look and feel** | Navy and gold theme in **light and dark mode** (Settings: match my phone, light or dark), a navy hero card for Safe to spend, icons, a redesigned welcome screen |
 
 Design rules baked in: money as integer fils; centralised strings and design tokens; written status and symbols,
 never colour alone; 48px touch targets; accessible error messages; no shame-based wording; privacy-minimised
@@ -57,8 +60,10 @@ analytics (allow-listed events only, no financial values).
 
 ### Quality and security
 
-- **258 tests in 17 suites:** domain maths, edit and journey flows through every screen, charts, analytics privacy,
-  the audit gate and the exception watch.
+- **475 tests in 26 suites:** domain maths (including dates, reminders, savings balance and investments), edit and
+  journey flows through every screen, charts, analytics privacy, the audit gate and the exception watch.
+- **Theme accessibility:** every text and background pair in both light and dark mode is tested at WCAG AA (4.5:1),
+  and the chart colours were validated for both modes.
 - **A code review found and fixed 10 bugs** (PR #34), the worst being that "payday today" showed the whole salary as
   one day of spending money.
 - **Dependency policy:** CI fails on any high or critical production advisory. One advisory has an approved,
@@ -113,6 +118,17 @@ See `docs/ARCHITECTURE.md` for the structure and `docs/TESTING.md` for how to ru
 - **Maestro E2E has never been run.**
 - **Competitor data** is vendor marketing; Monarch prices and Wally's own site were not captured.
 - The planning-horizon rule ("until the day before next payday", capped at 62 days) is an assumption, ADR 0003.
+- **The new theme, calendar, savings balance and investments have not been seen on a screen by Claude.** The logic
+  and contrast are tested; spacing, icon sizes and the hero card proportions need the owner's eyes.
+- **Reminders are in-app only.** A reminder shows when the app is open; nothing alerts the phone yet.
+- **The end-of-cycle savings result is an estimate** from a typical month (income minus typical spending), not from
+  real transactions, which do not exist in the prototype.
+- **Investment values are typed by the user** (no price feed) and nothing here is investment advice. Investment
+  income counts in monthly income but not in the payday forecast.
+- **Monthly bills repeat every 30 days in the projection** after the first (exact) occurrence, so a second
+  occurrence inside the plan horizon can be a day or two off.
+- **One intermittent test failure** was seen once on a cold start and could not be reproduced in four further runs;
+  Jest's per-test timeout was raised to 20 seconds as a guard.
 
 ---
 
@@ -138,9 +154,10 @@ Work in this order. Do not skip ahead: Phase 2 is gated on step 4.
 
 | # | Action | Done when |
 |---|---|---|
-| 1 | **Click through the prototype in Expo Go** (follow `docs/PROTOTYPE-WALKTHROUGH.md`) | You have a list of anything confusing, ugly or wrong, with screen names or screenshots |
+| 1 | **Click through the prototype in Expo Go** (follow `docs/PROTOTYPE-WALKTHROUGH.md`). Try the newest features: add a bill with a due date and a reminder, the Other bill, the current savings balance, an investment, and dark mode | You have a list of anything confusing, ugly or wrong, with screen names or screenshots |
 | 2 | **Send that list to Claude** | Issues are fixed in small PRs |
 | 3 | **Confirm or change the eight proposals in ADR 0004**, and decide the cloud vs on-device question | Each item marked Accepted or changed |
+| 3b | **Tell Claude when the in-app reminders feel right**, then ask for phone notifications (the next planned step) | A decision on notifications |
 
 ### B. Weeks 1 to 3: validation (OWNER)
 
@@ -171,6 +188,9 @@ Work in this order. Do not skip ahead: Phase 2 is gated on step 4.
    after pricing validation Phase 6 monetisation. Phase 7 bank connectivity needs its own legal go/no-go.
 
 ### E. Housekeeping and backlog (Claude can do these on request)
+
+- **Phone notifications for bill reminders** (the agreed next step after the in-app reminders): needs one new
+  component (`expo-notifications`) and a permission prompt; notifications will never show amounts on the lock screen.
 
 - Run the Maestro E2E flow once on a USB-connected Android phone.
 - Add screenshots and an accessibility pass; check small-screen layout.

@@ -58,12 +58,26 @@ confusing, that is useful for me. Please say what you are thinking out loud."
    sample data mid-study unless it is clearly broken; record any change and the date.
 3. Never save screenshots that show a participant's real data.
 
-The **Savings** tab shows goals with a written status, the emergency fund in months of essential spending
-(sample: about 1.4 months), the big bills ahead with the monthly amount to set aside (school fees due in 40 days:
-AED 4,500 a month), and an illustrative gratuity estimate (sample: AED 25,200). In the sample data, Summer travel is
-behind: it needs AED 1,120 a month to finish on time and sets aside 400.
+## The other tabs and newer features (sample numbers to expect)
 
-The **Income** tab splits income by source (sample: salary 85%), separates predictable from irregular income,
-lists money arriving in the next 60 days, and says how steady income is (sample: predictable income covers 102%
-of spending but not spending plus savings). The **Insights** tab turns the numbers into short notes, for example
-`Entertainment is over budget` and `School fees are coming up`. Tap one to open the screen behind it.
+- **Savings tab.** *Current savings* starts at **AED 23,600.00** with **Add money** and **Take out**. The *End of
+  this pay cycle* card says a typical month brings in **AED 17,830.00** and sends out **AED 14,658.33**, leaving
+  about **AED 3,171.67**; **Apply this to my savings** adds it once (balance becomes AED 26,771.67), and spending more
+  than you earn would reduce it. Also: the emergency fund in months of essential spending (about 1.4 months), the
+  big bills ahead with the monthly amount to set aside (school fees due in 40 days: AED 4,500 a month), an
+  illustrative gratuity estimate (AED 25,200), and recent activity. Summer travel is behind: it needs AED 1,120 a
+  month and sets aside 400.
+- **Investments** (open it from the Savings tab). Three sample investments worth **AED 47,100.00** against
+  **AED 43,000.00** put in: a **profit of AED 4,100.00 (+9.5%)**, and **AED 80.00 a month** of income from the
+  property fund. Tap one to change it, or add your own (type, amount put in, worth now, income, monthly
+  contribution). It says clearly that this is for tracking, not advice.
+- **Income tab.** Splits income by source (salary 84%, plus side work, the yearly bonus and investment income),
+  separates predictable from irregular income, lists money arriving in the next 60 days, and says how steady income
+  is (predictable income covers 102% of spending but not spending plus savings).
+- **Insights tab.** Short notes such as `Entertainment is over budget` and `School fees are coming up`. Tap one to
+  open the screen behind it.
+- **Due dates and reminders.** Add a bill (Bills and fixed expenses, then **Add a bill**), choose a **due date**
+  on the calendar, and under **Remind me** pick on the day, 1 day, 3 days, 1 week or 2 weeks before, or **Pick a
+  date**. A reminder that has started shows on the Overview and in Insights. Choose **Other bill (name it yourself)**
+  for anything not listed. Reminders are in-app only for now.
+- **Dark mode.** Settings, then **Appearance**: match your phone, light or dark.
