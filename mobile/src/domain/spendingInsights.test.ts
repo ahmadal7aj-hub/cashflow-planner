@@ -39,6 +39,13 @@ describe('paceStatus', () => {
     expect(paceStatus(aedToFils(600), aedToFils(600), 0.6)).toBe('ahead');
     expect(paceStatus(aedToFils(601), aedToFils(600), 0.6)).toBe('over');
   });
+  it('does not flag ordinary spending at the very start of a cycle', () => {
+    // 0% of the cycle has passed; spending up to about 11.5% of the budget is normal.
+    expect(paceStatus(aedToFils(60), aedToFils(600), 0)).toBe('on-track');
+    expect(paceStatus(aedToFils(68), aedToFils(600), 0)).toBe('on-track');
+    expect(paceStatus(aedToFils(70), aedToFils(600), 0)).toBe('ahead');
+  });
+
   it('treats a brand-new cycle with no spending as on track', () => {
     expect(paceStatus(0, aedToFils(600), 0)).toBe('on-track');
   });

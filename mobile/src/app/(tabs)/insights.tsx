@@ -74,7 +74,7 @@ export default function Insights() {
               key={i.id}
               accessibilityRole="button"
               accessibilityLabel={`${t.insights.severity[i.severity]}. ${c.title}. ${c.body}`}
-              onPress={() => router.push(c.route)}
+              onPress={() => router.navigate(c.route)}
               testID={`insight-${i.id}`}
             >
               <Card

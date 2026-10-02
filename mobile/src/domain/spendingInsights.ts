@@ -8,6 +8,8 @@ import { EXPENSE_GROUP_LABELS, getExpenseCategory, type ExpenseGroup } from './u
 export const CYCLE_DAYS = 30;
 /** Spending more than this multiple of the straight-line pace counts as "ahead of pace". */
 const PACE_TOLERANCE = 1.15;
+/** Floor on the elapsed fraction used for pace, so a brand-new cycle is not flagged for normal spending. */
+const PACE_MIN_ELAPSED = 0.1;
 
 export type PaceStatus = 'on-track' | 'ahead' | 'over';
 
@@ -19,7 +21,10 @@ export function cycleElapsedFraction(daysUntilPayday: number): number {
 
 export function paceStatus(spent: Fils, budget: Fils, elapsed: number): PaceStatus {
   if (spent > budget) return 'over';
-  return spent > budget * elapsed * PACE_TOLERANCE ? 'ahead' : 'on-track';
+  // Early in a cycle the straight-line pace is near zero, so even a small purchase would look "ahead".
+  // Allow at least the first tenth of the cycle's budget before calling it ahead of pace.
+  const expected = budget * Math.max(elapsed, PACE_MIN_ELAPSED);
+  return spent > expected * PACE_TOLERANCE ? 'ahead' : 'on-track';
 }
 
 export interface BudgetLine {

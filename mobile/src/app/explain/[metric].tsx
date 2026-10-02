@@ -33,7 +33,7 @@ export default function Explain() {
       <Card>
         <Heading>{t.explain.inputs}</Heading>
         <Row label={r.cash} value={formatAed(f.availableCash)} />
-        <Row label={r.income} value={formatAed(0)} />
+        <Row label={r.income} value={formatAed(f.expectedIncome)} />
         <Row label={r.commitments} value={`-${formatAed(f.reservedCommitments)}`} />
         <Row label={r.savings} value={`-${formatAed(f.savingsReserve)}`} />
         {metric !== 'forecast' && <Row label={r.buffer} value={`-${formatAed(f.safetyBuffer)}`} />}

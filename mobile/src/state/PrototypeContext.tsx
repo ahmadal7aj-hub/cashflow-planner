@@ -1,4 +1,4 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useContext, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import {
   deriveForecastInput,
@@ -23,6 +23,8 @@ interface PrototypeState {
   upsertGoal: (goal: SavingsGoal) => void;
   removeGoal: (id: string) => void;
   setEmployment: (e: Employment) => void;
+  /** True only the first time it is called, so onboarding_completed is recorded once per session. */
+  claimOnboardingCompletion: () => boolean;
   resetToSample: () => void;
   scenarioOn: boolean;
   setScenarioOn: (on: boolean) => void;
@@ -43,6 +45,7 @@ function upsert<T extends { id: string }>(list: readonly T[], item: T): T[] {
 export function PrototypeProvider({ children }: { children: ReactNode }) {
   const [plan, setPlan] = useState<Plan>(SAMPLE_PLAN);
   const [scenarioOn, setScenarioOn] = useState(false);
+  const onboardingTracked = useRef(false);
 
   const value = useMemo<PrototypeState>(() => {
     const input = deriveForecastInput(plan);
@@ -65,6 +68,11 @@ export function PrototypeProvider({ children }: { children: ReactNode }) {
       upsertGoal: (goal) => setPlan((p) => ({ ...p, goals: upsert(p.goals, goal) })),
       removeGoal: (id) => setPlan((p) => ({ ...p, goals: p.goals.filter((g) => g.id !== id) })),
       setEmployment: (e) => setPlan((p) => ({ ...p, employment: e })),
+      claimOnboardingCompletion: () => {
+        if (onboardingTracked.current) return false;
+        onboardingTracked.current = true;
+        return true;
+      },
       resetToSample: () => setPlan(SAMPLE_PLAN),
       scenarioOn,
       setScenarioOn,

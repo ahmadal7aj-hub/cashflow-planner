@@ -1,4 +1,4 @@
-import { aedToFils, formatAed, parseAmountToFils } from './money';
+import { aedToFils, formatAed, formatAedShort, parseAmountToFils } from './money';
 
 describe('formatAed', () => {
   it.each([
@@ -11,6 +11,27 @@ describe('formatAed', () => {
     [-125000, '-AED 1,250.00'],
   ])('formats %p fils as %p', (fils, expected) => {
     expect(formatAed(fils)).toBe(expected);
+  });
+});
+
+describe('amount limits and compact labels', () => {
+  it('rejects amounts above one billion AED so fils stay safe integers', () => {
+    expect(parseAmountToFils('99999999999999999999')).toEqual({ ok: false, reason: 'invalid' });
+    expect(parseAmountToFils('1000000000.01')).toEqual({ ok: false, reason: 'invalid' });
+    expect(parseAmountToFils('1000000000')).toEqual({ ok: true, fils: 100_000_000_000 });
+  });
+
+  it('accepted amounts are always safe integers', () => {
+    const r = parseAmountToFils('1000000000');
+    expect(r.ok && Number.isSafeInteger(r.fils)).toBe(true);
+  });
+
+  it.each([
+    [99960, 'AED 1k'], // 999.60 must not render as "AED 1000"
+    [99940, 'AED 999'],
+    [100000, 'AED 1k'],
+  ])('formatAedShort(%p) is %p', (fils, expected) => {
+    expect(formatAedShort(fils)).toBe(expected);
   });
 });
 

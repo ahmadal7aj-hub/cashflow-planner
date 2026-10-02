@@ -136,6 +136,37 @@ describe('editing the plan changes the forecast', () => {
     expect(safe({ ...base, goals })).toBe(aedToFils(1770 + 300));
   });
 
+  it('when payday is today, plans over the whole next cycle and counts the salary once', () => {
+    const income = base.income.map((i) => (i.id === 'salary' ? { ...i, nextInDays: 0 } : i));
+    const plan = { ...base, income };
+    const input = deriveForecastInput(plan);
+    const f = computeForecast(input);
+    expect(daysUntilPayday(plan)).toBe(30);
+    expect(f.horizonDays).toBe(30);
+    // Salary today (15,000) plus side work on day 20 (1,500); the next salary on day 30 is outside.
+    expect(f.expectedIncome).toBe(aedToFils(16500));
+    // Spread over the cycle, not dumped into a single day.
+    expect(f.dailySafe).toBeLessThan(f.safeToSpend / 10);
+  });
+
+  it('caps the horizon at about two months, however far away payday is entered', () => {
+    for (const nextInDays of [90, 200, 365]) {
+      const income = base.income.map((i) => (i.id === 'salary' ? { ...i, nextInDays } : i));
+      expect(daysUntilPayday({ ...base, income })).toBe(62);
+    }
+    const annual = base.income.map((i) =>
+      i.id === 'salary' ? { ...i, nextInDays: 0, frequency: 'annual' as const } : i,
+    );
+    expect(daysUntilPayday({ ...base, income: annual })).toBe(62);
+  });
+
+  it('a weekly salary paid today plans for 7 days', () => {
+    const income = base.income.map((i) =>
+      i.id === 'salary' ? { ...i, nextInDays: 0, frequency: 'weekly' as const } : i,
+    );
+    expect(daysUntilPayday({ ...base, income })).toBe(7);
+  });
+
   it('falls back to a 30-day cycle with no salary item', () => {
     const noSalary = { ...base, income: base.income.filter((i) => i.kind !== 'salary') };
     expect(daysUntilPayday(noSalary)).toBe(30);

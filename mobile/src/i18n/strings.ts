@@ -63,7 +63,9 @@ export const t = {
     errorAmount: 'Use numbers only, for example 1500 or 1500.50.',
     errorDays: 'Enter a whole number of days from 0 to 365.',
     notFound: 'This item no longer exists.',
-    salaryNote: 'Your salary date sets how far ahead the plan looks.',
+    salaryNote:
+      'Your salary date sets how far ahead the plan looks. If today is payday and your salary is already in your balance, enter your next payday instead.',
+    errorSalaryDays: 'Enter a salary date within the next 62 days.',
   },
 
   dashboard: {
@@ -357,6 +359,10 @@ export const t = {
     export: 'Export my data',
     delete: 'Delete my account',
     notAvailable: 'Not available in the prototype. Both will always be free and never blocked.',
+    exportMessage:
+      'Export is not available in this prototype yet. In the real app you will be able to download all of your own data.',
+    deleteMessage:
+      'Nothing is saved in this prototype, so there is nothing to delete. In the real app, deleting will remove your account and data.',
   },
 
   env: { prefix: 'Environment' },

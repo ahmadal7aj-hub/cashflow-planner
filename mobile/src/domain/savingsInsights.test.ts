@@ -59,9 +59,16 @@ describe('goalProgress', () => {
     expect(ok.status).toBe('on-track');
   });
 
-  it('handles a deadline of today without dividing by zero', () => {
-    const p = goalProgress(goal({ targetInDays: 0 }));
-    expect(Number.isFinite(p.neededPerMonth ?? NaN)).toBe(true);
+  it('a deadline inside a month needs the whole remainder, not an inflated monthly rate', () => {
+    // 8,000 left with 0, 10 or 29 days to go: all of it is needed within the month.
+    for (const days of [0, 10, 29, 30]) {
+      expect(goalProgress(goal({ targetInDays: days })).neededPerMonth).toBe(aedToFils(8000));
+    }
+    expect(goalProgress(goal({ targetInDays: 0 })).status).toBe('behind');
+  });
+
+  it('beyond a month it spreads the remainder over the months available', () => {
+    expect(goalProgress(goal({ targetInDays: 60 })).neededPerMonth).toBe(aedToFils(4000));
   });
 });
 

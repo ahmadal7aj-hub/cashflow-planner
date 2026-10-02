@@ -16,7 +16,7 @@ function toInput(fils: Fils): string {
 
 export default function Onboarding() {
   const router = useRouter();
-  const { plan, setNumbers } = usePrototype();
+  const { plan, setNumbers, claimOnboardingCompletion } = usePrototype();
   const startedAt = useRef(0);
   useEffect(() => {
     startedAt.current = Date.now();
@@ -43,10 +43,12 @@ export default function Onboarding() {
 
     setNumbers({ balance: parsed.balance.fils, safetyBuffer: parsed.buffer.fils });
     const seconds = (Date.now() - startedAt.current) / 1000;
-    track('onboarding_completed', {
-      steps_completed: 2,
-      duration_bucket: seconds < 30 ? 'lt_30s' : seconds < 120 ? 'lt_2m' : 'gte_2m',
-    });
+    if (claimOnboardingCompletion()) {
+      track('onboarding_completed', {
+        steps_completed: 2,
+        duration_bucket: seconds < 30 ? 'lt_30s' : seconds < 120 ? 'lt_2m' : 'gte_2m',
+      });
+    }
     router.push('/commitments');
   };
 

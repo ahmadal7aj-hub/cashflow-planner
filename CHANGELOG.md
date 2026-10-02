@@ -20,3 +20,4 @@ User-visible changes per release. Format: Keep a Changelog.
 - Competitor research (YooToo, YNAB, Monarch, Copilot): corrected the feature-gap document, revised the import proposal in ADR 0004, and added import, cloud-vs-local and Arabic/multi-currency questions to the interview guides.
 - Verified FinArt and Pocket Clear from their own pages and added Wally from listings; feature-gap document now notes that automatic capture without a bank login is a UAE market pattern.
 - Weekly security-exception watch: opens an issue assigned to the owner when a fix is published or an exception is about to expire.
+- Fixed (code review): payday-today planning, explain screen income row, over-eager 'ahead of pace' at the start of a cycle, unreadable chart for far-off payday dates, amount overflow, inflated goal deadlines, 'AED 1000' label, dead Delete/Export buttons, duplicate screens on the back stack, repeated onboarding analytics, and one-off income missing from the Income tab.

@@ -3,7 +3,7 @@ import { Pressable } from 'react-native';
 
 import { HorizontalBars, StatTile, TrendBars } from '../../components/dashboardParts';
 import { Body, Button, Card, Heading, Row, Screen } from '../../components/ui';
-import { FREQUENCY_LABELS, type Frequency } from '../../domain/budgetModel';
+import { FREQUENCY_LABELS, monthlyEquivalent } from '../../domain/budgetModel';
 import {
   incomeBreakdown,
   incomeRange,
@@ -13,6 +13,7 @@ import {
 } from '../../domain/incomeInsights';
 import { formatAed } from '../../domain/money';
 import { SAMPLE_HISTORY } from '../../domain/sampleData';
+import { getIncomeCategory } from '../../domain/uaeCategories';
 import { t } from '../../i18n/strings';
 import { usePrototype } from '../../state/PrototypeContext';
 
@@ -20,6 +21,10 @@ export default function Income() {
   const router = useRouter();
   const { plan } = usePrototype();
   const sources = incomeBreakdown(plan);
+  // The list shows every income item, including one-offs, which have no monthly value and so are not in the chart.
+  const allIncome = [...plan.income].sort(
+    (a, b) => monthlyEquivalent(b.amount, b.frequency) - monthlyEquivalent(a.amount, a.frequency),
+  );
   const s = incomeSummary(plan);
   const upcoming = upcomingIncome(plan, 60);
   const history = SAMPLE_HISTORY.income;
@@ -55,19 +60,19 @@ export default function Income() {
       />
 
       <Card testID="income-sources-list">
-        {sources.map((i) => (
+        {allIncome.map((i) => (
           <Pressable
             key={i.id}
             accessibilityRole="button"
-            accessibilityLabel={`${i.name}, ${formatAed(i.amount)}, ${FREQUENCY_LABELS[i.frequency as Frequency]}, ${i.stable ? t.income.predictable : t.income.varies}`}
+            accessibilityLabel={`${i.name}, ${formatAed(i.amount)}, ${FREQUENCY_LABELS[i.frequency]}, ${i.stable ? t.income.predictable : t.income.varies}`}
             onPress={() => router.push(`/edit/income/${i.id}`)}
             testID={`income-source-${i.id}`}
           >
             <Row label={i.name} value={formatAed(i.amount)} strong />
             <Body muted>
               {t.income.sourceLine(
-                i.kindLabel,
-                FREQUENCY_LABELS[i.frequency as Frequency],
+                getIncomeCategory(i.kind).label,
+                FREQUENCY_LABELS[i.frequency],
                 i.stable ? t.income.predictable : t.income.varies,
               )}
             </Body>
