@@ -149,6 +149,60 @@ export const t = {
     editExpenses: 'Edit my expenses',
   },
 
+  savings: {
+    title: 'Savings',
+    tileMonthly: 'Saved each month',
+    tileMonthlyNote: (pct: string) => `${pct} of your income`,
+    tileTotal: 'Total saved',
+    tileTotalNote: 'Across all your goals',
+    tileCover: 'Emergency cover',
+    tileCoverValue: (months: string) => `${months} months`,
+    tileCoverNone: 'None yet',
+    levels: {
+      none: 'No emergency fund yet',
+      low: 'Under 1 month: a start',
+      building: 'Building toward 3 months',
+      solid: '3 months or more covered',
+    },
+    coverTitle: 'Emergency fund',
+    coverBody: (essential: string, target: string, gap: string) =>
+      `Your essential spending is about ${essential} a month. Many people aim for 3 to 6 months. Three months is ${target}, and you are ${gap} away.`,
+    coverReached: (target: string) =>
+      `Three months of essential spending is ${target}, and you have reached it.`,
+    coverMissing: 'Mark one of your goals as your emergency fund to see how many months it covers.',
+    goalsTitle: 'Your goals',
+    goalLine: (saved: string, target: string, pct: number) => `${saved} of ${target} · ${pct}%`,
+    goalDone: '✓ Goal reached',
+    goalOnTrack: '✓ On track for the deadline',
+    goalBehind: (needed: string) => `▲ Needs ${needed} a month to finish on time`,
+    goalPaused: 'Paused: not set aside in your forecast',
+    goalEta: (months: number, monthly: string) => `About ${months} months at ${monthly} a month`,
+    goalNoEta: 'Set a monthly amount to see when you will get there',
+    addGoal: 'Add a goal',
+    billsTitle: 'Big bills ahead',
+    billsCaption:
+      'Termly, yearly and one-off bills. This is what to set aside each month, from today, to be ready on time.',
+    billLine: (days: number, perMonth: string) =>
+      `Due in ${days} days · set aside ${perMonth} a month`,
+    noBills: 'No big bills in the next year.',
+    surplusTitle: 'Each month',
+    surplusPositive: (amount: string) =>
+      `After your average spending and your savings, about ${amount} a month is unallocated.`,
+    surplusNegative: (amount: string) =>
+      `Your average spending and savings come to ${amount} a month more than your income.`,
+    gratuityTitle: 'End-of-service gratuity (estimate)',
+    gratuityBody: (years: string, basic: string) =>
+      `Based on ${years} years of service and a basic wage of ${basic} a month.`,
+    gratuityNote:
+      'An illustration only: 21 days of basic wage per year for the first five years, 30 days after that, capped at two years of basic wage. Your contract and the law decide the real figure, so please confirm with your employer or the labour authority.',
+    gratuityEdit: 'Edit service details',
+    gratuityAdd: 'Add service details',
+    trendTitle: 'Saved, last 6 cycles',
+    trendCaption: 'Sample history. The darker bar is your most recent cycle.',
+    trendSummary: (first: string, last: string) =>
+      `Amount saved each cycle over the last six cycles, from ${first} to ${last}.`,
+  },
+
   warning: {
     title: 'Why you are seeing this',
     when: 'When',

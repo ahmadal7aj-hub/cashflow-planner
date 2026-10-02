@@ -2,6 +2,7 @@ import { createContext, useContext, useMemo, useState, type ReactNode } from 're
 
 import {
   deriveForecastInput,
+  type Employment,
   type ExpenseItem,
   type IncomeItem,
   type Plan,
@@ -21,6 +22,7 @@ interface PrototypeState {
   removeIncome: (id: string) => void;
   upsertGoal: (goal: SavingsGoal) => void;
   removeGoal: (id: string) => void;
+  setEmployment: (e: Employment) => void;
   resetToSample: () => void;
   scenarioOn: boolean;
   setScenarioOn: (on: boolean) => void;
@@ -62,6 +64,7 @@ export function PrototypeProvider({ children }: { children: ReactNode }) {
       removeIncome: (id) => setPlan((p) => ({ ...p, income: p.income.filter((i) => i.id !== id) })),
       upsertGoal: (goal) => setPlan((p) => ({ ...p, goals: upsert(p.goals, goal) })),
       removeGoal: (id) => setPlan((p) => ({ ...p, goals: p.goals.filter((g) => g.id !== id) })),
+      setEmployment: (e) => setPlan((p) => ({ ...p, employment: e })),
       resetToSample: () => setPlan(SAMPLE_PLAN),
       scenarioOn,
       setScenarioOn,

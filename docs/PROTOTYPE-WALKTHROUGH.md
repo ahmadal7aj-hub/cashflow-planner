@@ -57,3 +57,8 @@ confusing, that is useful for me. Please say what you are thinking out loud."
 2. If a number looked wrong to the participant, note which screen and what they expected. Do not change the
    sample data mid-study unless it is clearly broken; record any change and the date.
 3. Never save screenshots that show a participant's real data.
+
+The **Savings** tab shows goals with a written status, the emergency fund in months of essential spending
+(sample: about 1.4 months), the big bills ahead with the monthly amount to set aside (school fees due in 40 days:
+AED 4,500 a month), and an illustrative gratuity estimate (sample: AED 25,200). In the sample data, Summer travel is
+behind: it needs AED 1,120 a month to finish on time and sets aside 400.

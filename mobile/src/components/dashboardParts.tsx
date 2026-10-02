@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { formatAed, formatAedShort, type Fils } from '../domain/money';
 import type { PaceStatus } from '../domain/spendingInsights';
@@ -82,6 +82,40 @@ export function BudgetBar({
   );
 }
 
+/** Goal progress: fill = share saved. Status is always written out with a symbol, never color alone. */
+export function GoalBar({
+  name,
+  pct,
+  line,
+  status,
+  onPress,
+  testID,
+}: {
+  name: string;
+  /** 0..1 */
+  pct: number;
+  line: string;
+  status: string;
+  onPress?: () => void;
+  testID?: string;
+}) {
+  return (
+    <Pressable
+      accessibilityRole={onPress ? 'button' : 'text'}
+      accessibilityLabel={`${name}. ${line}. ${status}`}
+      onPress={onPress}
+      style={styles.budgetRow}
+      testID={testID}
+    >
+      <Text style={styles.budgetName}>{name}</Text>
+      <View style={styles.track}>
+        <View style={[styles.fill, { width: `${Math.min(1, Math.max(0, pct)) * 100}%` }]} />
+      </View>
+      <Text style={styles.budgetFoot}>{line}</Text>
+      <Text style={styles.status}>{status}</Text>
+    </Pressable>
+  );
+}
 export interface BarItem {
   key: string;
   label: string;

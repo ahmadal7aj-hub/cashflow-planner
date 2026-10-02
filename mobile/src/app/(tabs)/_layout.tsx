@@ -39,6 +39,14 @@ export default function TabsLayout() {
           tabBarButtonTestID: 'tab-spending',
         }}
       />
+      <Tabs.Screen
+        name="savings"
+        options={{
+          title: t.tabs.savings,
+          tabBarIcon: glyph('\u25C8'),
+          tabBarButtonTestID: 'tab-savings',
+        }}
+      />
     </Tabs>
   );
 }

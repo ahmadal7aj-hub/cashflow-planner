@@ -7,6 +7,7 @@ import {
   FREQUENCIES,
   FREQUENCY_LABELS,
   nextId,
+  type Employment,
   type ExpenseItem,
   type Frequency,
   type IncomeItem,
@@ -23,10 +24,10 @@ import {
 import { t } from '../../../i18n/strings';
 import { usePrototype } from '../../../state/PrototypeContext';
 
-type Kind = 'income' | 'fixed' | 'variable' | 'goal';
+type Kind = 'income' | 'fixed' | 'variable' | 'goal' | 'employment';
 
 function isKind(v: string | undefined): v is Kind {
-  return v === 'income' || v === 'fixed' || v === 'variable' || v === 'goal';
+  return v === 'income' || v === 'fixed' || v === 'variable' || v === 'goal' || v === 'employment';
 }
 
 const toInput = (fils: Fils) => formatAed(fils).replace('AED ', '').replace(/,/g, '');
@@ -51,6 +52,7 @@ export default function EditItem() {
   }, [navigation, isNew]);
 
   if (!isKind(kind)) return <NotFound />;
+  if (kind === 'employment') return <EmploymentForm existing={store.plan.employment} />;
 
   const existing =
     kind === 'income'
@@ -334,6 +336,9 @@ function GoalForm({ existing }: { existing?: SavingsGoal }) {
     existing?.targetInDays !== undefined ? String(existing.targetInDays) : '',
   );
   const [enabled, setEnabled] = useState<'yes' | 'no'>(existing?.enabled === false ? 'no' : 'yes');
+  const [emergency, setEmergency] = useState<'yes' | 'no'>(
+    existing?.purpose === 'emergency' ? 'yes' : 'no',
+  );
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
 
   const save = () => {
@@ -350,14 +355,32 @@ function GoalForm({ existing }: { existing?: SavingsGoal }) {
     setErrors(next);
     if (Object.keys(next).length > 0 || !tg.ok || !sv.ok || !mo.ok || dl === undefined) return;
 
+    const id = existing?.id ?? nextId('goal', plan.goals);
+    if (emergency === 'yes') {
+      // Only one goal can be the emergency fund: clear the flag on any other goal.
+      for (const g of plan.goals) {
+        if (g.id !== id && g.purpose === 'emergency') {
+          upsertGoal({
+            id: g.id,
+            name: g.name,
+            target: g.target,
+            saved: g.saved,
+            monthlyContribution: g.monthlyContribution,
+            enabled: g.enabled,
+            ...(g.targetInDays === undefined ? {} : { targetInDays: g.targetInDays }),
+          });
+        }
+      }
+    }
     upsertGoal({
-      id: existing?.id ?? nextId('goal', plan.goals),
+      id,
       name: name.trim(),
       target: tg.fils,
       saved: sv.fils,
       monthlyContribution: mo.fils,
       enabled: enabled === 'yes',
       ...(dl === null ? {} : { targetInDays: dl }),
+      ...(emergency === 'yes' ? { purpose: 'emergency' as const } : {}),
     });
     router.back();
   };
@@ -414,6 +437,16 @@ function GoalForm({ existing }: { existing?: SavingsGoal }) {
           { value: 'no', label: 'Paused' },
         ]}
       />
+      <ChipGroup
+        label="Is this your emergency fund?"
+        testID="emergency"
+        value={emergency}
+        onChange={setEmergency}
+        options={[
+          { value: 'yes', label: 'Yes, this is my emergency fund' },
+          { value: 'no', label: 'No' },
+        ]}
+      />
       <Button label={t.edit.save} onPress={save} testID="edit-save" />
       {existing && (
         <Button
@@ -426,6 +459,50 @@ function GoalForm({ existing }: { existing?: SavingsGoal }) {
           }}
         />
       )}
+    </Screen>
+  );
+}
+
+function EmploymentForm({ existing }: { existing?: Employment | undefined }) {
+  const router = useRouter();
+  const { setEmployment } = usePrototype();
+  const [years, setYears] = useState(existing ? String(existing.yearsOfService) : '');
+  const [basic, setBasic] = useState(existing ? toInput(existing.basicMonthly) : '');
+  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+
+  const save = () => {
+    const y = /^\d+(\.\d{1,2})?$/.test(years.trim()) ? Number(years.trim()) : undefined;
+    const b = parseAmountToFils(basic);
+    const next: Record<string, string | undefined> = {};
+    if (y === undefined || y > 60) next.years = 'Enter years of service, for example 4 or 4.5.';
+    if (!b.ok || b.fils <= 0) next.basic = t.edit.errorAmount;
+    setErrors(next);
+    if (Object.keys(next).length > 0 || y === undefined || !b.ok) return;
+    setEmployment({ yearsOfService: y, basicMonthly: b.fils });
+    router.back();
+  };
+
+  return (
+    <Screen testID="edit-screen">
+      <Heading>{t.savings.gratuityTitle}</Heading>
+      <Body muted>{t.savings.gratuityNote}</Body>
+      <Field
+        label="Years of service so far"
+        testID="years"
+        value={years}
+        onChangeText={setYears}
+        error={errors.years}
+        keyboardType="decimal-pad"
+      />
+      <Field
+        label="Monthly basic wage (AED), not total pay"
+        testID="basic"
+        value={basic}
+        onChangeText={setBasic}
+        error={errors.basic}
+        keyboardType="decimal-pad"
+      />
+      <Button label={t.edit.save} onPress={save} testID="edit-save" />
     </Screen>
   );
 }
