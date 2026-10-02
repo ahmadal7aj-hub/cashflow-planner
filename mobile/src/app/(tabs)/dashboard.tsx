@@ -6,6 +6,7 @@ import { track } from '../../analytics/events';
 import { Body, Button, Card, Heading, Row, Screen } from '../../components/ui';
 import { BalanceChart, BreakdownBar } from '../../components/charts';
 import { buildBalanceTimeline, buildBreakdown } from '../../domain/forecastCharts';
+import { formatDate, relativeDays } from '../../domain/dates';
 import { formatAed } from '../../domain/money';
 import { t } from '../../i18n/strings';
 import { usePrototype } from '../../state/PrototypeContext';
@@ -15,7 +16,8 @@ const MAX_UPCOMING = 5;
 
 export default function Dashboard() {
   const router = useRouter();
-  const { baseline: f } = usePrototype();
+  const { baseline: f, reminders } = usePrototype();
+  const active = reminders.filter((r) => r.active);
 
   useEffect(() => {
     track('dashboard_viewed', { has_warning: f.warnings.length > 0, horizon_type: 'next_payday' });
@@ -64,6 +66,17 @@ export default function Dashboard() {
           <Body muted>{t.dashboard.forecastOn(f.horizonDays)}</Body>
         </Pressable>
       </Card>
+
+      {active.length > 0 && (
+        <Card tone="warn" testID="reminders-card">
+          <Heading>{t.reminder.cardTitle}</Heading>
+          {active.map((r) => (
+            <Body key={r.id}>
+              {t.reminder.line(r.name, relativeDays(r.daysUntilDue), formatDate(r.dueDate))}
+            </Body>
+          ))}
+        </Card>
+      )}
 
       <BalanceChart timeline={buildBalanceTimeline(f)} />
       <BreakdownBar breakdown={buildBreakdown(f)} />

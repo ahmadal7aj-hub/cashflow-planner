@@ -3,6 +3,7 @@ import { Pressable } from 'react-native';
 
 import { Body, Card, Heading, Screen } from '../../components/ui';
 import { buildInsights, type Insight } from '../../domain/insights';
+import { relativeDays } from '../../domain/dates';
 import { formatAed } from '../../domain/money';
 import { t } from '../../i18n/strings';
 import { usePrototype } from '../../state/PrototypeContext';
@@ -49,6 +50,12 @@ function copy(i: Insight): { title: string; body: string; route: string } {
         body: t.insights.goalBody(amount),
         route: '/savings',
       };
+    case 'reminder':
+      return {
+        title: t.reminder.insightTitle(name),
+        body: t.reminder.insightBody(relativeDays(i.days ?? 0), amount),
+        route: '/commitments',
+      };
     case 'income-gap':
       return { title: t.insights.gapTitle, body: t.insights.gapBody(amount), route: '/income' };
   }
@@ -56,8 +63,8 @@ function copy(i: Insight): { title: string; body: string; route: string } {
 
 export default function Insights() {
   const router = useRouter();
-  const { plan, baseline } = usePrototype();
-  const insights = buildInsights(plan, baseline);
+  const { plan, baseline, reminders } = usePrototype();
+  const insights = buildInsights(plan, baseline, reminders);
 
   return (
     <Screen testID="insights-screen">

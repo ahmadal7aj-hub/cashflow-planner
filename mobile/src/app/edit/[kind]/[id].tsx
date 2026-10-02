@@ -1,7 +1,9 @@
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 
+import { DateField } from '../../../components/dates';
 import { ChipGroup, Field } from '../../../components/forms';
+import { ReminderPicker } from '../../../components/ReminderPicker';
 import { Body, Button, Heading, Screen } from '../../../components/ui';
 import {
   FREQUENCIES,
@@ -14,6 +16,7 @@ import {
   type IncomeItem,
   type SavingsGoal,
 } from '../../../domain/budgetModel';
+import { addDays, daysBetween, nextOnOrAfter, type ISODate } from '../../../domain/dates';
 import { formatAed, parseAmountToFils, type Fils } from '../../../domain/money';
 import {
   EXPENSE_CATEGORIES,
@@ -33,14 +36,10 @@ function isKind(v: string | undefined): v is Kind {
 
 const toInput = (fils: Fils) => formatAed(fils).replace('AED ', '').replace(/,/g, '');
 
-/** Whole days 0..365. Returns undefined when invalid. */
-function parseDays(s: string): number | undefined {
-  if (!/^\d+$/.test(s.trim())) return undefined;
-  const n = Number(s.trim());
-  return n >= 0 && n <= 365 ? n : undefined;
-}
-
 const FREQUENCY_OPTIONS = FREQUENCIES.map((f) => ({ value: f, label: FREQUENCY_LABELS[f] }));
+
+/** Categories where the user names the expense themselves instead of getting a preset name. */
+const OPEN_NAME_CATEGORIES = ['other', 'other_bill'];
 
 export default function EditItem() {
   const { kind, id } = useLocalSearchParams<{ kind: string; id: string }>();
@@ -78,14 +77,17 @@ function NotFound() {
 
 function ExpenseForm({ kind, existing }: { kind: 'fixed' | 'variable'; existing?: ExpenseItem }) {
   const router = useRouter();
-  const { plan, upsertExpense, removeExpense } = usePrototype();
+  const { plan, today, upsertExpense, removeExpense } = usePrototype();
   const categories = EXPENSE_CATEGORIES.filter((c) => c.kind === kind);
   const first = categories[0]!;
   const [categoryId, setCategoryId] = useState(existing?.categoryId ?? first.id);
   const [name, setName] = useState(existing?.name ?? first.label);
   const [amount, setAmount] = useState(existing ? toInput(existing.amount) : '');
   const [frequency, setFrequency] = useState<Frequency>(existing?.frequency ?? first.frequency);
-  const [nextDue, setNextDue] = useState(String(existing?.nextDueInDays ?? 7));
+  const [dueDate, setDueDate] = useState<ISODate | null>(
+    existing?.dueDate ?? (existing ? addDays(today, existing.nextDueInDays) : null),
+  );
+  const [reminder, setReminder] = useState<number | undefined>(existing?.reminderDaysBefore);
   const [spent, setSpent] = useState(existing ? toInput(existing.spentSoFar) : '0');
   const [essential, setEssential] = useState<'yes' | 'no'>(
     (existing?.essential ?? first.essential) ? 'yes' : 'no',
@@ -96,7 +98,8 @@ function ExpenseForm({ kind, existing }: { kind: 'fixed' | 'variable'; existing?
     setCategoryId(cid);
     if (!existing) {
       const c = getExpenseCategory(cid);
-      setName(c.label);
+      // "Other" categories start with an empty name so the user types what the expense really is.
+      setName(OPEN_NAME_CATEGORIES.includes(cid) ? '' : c.label);
       setFrequency(c.frequency);
       setEssential(c.essential ? 'yes' : 'no');
     }
@@ -105,12 +108,15 @@ function ExpenseForm({ kind, existing }: { kind: 'fixed' | 'variable'; existing?
   const save = () => {
     const a = parseAmountToFils(amount);
     const s = parseAmountToFils(spent);
-    const d = parseDays(nextDue);
     const next: Record<string, string | undefined> = {};
     if (name.trim() === '') next.name = t.edit.errorName;
     if (!a.ok || a.fils <= 0) next.amount = t.edit.errorAmount;
     if (kind === 'variable' && !s.ok) next.spent = t.edit.errorAmount;
-    if (kind === 'fixed' && d === undefined) next.days = t.edit.errorDays;
+    if (kind === 'fixed') {
+      if (dueDate === null) next.date = t.dates.errorDueDate;
+      else if (frequency === 'once' && daysBetween(today, dueDate) < 0)
+        next.date = t.dates.errorPastOneOff;
+    }
     setErrors(next);
     if (Object.keys(next).length > 0 || !a.ok) return;
 
@@ -120,10 +126,12 @@ function ExpenseForm({ kind, existing }: { kind: 'fixed' | 'variable'; existing?
       categoryId,
       amount: a.fils,
       frequency: kind === 'variable' ? 'monthly' : frequency,
-      nextDueInDays: kind === 'fixed' ? (d ?? 0) : 0,
+      nextDueInDays: kind === 'fixed' && dueDate ? daysBetween(today, dueDate) : 0,
       kind,
       essential: essential === 'yes',
       spentSoFar: kind === 'variable' && s.ok ? s.fils : 0,
+      ...(kind === 'fixed' && dueDate ? { dueDate } : {}),
+      ...(kind === 'fixed' && reminder !== undefined ? { reminderDaysBefore: reminder } : {}),
     });
     router.back();
   };
@@ -167,14 +175,17 @@ function ExpenseForm({ kind, existing }: { kind: 'fixed' | 'variable'; existing?
             onChange={setFrequency}
             options={FREQUENCY_OPTIONS}
           />
-          <Field
-            label={t.edit.nextDue}
-            testID="days"
-            value={nextDue}
-            onChangeText={setNextDue}
-            error={errors.days}
-            keyboardType="number-pad"
+          <DateField
+            label={t.dates.dueDate}
+            hint={t.dates.dueDateHint}
+            testID="due-date"
+            value={dueDate}
+            today={today}
+            onChange={setDueDate}
+            error={errors.date}
+            {...(frequency === 'once' ? { minDate: today } : {})}
           />
+          <ReminderPicker dueDate={dueDate} today={today} value={reminder} onChange={setReminder} />
         </>
       )}
       {kind === 'variable' && (
@@ -215,13 +226,15 @@ function ExpenseForm({ kind, existing }: { kind: 'fixed' | 'variable'; existing?
 
 function IncomeForm({ existing }: { existing?: IncomeItem }) {
   const router = useRouter();
-  const { plan, upsertIncome, removeIncome } = usePrototype();
+  const { plan, today, upsertIncome, removeIncome } = usePrototype();
   const first = INCOME_CATEGORIES[0]!;
   const [kind, setKind] = useState<IncomeKind>(existing?.kind ?? first.id);
   const [name, setName] = useState(existing?.name ?? first.label);
   const [amount, setAmount] = useState(existing ? toInput(existing.amount) : '');
   const [frequency, setFrequency] = useState<Frequency>(existing?.frequency ?? first.frequency);
-  const [nextIn, setNextIn] = useState(String(existing?.nextInDays ?? 30));
+  const [nextDate, setNextDate] = useState<ISODate | null>(
+    existing?.nextDate ?? (existing ? addDays(today, existing.nextInDays) : null),
+  );
   const [stable, setStable] = useState<'yes' | 'no'>(
     (existing?.stable ?? first.stable) ? 'yes' : 'no',
   );
@@ -239,14 +252,18 @@ function IncomeForm({ existing }: { existing?: IncomeItem }) {
 
   const save = () => {
     const a = parseAmountToFils(amount);
-    const d = parseDays(nextIn);
     const next: Record<string, string | undefined> = {};
     if (name.trim() === '') next.name = t.edit.errorName;
     if (!a.ok || a.fils <= 0) next.amount = t.edit.errorAmount;
-    if (d === undefined) next.days = t.edit.errorDays;
-    else if (kind === 'salary' && d > MAX_HORIZON_DAYS) next.days = t.edit.errorSalaryDays;
+    // Days until the next payment on or after today (recurring dates roll forward).
+    const days = nextDate
+      ? daysBetween(today, nextOnOrAfter(nextDate, frequency, today))
+      : undefined;
+    if (nextDate === null) next.date = t.dates.errorDueDate;
+    else if (kind === 'salary' && days !== undefined && days > MAX_HORIZON_DAYS)
+      next.date = t.dates.errorSalaryDate;
     setErrors(next);
-    if (Object.keys(next).length > 0 || !a.ok || d === undefined) return;
+    if (Object.keys(next).length > 0 || !a.ok || nextDate === null || days === undefined) return;
 
     upsertIncome({
       id: existing?.id ?? nextId('inc', plan.income),
@@ -254,7 +271,8 @@ function IncomeForm({ existing }: { existing?: IncomeItem }) {
       kind,
       amount: a.fils,
       frequency,
-      nextInDays: d,
+      nextInDays: days,
+      nextDate,
       stable: stable === 'yes',
     });
     router.back();
@@ -292,14 +310,14 @@ function IncomeForm({ existing }: { existing?: IncomeItem }) {
         onChange={setFrequency}
         options={FREQUENCY_OPTIONS}
       />
-      <Field
-        label={t.edit.nextIncome}
-        hint={kind === 'salary' ? t.edit.salaryNote : undefined}
-        testID="days"
-        value={nextIn}
-        onChangeText={setNextIn}
-        error={errors.days}
-        keyboardType="number-pad"
+      <DateField
+        label={t.dates.nextPayment}
+        {...(kind === 'salary' ? { hint: t.edit.salaryNote } : {})}
+        testID="next-date"
+        value={nextDate}
+        today={today}
+        onChange={setNextDate}
+        error={errors.date}
       />
       <ChipGroup
         label={t.edit.stableLabel}
@@ -329,13 +347,14 @@ function IncomeForm({ existing }: { existing?: IncomeItem }) {
 
 function GoalForm({ existing }: { existing?: SavingsGoal }) {
   const router = useRouter();
-  const { plan, upsertGoal, removeGoal } = usePrototype();
+  const { plan, today, upsertGoal, removeGoal } = usePrototype();
   const [name, setName] = useState(existing?.name ?? '');
   const [target, setTarget] = useState(existing ? toInput(existing.target) : '');
   const [saved, setSaved] = useState(existing ? toInput(existing.saved) : '0');
   const [monthly, setMonthly] = useState(existing ? toInput(existing.monthlyContribution) : '0');
-  const [deadline, setDeadline] = useState(
-    existing?.targetInDays !== undefined ? String(existing.targetInDays) : '',
+  const [deadline, setDeadline] = useState<ISODate | null>(
+    existing?.targetDate ??
+      (existing?.targetInDays !== undefined ? addDays(today, existing.targetInDays) : null),
   );
   const [enabled, setEnabled] = useState<'yes' | 'no'>(existing?.enabled === false ? 'no' : 'yes');
   const [emergency, setEmergency] = useState<'yes' | 'no'>(
@@ -347,15 +366,13 @@ function GoalForm({ existing }: { existing?: SavingsGoal }) {
     const tg = parseAmountToFils(target);
     const sv = parseAmountToFils(saved);
     const mo = parseAmountToFils(monthly);
-    const dl = deadline.trim() === '' ? null : parseDays(deadline);
     const next: Record<string, string | undefined> = {};
     if (name.trim() === '') next.name = t.edit.errorName;
     if (!tg.ok || tg.fils <= 0) next.target = t.edit.errorAmount;
     if (!sv.ok) next.saved = t.edit.errorAmount;
     if (!mo.ok) next.monthly = t.edit.errorAmount;
-    if (dl === undefined) next.days = t.edit.errorDays;
     setErrors(next);
-    if (Object.keys(next).length > 0 || !tg.ok || !sv.ok || !mo.ok || dl === undefined) return;
+    if (Object.keys(next).length > 0 || !tg.ok || !sv.ok || !mo.ok) return;
 
     const id = existing?.id ?? nextId('goal', plan.goals);
     if (emergency === 'yes') {
@@ -370,6 +387,7 @@ function GoalForm({ existing }: { existing?: SavingsGoal }) {
             monthlyContribution: g.monthlyContribution,
             enabled: g.enabled,
             ...(g.targetInDays === undefined ? {} : { targetInDays: g.targetInDays }),
+            ...(g.targetDate === undefined ? {} : { targetDate: g.targetDate }),
           });
         }
       }
@@ -381,7 +399,9 @@ function GoalForm({ existing }: { existing?: SavingsGoal }) {
       saved: sv.fils,
       monthlyContribution: mo.fils,
       enabled: enabled === 'yes',
-      ...(dl === null ? {} : { targetInDays: dl }),
+      ...(deadline
+        ? { targetDate: deadline, targetInDays: Math.max(0, daysBetween(today, deadline)) }
+        : {}),
       ...(emergency === 'yes' ? { purpose: 'emergency' as const } : {}),
     });
     router.back();
@@ -421,13 +441,14 @@ function GoalForm({ existing }: { existing?: SavingsGoal }) {
         error={errors.monthly}
         keyboardType="decimal-pad"
       />
-      <Field
-        label="Deadline in days (optional)"
-        testID="days"
+      <DateField
+        label={t.dates.deadline}
+        testID="deadline"
         value={deadline}
-        onChangeText={setDeadline}
-        error={errors.days}
-        keyboardType="number-pad"
+        today={today}
+        minDate={today}
+        onChange={setDeadline}
+        onClear={() => setDeadline(null)}
       />
       <ChipGroup
         label="Include in my forecast?"

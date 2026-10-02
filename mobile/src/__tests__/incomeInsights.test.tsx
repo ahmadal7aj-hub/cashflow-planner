@@ -41,6 +41,20 @@ async function openApp(initialUrl: string) {
   return { getPathname: () => rendered.getPathname() };
 }
 
+/** Today is pinned so date maths in the tests is deterministic. */
+beforeAll(() => {
+  jest.useFakeTimers({ now: new Date('2026-10-03T09:00:00') });
+});
+afterAll(() => {
+  jest.useRealTimers();
+});
+
+/** Open a date field and tap a day in its calendar. */
+async function pickDate(toggleTestId: string, iso: string) {
+  await fireEvent.press(screen.getByTestId(toggleTestId));
+  await fireEvent.press(screen.getByTestId(`date-day-${iso}`));
+}
+
 describe('Income dashboard (P1-01)', () => {
   it('is reachable from the tab bar', async () => {
     const { getPathname } = await openApp('/dashboard');
@@ -120,7 +134,7 @@ describe('Income dashboard (P1-01)', () => {
 
     await fireEvent.press(screen.getByTestId('income-source-side'));
     await waitFor(() => expect(getPathname()).toBe('/edit/income/side'));
-    await fireEvent.changeText(screen.getByTestId('input-days'), '5');
+    await pickDate('next-date-toggle', '2026-10-08');
     await fireEvent.press(screen.getByTestId('edit-save'));
     await waitFor(() => expect(getPathname()).toBe('/income'));
 
@@ -136,7 +150,7 @@ describe('Income dashboard (P1-01)', () => {
     await fireEvent.press(screen.getByTestId('frequency-once'));
     await fireEvent.changeText(screen.getByTestId('input-name'), 'Eid gift');
     await fireEvent.changeText(screen.getByTestId('input-amount'), '2000');
-    await fireEvent.changeText(screen.getByTestId('input-days'), '5');
+    await pickDate('next-date-toggle', '2026-10-08');
     await fireEvent.press(screen.getByTestId('edit-save'));
     await waitFor(() => expect(getPathname()).toBe('/income'));
 
@@ -150,7 +164,7 @@ describe('Income dashboard (P1-01)', () => {
     await waitFor(() => expect(getPathname()).toBe('/edit/income/new'));
     await fireEvent.press(screen.getByTestId('category-allowance'));
     await fireEvent.changeText(screen.getByTestId('input-amount'), '2000');
-    await fireEvent.changeText(screen.getByTestId('input-days'), '10');
+    await pickDate('next-date-toggle', '2026-10-13');
     await fireEvent.press(screen.getByTestId('edit-save'));
     await waitFor(() => expect(getPathname()).toBe('/income'));
 

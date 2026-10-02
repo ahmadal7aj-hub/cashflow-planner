@@ -2,6 +2,7 @@ import type { Plan } from './budgetModel';
 import { incomeSummary } from './incomeInsights';
 import type { Fils } from './money';
 import type { ForecastResult } from './prototypeForecast';
+import type { Reminder } from './reminders';
 import { bigBills, emergencyCover, goalProgress } from './savingsInsights';
 import { budgetLines, spendingSummary } from './spendingInsights';
 
@@ -17,7 +18,8 @@ export type InsightKind =
   | 'discretionary-tight'
   | 'emergency-low'
   | 'goal-behind'
-  | 'income-gap';
+  | 'income-gap'
+  | 'reminder';
 
 export type InsightSeverity = 'attention' | 'heads-up' | 'info';
 
@@ -37,7 +39,11 @@ const BIG_BILL_WINDOW_DAYS = 60;
 /** Fewer months of essential cover than this is called out. */
 const LOW_COVER_MONTHS = 1;
 
-export function buildInsights(plan: Plan, f: ForecastResult): Insight[] {
+export function buildInsights(
+  plan: Plan,
+  f: ForecastResult,
+  reminders: readonly Reminder[] = [],
+): Insight[] {
   const days = f.horizonDays;
   const out: Insight[] = [];
 
@@ -76,6 +82,18 @@ export function buildInsights(plan: Plan, f: ForecastResult): Insight[] {
         days: b.dueInDays,
       });
     }
+  }
+
+  for (const r of reminders) {
+    if (!r.active) continue;
+    out.push({
+      id: `reminder-${r.id}`,
+      kind: 'reminder',
+      severity: 'heads-up',
+      subject: r.name,
+      amount: r.amount,
+      days: r.daysUntilDue,
+    });
   }
 
   const spend = spendingSummary(plan, f, days);
