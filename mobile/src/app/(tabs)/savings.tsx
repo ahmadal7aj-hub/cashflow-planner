@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 
 import { GoalBar, StatTile, TrendBars } from '../../components/dashboardParts';
 import { Body, Button, Card, Heading, Row, Screen } from '../../components/ui';
+import { formatDate } from '../../domain/dates';
 import { formatAed } from '../../domain/money';
 import { SAMPLE_HISTORY } from '../../domain/sampleData';
 import {
@@ -44,17 +45,14 @@ export default function Savings() {
 
   return (
     <Screen testID="savings-screen">
+      <CurrentSavings />
+      <CycleCard />
+
       <StatTile
         testID="tile-monthly-saved"
         label={t.savings.tileMonthly}
         value={formatAed(summary.monthlySaved)}
         note={t.savings.tileMonthlyNote(`${(summary.savingsRate * 100).toFixed(1)}%`)}
-      />
-      <StatTile
-        testID="tile-total-saved"
-        label={t.savings.tileTotal}
-        value={formatAed(summary.totalSaved)}
-        note={t.savings.tileTotalNote}
       />
       <StatTile
         testID="tile-cover"
@@ -150,6 +148,8 @@ export default function Savings() {
         />
       </Card>
 
+      <ActivityCard />
+
       <TrendBars
         testID="savings-trend"
         title={t.savings.trendTitle}
@@ -163,5 +163,82 @@ export default function Savings() {
         )}
       />
     </Screen>
+  );
+}
+
+function signed(change: number): string {
+  return change >= 0 ? `+${formatAed(change)}` : formatAed(change);
+}
+
+/** The headline balance with buttons to add money or take it out. */
+function CurrentSavings() {
+  const router = useRouter();
+  const { plan } = usePrototype();
+  const balance = plan.savings.balance;
+  return (
+    <Card tone={balance < 0 ? 'danger' : 'info'} testID="current-savings-card">
+      <Body muted>{t.savings.currentTitle}</Body>
+      <Heading>{formatAed(balance)}</Heading>
+      <Body muted>{t.savings.currentNote}</Body>
+      {balance < 0 ? <Body testID="below-zero-note">{t.savings.belowZero}</Body> : null}
+      <Button
+        label={t.savings.addMoney}
+        onPress={() => router.push('/edit/savings-in/new')}
+        testID="savings-add"
+      />
+      <Button
+        label={t.savings.takeOut}
+        variant="secondary"
+        onPress={() => router.push('/edit/savings-out/new')}
+        testID="savings-take"
+      />
+    </Card>
+  );
+}
+
+/** Applies a pay cycle's result (income minus spending) to savings, only when the user confirms. */
+function CycleCard() {
+  const { cycle, closePayCycle } = usePrototype();
+  return (
+    <Card tone={cycle.result < 0 ? 'warn' : 'default'} testID="cycle-card">
+      <Heading>{t.savings.cycleTitle}</Heading>
+      <Body>{t.savings.cycleBody(formatAed(cycle.income), formatAed(cycle.spending))}</Body>
+      <Body testID="cycle-result">
+        {cycle.result >= 0
+          ? t.savings.cycleGain(formatAed(cycle.result))
+          : t.savings.cycleLoss(formatAed(-cycle.result))}
+      </Body>
+      {cycle.canClose ? (
+        <Button label={t.savings.cycleApply} onPress={closePayCycle} testID="close-cycle" />
+      ) : (
+        <Body muted testID="cycle-done">
+          {t.savings.cycleDone}
+        </Body>
+      )}
+      <Body muted>{t.savings.cycleNote}</Body>
+    </Card>
+  );
+}
+
+const ACTIVITY_LIMIT = 6;
+
+function ActivityCard() {
+  const { plan } = usePrototype();
+  const entries = plan.savings.entries.slice(0, ACTIVITY_LIMIT);
+  return (
+    <Card testID="activity-card">
+      <Heading>{t.savings.activityTitle}</Heading>
+      {entries.length === 0 ? (
+        <Body muted>{t.savings.noActivity}</Body>
+      ) : (
+        entries.map((e) => (
+          <Row
+            key={e.id}
+            label={t.savings.entryLine(formatDate(e.date), t.savings.entryKinds[e.kind], e.note)}
+            value={signed(e.change)}
+          />
+        ))
+      )}
+    </Card>
   );
 }

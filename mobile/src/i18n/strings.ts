@@ -197,6 +197,35 @@ export const t = {
     tileMonthlyNote: (pct: string) => `${pct} of your income`,
     tileTotal: 'Total saved',
     tileTotalNote: 'Across all your goals',
+    currentTitle: 'Current savings',
+    currentNote:
+      'Your goals set aside parts of this. It goes up when you add money or save, and down when you take money out or spend more than you earn.',
+    belowZero:
+      'Your savings are below zero. That means more was spent than earned. Adding money or trimming spending will bring it back up.',
+    addMoney: 'Add money',
+    takeOut: 'Take out',
+    cycleTitle: 'End of this pay cycle',
+    cycleBody: (income: string, spending: string) =>
+      `A typical month: ${income} comes in and ${spending} goes out.`,
+    cycleGain: (amount: string) =>
+      `That leaves about ${amount}. Apply it to add it to your savings.`,
+    cycleLoss: (amount: string) =>
+      `That is about ${amount} more going out than coming in. Applying it reduces your savings.`,
+    cycleApply: 'Apply this to my savings',
+    cycleDone: 'This pay cycle has already been added to your savings.',
+    cycleNote:
+      'An estimate from your typical month. The real app will use your actual transactions instead.',
+    activityTitle: 'Recent activity',
+    noActivity: 'No activity yet. Add money or apply a pay cycle and it will appear here.',
+    entryKinds: { deposit: 'Added', withdrawal: 'Taken out', cycle: 'Pay cycle' },
+    entryLine: (date: string, kind: string, note: string) =>
+      `${date} · ${kind}${note ? ` · ${note}` : ''}`,
+    formTitleIn: 'Add to savings',
+    formTitleOut: 'Take out of savings',
+    formAmount: 'Amount (AED)',
+    formNote: 'Note (optional)',
+    formNoteHint: 'For example: bonus, car repair.',
+    errorInsufficient: (balance: string) => `You only have ${balance} saved.`,
     tileCover: 'Emergency cover',
     tileCoverValue: (months: string) => `${months} months`,
     tileCoverNone: 'None yet',

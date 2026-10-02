@@ -88,7 +88,30 @@ export interface Employment {
   basicMonthly: Fils;
 }
 
+export type SavingsEntryKind = 'deposit' | 'withdrawal' | 'cycle';
+
+/** One change to the current savings balance. `change` is signed: positive adds, negative reduces. */
+export interface SavingsEntry {
+  id: string;
+  kind: SavingsEntryKind;
+  change: Fils;
+  /** The balance right after this change. */
+  balanceAfter: Fils;
+  date: ISODate;
+  note: string;
+}
+
+/** The user's current savings pot. Goals earmark parts of it; they do not add to it. */
+export interface SavingsAccount {
+  balance: Fils;
+  /** Newest first. */
+  entries: readonly SavingsEntry[];
+  /** The payday date of the last pay cycle whose result was added, so a cycle is only added once. */
+  lastClosedCycle?: ISODate;
+}
+
 export interface Plan {
+  savings: SavingsAccount;
   availableCash: Fils;
   safetyBuffer: Fils;
   income: readonly IncomeItem[];

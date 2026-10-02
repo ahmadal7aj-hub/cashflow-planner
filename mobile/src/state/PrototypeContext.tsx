@@ -11,6 +11,14 @@ import {
 } from '../domain/budgetModel';
 import { todayISO, type ISODate } from '../domain/dates';
 import type { Fils } from '../domain/money';
+import {
+  canCloseCycle,
+  closeCycle,
+  cycleResult,
+  deposit,
+  withdraw,
+  type CycleResult,
+} from '../domain/savingsBalance';
 import { computeForecast, type ForecastResult } from '../domain/prototypeForecast';
 import { remindersFor, type Reminder } from '../domain/reminders';
 import { SAMPLE_PLAN, SCENARIO_PRESET } from '../domain/sampleData';
@@ -18,7 +26,7 @@ import { SAMPLE_PLAN, SCENARIO_PRESET } from '../domain/sampleData';
 interface PrototypeState {
   /** Today's date (device clock), used to turn real dates into days. */
   today: ISODate;
-  /** The plan with real dates resolved to relative days for 	oday. Edit through the actions below. */
+  /** The plan with real dates resolved to relative days for `today`. Edit through the actions below. */
   plan: Plan;
   /** Bill reminders, soonest due first (in-app only). */
   reminders: Reminder[];
@@ -31,6 +39,14 @@ interface PrototypeState {
   upsertGoal: (goal: SavingsGoal) => void;
   removeGoal: (id: string) => void;
   setEmployment: (e: Employment) => void;
+  /** Add money to current savings. */
+  addToSavings: (amount: Fils, note: string) => void;
+  /** Take money out of current savings. Refuses more than is saved. */
+  takeFromSavings: (amount: Fils, note: string) => 'ok' | 'insufficient' | 'invalid';
+  /** Add this pay cycle's result (income minus spending) to savings. False if already added. */
+  closePayCycle: () => boolean;
+  /** The estimated result of the current pay cycle, and whether it can still be added. */
+  cycle: CycleResult & { canClose: boolean };
   /** True only the first time it is called, so onboarding_completed is recorded once per session. */
   claimOnboardingCompletion: () => boolean;
   resetToSample: () => void;
@@ -87,6 +103,21 @@ export function PrototypeProvider({
       upsertGoal: (goal) => setPlan((p) => ({ ...p, goals: upsert(p.goals, goal) })),
       removeGoal: (id) => setPlan((p) => ({ ...p, goals: p.goals.filter((g) => g.id !== id) })),
       setEmployment: (e) => setPlan((p) => ({ ...p, employment: e })),
+      addToSavings: (amount, note) =>
+        setPlan((p) => ({ ...p, savings: deposit(p.savings, amount, today, note) })),
+      takeFromSavings: (amount, note) => {
+        const r = withdraw(rawPlan.savings, amount, today, note);
+        if (!r.ok) return r.reason;
+        setPlan((p) => ({ ...p, savings: r.account }));
+        return 'ok';
+      },
+      closePayCycle: () => {
+        const next = closeCycle(plan, today);
+        if (!next) return false;
+        setPlan((p) => ({ ...p, savings: next }));
+        return true;
+      },
+      cycle: { ...cycleResult(plan), canClose: canCloseCycle(plan, today) },
       claimOnboardingCompletion: () => {
         if (onboardingTracked.current) return false;
         onboardingTracked.current = true;

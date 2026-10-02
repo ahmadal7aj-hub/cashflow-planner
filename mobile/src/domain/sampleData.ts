@@ -129,6 +129,8 @@ export const SAMPLE_GOALS: readonly SavingsGoal[] = [
 ];
 
 export const SAMPLE_PLAN: Plan = {
+  // Matches the sum of the goals' saved amounts (18,000 + 3,200 + 2,400): goals earmark this pot.
+  savings: { balance: aedToFils(23600), entries: [] },
   availableCash: aedToFils(12000),
   safetyBuffer: aedToFils(300),
   income: SAMPLE_INCOME,
