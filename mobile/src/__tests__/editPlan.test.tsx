@@ -131,6 +131,43 @@ describe('income and expenses editor (P1-01)', () => {
     expect(screen.getByText('AED 1,270.00')).toBeTruthy(); // 1,770 - 500 set aside
   });
 
+  it('the explanation lists income that arrives before payday, so the rows add up', async () => {
+    const { getPathname } = await openApp('/commitments');
+
+    await fireEvent.press(screen.getByTestId('income-side'));
+    await waitFor(() => expect(getPathname()).toBe('/edit/income/side'));
+    await fireEvent.changeText(screen.getByTestId('input-days'), '5');
+    await fireEvent.press(screen.getByTestId('edit-save'));
+    await waitFor(() => expect(getPathname()).toBe('/commitments'));
+    await fireEvent.press(screen.getByTestId('commitments-continue'));
+    await waitFor(() => expect(getPathname()).toBe('/dashboard'));
+    await fireEvent.press(screen.getByTestId('metric-safe'));
+    await waitFor(() => expect(getPathname()).toBe('/explain/safe'));
+
+    expect(screen.getByLabelText('Expected income in plan: AED 1,500.00')).toBeTruthy();
+    expect(screen.getByLabelText('Result: AED 3,270.00')).toBeTruthy();
+  });
+
+  it('rejects a salary date more than 62 days away', async () => {
+    const { getPathname } = await openApp('/commitments');
+
+    await fireEvent.press(screen.getByTestId('income-salary'));
+    await waitFor(() => expect(getPathname()).toBe('/edit/income/salary'));
+    await fireEvent.changeText(screen.getByTestId('input-days'), '200');
+    await fireEvent.press(screen.getByTestId('edit-save'));
+
+    expect(screen.getByText('Enter a salary date within the next 62 days.')).toBeTruthy();
+    expect(getPathname()).toBe('/edit/income/salary');
+  });
+
+  it('rejects an absurdly large amount instead of overflowing', async () => {
+    await openApp('/edit/fixed/new');
+
+    await fireEvent.changeText(screen.getByTestId('input-amount'), '99999999999999999999');
+    await fireEvent.press(screen.getByTestId('edit-save'));
+
+    expect(screen.getByTestId('error-amount')).toBeTruthy();
+  });
   it('rejects an empty amount with an accessible error and does not save', async () => {
     const { getPathname } = await openApp('/edit/fixed/new');
 

@@ -6,6 +6,7 @@ import { Body, Button, Heading, Screen } from '../../../components/ui';
 import {
   FREQUENCIES,
   FREQUENCY_LABELS,
+  MAX_HORIZON_DAYS,
   nextId,
   type Employment,
   type ExpenseItem,
@@ -243,6 +244,7 @@ function IncomeForm({ existing }: { existing?: IncomeItem }) {
     if (name.trim() === '') next.name = t.edit.errorName;
     if (!a.ok || a.fils <= 0) next.amount = t.edit.errorAmount;
     if (d === undefined) next.days = t.edit.errorDays;
+    else if (kind === 'salary' && d > MAX_HORIZON_DAYS) next.days = t.edit.errorSalaryDays;
     setErrors(next);
     if (Object.keys(next).length > 0 || !a.ok || d === undefined) return;
 

@@ -1,4 +1,5 @@
-import { fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-library';
+import { router } from 'expo-router';
+import { act, fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-library';
 
 import { clearRecordedEvents, getRecordedEvents } from '../analytics/events';
 import Commitments from '../app/commitments';
@@ -151,6 +152,31 @@ describe('prototype journey (P1-01)', () => {
     expect(serialized).not.toMatch(/12000|15000|1200000|salary|balance/i);
   });
 
+  it('settings data buttons always give feedback', async () => {
+    await openApp('/settings');
+
+    expect(screen.queryByTestId('data-message')).toBeNull();
+    await fireEvent.press(screen.getByTestId('delete-data'));
+    expect(screen.getByText(/there is nothing to delete/)).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('export-data'));
+    expect(screen.getByText(/Export is not available in this prototype yet/)).toBeTruthy();
+  });
+
+  it('records onboarding_completed only once even if the numbers are edited again', async () => {
+    const { getPathname } = await openApp('/onboarding');
+
+    await fireEvent.press(screen.getByTestId('onboarding-continue'));
+    await waitFor(() => expect(getPathname()).toBe('/commitments'));
+    await act(async () => {
+      router.push('/onboarding');
+    });
+    await waitFor(() => expect(getPathname()).toBe('/onboarding'));
+    await fireEvent.press(screen.getByTestId('onboarding-continue'));
+    await waitFor(() => expect(getPathname()).toBe('/commitments'));
+
+    const completed = getRecordedEvents().filter((e) => e.name === 'onboarding_completed');
+    expect(completed).toHaveLength(1);
+  });
   it('settings shows assumptions and a never-blocked data section', async () => {
     await openApp('/settings');
 

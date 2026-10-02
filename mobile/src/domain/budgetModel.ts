@@ -119,11 +119,25 @@ export function occurrenceDays(
 }
 
 const DEFAULT_CYCLE_DAYS = 30;
+/** The planning horizon never exceeds about two months, which keeps the charts readable. */
+export const MAX_HORIZON_DAYS = 62;
 
-/** Days until the next salary; this is the planning horizon. Falls back to 30 with no salary. */
+/**
+ * Days until the next salary; this is the planning horizon. Falls back to 30 with no salary.
+ * When payday is TODAY the salary lands now and a new cycle begins, so the horizon is the length of one
+ * pay cycle (not a single day, which would make today's salary look like one day of spending money).
+ */
 export function daysUntilPayday(plan: Plan): number {
   const salary = plan.income.find((i) => i.kind === 'salary');
-  return salary ? Math.max(0, Math.floor(salary.nextInDays)) : DEFAULT_CYCLE_DAYS;
+  if (!salary) return DEFAULT_CYCLE_DAYS;
+  const next = Math.max(0, Math.floor(salary.nextInDays));
+  const horizon =
+    next > 0
+      ? next
+      : salary.frequency === 'once'
+        ? DEFAULT_CYCLE_DAYS
+        : PERIOD_DAYS[salary.frequency];
+  return Math.min(horizon, MAX_HORIZON_DAYS);
 }
 
 export function remainingBudget(item: ExpenseItem): Fils {

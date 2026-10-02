@@ -38,7 +38,8 @@ export function goalProgress(goal: SavingsGoal): GoalProgress {
   const hasDeadline = goal.targetInDays !== undefined;
   const neededPerMonth =
     hasDeadline && remaining > 0
-      ? Math.ceil((remaining * DAYS_PER_MONTH) / Math.max(1, goal.targetInDays ?? 1))
+      ? // Under a month to go, everything is needed within the month, not an inflated monthly rate.
+        Math.ceil(remaining / Math.max(1, (goal.targetInDays ?? 0) / DAYS_PER_MONTH))
       : null;
 
   let status: GoalStatus;

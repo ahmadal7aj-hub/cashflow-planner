@@ -56,7 +56,7 @@ export default function Commitments() {
       <Button
         label={t.commitments.toDashboard}
         testID="commitments-continue"
-        onPress={() => router.push('/dashboard')}
+        onPress={() => router.navigate('/dashboard')}
       />
       <Button
         label={t.commitments.reset}

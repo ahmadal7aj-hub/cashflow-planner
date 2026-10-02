@@ -28,12 +28,24 @@ export function Body({
   children,
   muted,
   style,
+  testID,
+  accessibilityLiveRegion,
 }: {
   children: ReactNode;
   muted?: boolean;
   style?: TextStyle;
+  testID?: string;
+  accessibilityLiveRegion?: 'none' | 'polite' | 'assertive';
 }) {
-  return <Text style={[styles.body, muted && styles.muted, style]}>{children}</Text>;
+  return (
+    <Text
+      style={[styles.body, muted && styles.muted, style]}
+      testID={testID}
+      accessibilityLiveRegion={accessibilityLiveRegion}
+    >
+      {children}
+    </Text>
+  );
 }
 
 export function Card({

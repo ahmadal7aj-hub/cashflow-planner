@@ -127,6 +127,22 @@ describe('Income dashboard (P1-01)', () => {
     expect(screen.getByLabelText('Side work (in 5 days): AED 1,500.00')).toBeTruthy();
   });
 
+  it('keeps one-off income visible and editable on the Income tab', async () => {
+    const { getPathname } = await openApp('/income');
+
+    await fireEvent.press(screen.getByTestId('add-income-source'));
+    await waitFor(() => expect(getPathname()).toBe('/edit/income/new'));
+    await fireEvent.press(screen.getByTestId('category-other'));
+    await fireEvent.press(screen.getByTestId('frequency-once'));
+    await fireEvent.changeText(screen.getByTestId('input-name'), 'Eid gift');
+    await fireEvent.changeText(screen.getByTestId('input-amount'), '2000');
+    await fireEvent.changeText(screen.getByTestId('input-days'), '5');
+    await fireEvent.press(screen.getByTestId('edit-save'));
+    await waitFor(() => expect(getPathname()).toBe('/income'));
+
+    expect(screen.getByLabelText('Eid gift, AED 2,000.00, One-off, Varies')).toBeTruthy();
+    expect(screen.getByLabelText('Eid gift (in 5 days): AED 2,000.00')).toBeTruthy();
+  });
   it('adding predictable income changes the steadiness message', async () => {
     const { getPathname } = await openApp('/income');
 
