@@ -1,15 +1,28 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import { appEnvironment, environmentLabel, isProduction } from '../config/environment';
 import { t } from '../i18n/strings';
 import { PrototypeProvider } from '../state/PrototypeContext';
-import { colors, fontSize, spacing } from '../theme/tokens';
+import { makeStyles, ThemeProvider, useTheme } from '../theme/ThemeProvider';
+import { fontSize, spacing } from '../theme/tokens';
 
-export default function RootLayout() {
+const useStyles = makeStyles(({ colors }) => ({
+  banner: {
+    backgroundColor: colors.envBanner,
+    paddingTop: spacing.xl,
+    paddingBottom: spacing.xs,
+    alignItems: 'center',
+  },
+  bannerText: { color: '#FFFFFF', fontWeight: '600', fontSize: fontSize.caption, letterSpacing: 1 },
+}));
+
+function ThemedStack() {
+  const styles = useStyles();
+  const { colors, scheme } = useTheme();
   return (
-    <PrototypeProvider>
+    <>
       {!isProduction(appEnvironment) && (
         <View style={styles.banner} testID="environment-banner">
           <Text style={styles.bannerText}>{environmentLabel(appEnvironment)}</Text>
@@ -18,7 +31,9 @@ export default function RootLayout() {
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: colors.surface },
-          headerTintColor: colors.text,
+          headerTintColor: colors.primary,
+          headerTitleStyle: { color: colors.text, fontWeight: '700' },
+          headerShadowVisible: false,
           contentStyle: { backgroundColor: colors.background },
         }}
       >
@@ -33,17 +48,17 @@ export default function RootLayout() {
         <Stack.Screen name="scenario" options={{ title: t.scenario.title }} />
         <Stack.Screen name="settings" options={{ title: t.settings.title }} />
       </Stack>
-      <StatusBar style="auto" />
-    </PrototypeProvider>
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+    </>
   );
 }
 
-const styles = StyleSheet.create({
-  banner: {
-    backgroundColor: colors.envBanner,
-    paddingTop: spacing.xl,
-    paddingBottom: spacing.xs,
-    alignItems: 'center',
-  },
-  bannerText: { color: '#fff', fontWeight: '600', fontSize: fontSize.caption, letterSpacing: 1 },
-});
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <PrototypeProvider>
+        <ThemedStack />
+      </PrototypeProvider>
+    </ThemeProvider>
+  );
+}

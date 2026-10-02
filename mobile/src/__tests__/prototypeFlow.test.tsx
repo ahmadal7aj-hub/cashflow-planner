@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { StyleSheet } from 'react-native';
 import { act, fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-library';
 
 import { clearRecordedEvents, getRecordedEvents } from '../analytics/events';
@@ -178,6 +179,49 @@ describe('prototype journey (P1-01)', () => {
 
     const completed = getRecordedEvents().filter((e) => e.name === 'onboarding_completed');
     expect(completed).toHaveLength(1);
+  });
+  it('the Appearance setting switches between light and dark live', async () => {
+    await openApp('/settings');
+    const cardBg = () =>
+      StyleSheet.flatten(screen.getByTestId('appearance-card').props.style).backgroundColor;
+
+    expect(screen.getByText(/Match my phone/)).toBeTruthy(); // selected, so it shows a check mark
+    expect(cardBg()).toBe('#FFFFFF'); // light by default under test
+
+    await fireEvent.press(screen.getByTestId('appearance-dark'));
+    expect(cardBg()).toBe('#121C2F');
+    expect(screen.getByTestId('appearance-dark').props.accessibilityState).toMatchObject({
+      selected: true,
+    });
+
+    await fireEvent.press(screen.getByTestId('appearance-light'));
+    expect(cardBg()).toBe('#FFFFFF');
+
+    await fireEvent.press(screen.getByTestId('appearance-system'));
+    expect(screen.getByTestId('appearance-system').props.accessibilityState).toMatchObject({
+      selected: true,
+    });
+  });
+
+  it('the welcome screen promises three clear benefits before asking anything', async () => {
+    await openApp();
+
+    expect(screen.getByText('See what is safe to spend until your next payday.')).toBeTruthy();
+    expect(screen.getByText('Never miss a bill, with reminders you choose.')).toBeTruthy();
+    expect(
+      screen.getByText('Understand every number, and try a what-if before you spend.'),
+    ).toBeTruthy();
+    expect(screen.getByRole('header', { name: 'UAE Cash-Flow Planner' })).toBeTruthy();
+  });
+
+  it('the dashboard leads with Safe to spend in the hero card', async () => {
+    await openApp('/dashboard');
+
+    const hero = StyleSheet.flatten(screen.getByTestId('safe-to-spend-card').props.style);
+    expect(hero.backgroundColor).toBe('#12294A'); // navy hero card in light mode
+    expect(
+      screen.getByLabelText('Safe to spend: AED 1,770.00, until your next payday, in 12 days'),
+    ).toBeTruthy();
   });
   it('settings shows assumptions and a never-blocked data section', async () => {
     await openApp('/settings');

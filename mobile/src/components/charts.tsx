@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Text, View } from 'react-native';
 
 import type { Breakdown, BalanceTimeline, SegmentKey } from '../domain/forecastCharts';
 import { formatAed } from '../domain/money';
 import { t } from '../i18n/strings';
-import { chartColors, colors, fontSize, spacing } from '../theme/tokens';
+import { fontSize, spacing } from '../theme/tokens';
+import { makeStyles, useTheme } from '../theme/ThemeProvider';
 import { Body, Button, Card, Heading, Row } from './ui';
 
 const CHART_HEIGHT = 140;
@@ -12,6 +13,7 @@ const SEGMENT_GAP = 2;
 
 /** One-series column chart of the projected balance, with the kept-aside line and a table view. */
 export function BalanceChart({ timeline }: { timeline: BalanceTimeline }) {
+  const styles = useStyles();
   const [table, setTable] = useState(false);
   const { days, keptAside } = timeline;
   const first = days[0];
@@ -87,6 +89,8 @@ export function BalanceChart({ timeline }: { timeline: BalanceTimeline }) {
 
 /** Part-to-whole stacked bar. Identity is carried by the legend labels and values, not color alone. */
 export function BreakdownBar({ breakdown }: { breakdown: Breakdown }) {
+  const styles = useStyles();
+  const { chart: chartColors } = useTheme();
   const { segments, total, shortfall } = breakdown;
   return (
     <Card testID="breakdown-chart">
@@ -138,6 +142,8 @@ function LegendRow({
   amount: number;
   total: number;
 }) {
+  const styles = useStyles();
+  const { chart: chartColors } = useTheme();
   const label = t.charts.segments[segmentKey];
   const value = formatAed(amount);
   const percent = t.charts.percent(Math.round((amount * 100) / total));
@@ -150,7 +156,7 @@ function LegendRow({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles(({ colors, chart: chartColors }) => ({
   plot: {
     height: CHART_HEIGHT + 20,
     justifyContent: 'flex-end',
@@ -193,4 +199,4 @@ const styles = StyleSheet.create({
   legendText: { fontSize: fontSize.body, color: colors.text },
   legendLabel: { flex: 1 },
   shortfall: { fontSize: fontSize.body, fontWeight: '600', color: colors.dangerText },
-});
+}));

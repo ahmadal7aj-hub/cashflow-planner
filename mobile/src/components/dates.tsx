@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import {
   addMonths,
@@ -14,7 +14,8 @@ import {
   type ISODate,
 } from '../domain/dates';
 import { t } from '../i18n/strings';
-import { colors, fontSize, minTouchTarget, radius, spacing } from '../theme/tokens';
+import { fontSize, minTouchTarget, radius, spacing } from '../theme/tokens';
+import { makeStyles } from '../theme/ThemeProvider';
 import { Body } from './ui';
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -35,6 +36,7 @@ export function DatePicker({
   maxDate?: ISODate;
   testID?: string;
 }) {
+  const styles = useStyles();
   const start = parseISO(value ?? today) ?? parseISO(today)!;
   const [view, setView] = useState({ y: start.y, m: start.m });
 
@@ -149,6 +151,7 @@ export function DateField({
   maxDate?: ISODate;
   testID: string;
 }) {
+  const styles = useStyles();
   const [open, setOpen] = useState(false);
   const shown = value
     ? `${formatDate(value)} · ${relativeDays(daysBetween(today, value))}`
@@ -202,7 +205,7 @@ export function DateField({
   );
 }
 
-const styles = StyleSheet.create({
+const useStyles = makeStyles(({ colors, chart: chartColors }) => ({
   field: { gap: spacing.xs },
   label: { fontSize: fontSize.body, fontWeight: '600', color: colors.text },
   dateButton: {
@@ -254,5 +257,5 @@ const styles = StyleSheet.create({
   selected: { backgroundColor: colors.primary },
   disabled: { opacity: 0.35 },
   dayText: { fontSize: fontSize.body, color: colors.text },
-  selectedText: { color: colors.primaryText, fontWeight: '700' },
-});
+  selectedText: { color: colors.onPrimary, fontWeight: '700' },
+}));
