@@ -67,6 +67,16 @@ export interface SavingsGoal {
   enabled: boolean;
   /** Optional deadline in days from today. */
   targetInDays?: number;
+  /** Marks the goal that counts as the emergency fund (used for months-of-cover). */
+  purpose?: 'emergency';
+}
+
+/** Used only for the illustrative end-of-service gratuity estimate. */
+export interface Employment {
+  /** Years of service so far; fractions allowed (4.5 = four and a half years). */
+  yearsOfService: number;
+  /** Monthly basic wage (not total pay). */
+  basicMonthly: Fils;
 }
 
 export interface Plan {
@@ -75,6 +85,7 @@ export interface Plan {
   income: readonly IncomeItem[];
   expenses: readonly ExpenseItem[];
   goals: readonly SavingsGoal[];
+  employment?: Employment;
 }
 
 /** Average monthly value of a recurring amount. One-off items have no monthly equivalent. */

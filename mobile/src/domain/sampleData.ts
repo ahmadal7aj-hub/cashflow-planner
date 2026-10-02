@@ -107,6 +107,7 @@ export const SAMPLE_GOALS: readonly SavingsGoal[] = [
     saved: aedToFils(18000),
     monthlyContribution: aedToFils(500),
     enabled: true,
+    purpose: 'emergency',
   },
   {
     id: 'gold',
@@ -133,6 +134,7 @@ export const SAMPLE_PLAN: Plan = {
   income: SAMPLE_INCOME,
   expenses: SAMPLE_EXPENSES,
   goals: SAMPLE_GOALS,
+  employment: { yearsOfService: 4, basicMonthly: aedToFils(9000) },
 };
 
 /** Fictional last six pay cycles (oldest first). Used for trend charts only. */
