@@ -26,3 +26,12 @@ export function parseAmountToFils(input: string): ParseResult {
   if (!/^\d+(\.\d{1,2})?$/.test(cleaned)) return { ok: false, reason: 'invalid' };
   return { ok: true, fils: Math.round(Number(cleaned) * FILS_PER_AED) };
 }
+
+/** Compact label for charts: `AED 950` or `AED 14.6k`. Display only; never use for arithmetic. */
+export function formatAedShort(fils: Fils): string {
+  const aed = Math.abs(fils) / FILS_PER_AED;
+  const sign = fils < 0 ? '-' : '';
+  if (aed < 1000) return `${sign}AED ${Math.round(aed)}`;
+  const k = Math.round(aed / 100) / 10;
+  return `${sign}AED ${k}k`;
+}

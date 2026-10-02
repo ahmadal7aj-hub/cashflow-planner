@@ -2,14 +2,14 @@ import { useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
-import { track } from '../analytics/events';
-import { Body, Button, Card, Heading, Row, Screen } from '../components/ui';
-import { BalanceChart, BreakdownBar } from '../components/charts';
-import { buildBalanceTimeline, buildBreakdown } from '../domain/forecastCharts';
-import { formatAed } from '../domain/money';
-import { t } from '../i18n/strings';
-import { usePrototype } from '../state/PrototypeContext';
-import { colors, fontSize, minTouchTarget } from '../theme/tokens';
+import { track } from '../../analytics/events';
+import { Body, Button, Card, Heading, Row, Screen } from '../../components/ui';
+import { BalanceChart, BreakdownBar } from '../../components/charts';
+import { buildBalanceTimeline, buildBreakdown } from '../../domain/forecastCharts';
+import { formatAed } from '../../domain/money';
+import { t } from '../../i18n/strings';
+import { usePrototype } from '../../state/PrototypeContext';
+import { colors, fontSize, minTouchTarget } from '../../theme/tokens';
 
 const MAX_UPCOMING = 5;
 

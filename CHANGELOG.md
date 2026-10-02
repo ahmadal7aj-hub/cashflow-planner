@@ -13,3 +13,4 @@ User-visible changes per release. Format: Keep a Changelog.
 - Validation hypotheses, interview guide and usability tasks (P1-03).
 - Richer dashboard: day-by-day balance chart to payday with a kept-aside line, and a stacked breakdown of where the money goes, with table view and accessible labels (P1-01).
 - Editable income and expenses with standard UAE categories (rent, DEWA, du/e&, Salik, parking, fuel, school fees, remittances, car registration, visa fees...). Edits feed the forecast (P1-01).
+- Bottom tab bar (Overview, Spending) and a Spending dashboard: budgets vs spent with on-track / ahead / over status, monthly cost by type, UAE driving costs (Salik, parking, fuel), room left for dining and shopping, and a 6-cycle trend (P1-01).
