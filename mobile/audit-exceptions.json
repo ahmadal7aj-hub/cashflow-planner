@@ -1,0 +1,9 @@
+[
+  {
+    "id": "GHSA-86w9-cpqp-85rv",
+    "package": "node-forge",
+    "reason": "No patched version exists (advisory covers <=1.4.0; 1.4.0 is the latest release). Reached only through Expo's build tooling (@expo/cli, code-signing certificates). Not imported by app code, not in the shipped bundle, and no code signing of updates is configured. Re-check weekly; remove this entry as soon as a fixed version ships.",
+    "expires": "2026-11-01",
+    "acceptedBy": "PENDING owner approval (do not merge until confirmed)"
+  }
+]
