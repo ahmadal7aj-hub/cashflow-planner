@@ -1,5 +1,5 @@
 import { aedToFils } from './money';
-import type { ExpenseItem, IncomeItem, Plan, SavingsGoal } from './budgetModel';
+import type { ExpenseItem, IncomeItem, Investment, Plan, SavingsGoal } from './budgetModel';
 import { deriveForecastInput } from './budgetModel';
 import { getExpenseCategory } from './uaeCategories';
 
@@ -128,7 +128,44 @@ export const SAMPLE_GOALS: readonly SavingsGoal[] = [
   },
 ];
 
+export const SAMPLE_INVESTMENTS: readonly Investment[] = [
+  {
+    id: 'etf',
+    name: 'Global index fund',
+    type: 'funds',
+    invested: aedToFils(20000),
+    currentValue: aedToFils(22400),
+    monthlyContribution: 0,
+    enabled: true,
+    incomeAmount: 0,
+    incomeFrequency: 'quarterly',
+  },
+  {
+    id: 'gold',
+    name: 'Gold bars',
+    type: 'gold',
+    invested: aedToFils(8000),
+    currentValue: aedToFils(9100),
+    monthlyContribution: 0,
+    enabled: true,
+    incomeAmount: 0,
+    incomeFrequency: 'annual',
+  },
+  {
+    id: 'reit',
+    name: 'Dubai property fund',
+    type: 'real-estate',
+    invested: aedToFils(15000),
+    currentValue: aedToFils(15600),
+    monthlyContribution: 0,
+    enabled: true,
+    incomeAmount: aedToFils(240),
+    incomeFrequency: 'quarterly',
+  },
+];
+
 export const SAMPLE_PLAN: Plan = {
+  investments: SAMPLE_INVESTMENTS,
   // Matches the sum of the goals' saved amounts (18,000 + 3,200 + 2,400): goals earmark this pot.
   savings: { balance: aedToFils(23600), entries: [] },
   availableCash: aedToFils(12000),

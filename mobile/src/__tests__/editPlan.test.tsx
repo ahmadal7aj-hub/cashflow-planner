@@ -12,6 +12,7 @@ import Spending from '../app/(tabs)/spending';
 import EditItem from '../app/edit/[kind]/[id]';
 import Explain from '../app/explain/[metric]';
 import Index from '../app/index';
+import Investments from '../app/investments';
 import Onboarding from '../app/onboarding';
 import Scenario from '../app/scenario';
 import Settings from '../app/settings';
@@ -20,6 +21,7 @@ import Warning from '../app/warning/[id]';
 const routes = {
   _layout: RootLayout,
   index: Index,
+  investments: Investments,
   onboarding: Onboarding,
   commitments: Commitments,
   '(tabs)/_layout': TabsLayout,

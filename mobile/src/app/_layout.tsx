@@ -29,6 +29,7 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="warning/[id]" options={{ title: t.warning.title }} />
         <Stack.Screen name="explain/[metric]" options={{ title: t.explain.title }} />
+        <Stack.Screen name="investments" options={{ title: t.investments.title }} />
         <Stack.Screen name="scenario" options={{ title: t.scenario.title }} />
         <Stack.Screen name="settings" options={{ title: t.settings.title }} />
       </Stack>

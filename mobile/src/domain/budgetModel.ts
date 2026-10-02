@@ -110,7 +110,31 @@ export interface SavingsAccount {
   lastClosedCycle?: ISODate;
 }
 
+export type InvestmentType =
+  'stocks' | 'funds' | 'gold' | 'crypto' | 'real-estate' | 'fixed-income' | 'business' | 'other';
+
+/**
+ * Something the user has invested in. Tracking only: this is not investment advice and returns are
+ * not guaranteed. Profit is `currentValue - invested`; income (dividends, rent, interest) is separate.
+ */
+export interface Investment {
+  id: string;
+  name: string;
+  type: InvestmentType;
+  /** Total put in so far. */
+  invested: Fils;
+  /** What it is worth now, as entered by the user. */
+  currentValue: Fils;
+  /** Planned amount added each month; reserved in the forecast when enabled. */
+  monthlyContribution: Fils;
+  enabled: boolean;
+  /** Income received per payment (dividend, rent, interest). 0 when none. */
+  incomeAmount: Fils;
+  incomeFrequency: Frequency;
+}
+
 export interface Plan {
+  investments: readonly Investment[];
   savings: SavingsAccount;
   availableCash: Fils;
   safetyBuffer: Fils;
@@ -210,9 +234,10 @@ export function deriveForecastInput(plan: Plan): ForecastInput {
     0,
   );
 
-  const savingsReserve = plan.goals
-    .filter((g) => g.enabled)
-    .reduce((sum, g) => sum + g.monthlyContribution, 0);
+  // Money set aside each cycle: savings goal contributions plus planned investment contributions.
+  const savingsReserve =
+    plan.goals.filter((g) => g.enabled).reduce((sum, g) => sum + g.monthlyContribution, 0) +
+    plan.investments.filter((v) => v.enabled).reduce((sum, v) => sum + v.monthlyContribution, 0);
 
   return {
     availableCash: plan.availableCash,

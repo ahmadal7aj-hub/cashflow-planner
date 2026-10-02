@@ -86,11 +86,11 @@ describe('withdraw', () => {
 });
 
 describe('cycleResult (sample, hand-calculated)', () => {
-  it('income 17,750 minus spending 14,658.33 = +3,091.67', () => {
+  it('income 17,830 minus spending 14,658.33 = +3,171.67', () => {
     expect(cycleResult(SAMPLE_PLAN)).toEqual({
-      income: aedToFils(17750),
+      income: aedToFils(17830),
       spending: 1465833,
-      result: 309167,
+      result: 317167,
     });
   });
 
@@ -112,7 +112,7 @@ describe('cycleResult (sample, hand-calculated)', () => {
         },
       ],
     };
-    expect(cycleResult(plan).result).toBe(309167 - aedToFils(5000)); // -1,908.33
+    expect(cycleResult(plan).result).toBe(317167 - aedToFils(5000)); // -1,828.33
   });
 
   it('does not count goal contributions as spending', () => {
@@ -122,13 +122,13 @@ describe('cycleResult (sample, hand-calculated)', () => {
 });
 
 describe('closing a pay cycle', () => {
-  it('adds the result: 23,600 + 3,091.67 = 26,691.67', () => {
+  it('adds the result: 23,600 + 3,171.67 = 26,771.67', () => {
     const closed = closeCycle(SAMPLE_PLAN, TODAY)!;
-    expect(closed.balance).toBe(2669167);
+    expect(closed.balance).toBe(2677167);
     expect(closed.entries[0]).toMatchObject({
       kind: 'cycle',
-      change: 309167,
-      balanceAfter: 2669167,
+      change: 317167,
+      balanceAfter: 2677167,
       date: TODAY,
     });
   });
@@ -174,7 +174,7 @@ describe('closing a pay cycle', () => {
       ],
     };
     const closed = closeCycle(plan, TODAY)!;
-    expect(closed.balance).toBe(aedToFils(23600) + 309167 - aedToFils(5000)); // 21,691.67
+    expect(closed.balance).toBe(aedToFils(23600) + 317167 - aedToFils(5000)); // 21,771.67
     expect(closed.entries[0]!.change).toBeLessThan(0);
   });
 

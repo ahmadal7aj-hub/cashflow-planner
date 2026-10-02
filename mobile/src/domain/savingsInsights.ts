@@ -5,6 +5,7 @@ import {
   type Plan,
   type SavingsGoal,
 } from './budgetModel';
+import { investmentMonthlyIncome } from './investmentInsights';
 import type { Fils } from './money';
 import { totalMonthlySpend } from './spendingInsights';
 
@@ -104,8 +105,12 @@ export function emergencyCover(plan: Plan): EmergencyCover | null {
   };
 }
 
+/** Average monthly income from every source, including dividends, rent and interest from investments. */
 export function monthlyIncome(plan: Plan): Fils {
-  return plan.income.reduce((sum, i) => sum + monthlyEquivalent(i.amount, i.frequency), 0);
+  return (
+    plan.income.reduce((sum, i) => sum + monthlyEquivalent(i.amount, i.frequency), 0) +
+    investmentMonthlyIncome(plan)
+  );
 }
 
 export interface SavingsSummary {
@@ -120,9 +125,10 @@ export interface SavingsSummary {
 
 export function savingsSummary(plan: Plan): SavingsSummary {
   const income = monthlyIncome(plan);
-  const monthlySaved = plan.goals
-    .filter((g) => g.enabled)
-    .reduce((s, g) => s + g.monthlyContribution, 0);
+  // Money set aside each month: savings goals plus planned investment contributions.
+  const monthlySaved =
+    plan.goals.filter((g) => g.enabled).reduce((s, g) => s + g.monthlyContribution, 0) +
+    plan.investments.filter((v) => v.enabled).reduce((s, v) => s + v.monthlyContribution, 0);
   return {
     monthlyIncome: income,
     monthlySaved,
