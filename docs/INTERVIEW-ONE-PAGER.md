@@ -22,6 +22,9 @@ account numbers. You can skip anything or stop at any time. Notes are stored und
 6. Ever paid for a finance tool? Why or why not? What felt fair?
 7. Would you enter your salary and bills by hand? What would make it worth it? Would importing a
    statement matter more?
+8. How would you feel about your financial data being stored in the cloud, versus only on your phone?
+   What would make you trust an app with it?
+9. Do you send money home or hold money in other currencies? Would you want Arabic?
 
 **Probes:** "Say more." "What happened next?" "How did that feel?" "Can you give an example?"
 **Avoid:** "Would you use...?", "Do you like...?", anything that suggests the answer.

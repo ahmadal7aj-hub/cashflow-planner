@@ -16,6 +16,8 @@ forecasting / safe-to-spend solves a real recurring problem.
 | H3 | Users will keep the manual inputs the forecast needs. | Willingness to list commitments; plausible weekly update habit | Strong resistance to manual entry; demand for bank sync as a precondition |
 | H4 | The planning horizon "until the day before next payday" matches how people think. | Participants think in payday cycles | Participants think in calendar months |
 | H5 | Willingness to pay exists for forecasting beyond free trackers. | Stated price expectations, current spend on finance apps | Expect it free; no comparable spend |
+| H6 | Manual entry is acceptable without automatic import (UAE competitors import bank PDFs) | Participants would maintain inputs, or find import only a nice-to-have | Participants say they would not use an app without import or bank sync |
+| H7 | Cloud storage is acceptable for this kind of data (a UAE competitor markets local-only data) | Participants are comfortable with a secure cloud account | Participants insist on data staying on the phone |
 
 ## Interview guide (15-20 minutes, before showing the prototype)
 
@@ -25,7 +27,9 @@ forecasting / safe-to-spend solves a real recurring problem.
 4. What bills or payments have surprised you? How often?
 5. When in the month do you feel the most pressure? How do you cope?
 6. Have you paid for any finance or budgeting tool? Why, or why not?
-7. How would you feel typing in your salary and bills by hand? What would make that worthwhile?
+7. How would you feel typing in your salary and bills by hand? What would make that worthwhile? Would importing a bank statement (for example a PDF) matter more?
+8. How would you feel about your financial data being stored in the cloud, versus only on your phone? What would make you trust an app with it?
+9. Do you send money home or hold money in other currencies? Would you want an Arabic version?
 
 Avoid leading questions. Do not mention the product's solution until the second half.
 
