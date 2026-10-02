@@ -60,8 +60,8 @@ jobs:
         run: npm ci
       # Blocks high/critical advisories in production dependencies (BRD section 9).
       # Moderate advisories in Expo build tooling are tracked in ADR 0002.
-      - name: Audit production dependencies
-        run: npm audit --omit=dev --audit-level=high
+      - name: Audit production dependencies (high/critical block; expiring exceptions in audit-exceptions.json)
+        run: node scripts/audit-gate.js
       - name: Dependency review (PRs only)
         if: github.event_name == 'pull_request'
         uses: actions/dependency-review-action@v5
