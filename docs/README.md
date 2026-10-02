@@ -10,3 +10,5 @@
 | `PRIVACY-DATA-MAP.md` | Data inventory, processors, retention/deletion, logging rules |
 | `VALIDATION.md` | Hypotheses, interview questions, results |
 | `adr/` | One short file per material technical decision |
+| `FEATURE-GAP.md` | What is built, what market apps offer (unverified), differentiators and the roadmap |
+| `INTERVIEW-KIT.md` / `INTERVIEW-ONE-PAGER.md` / `PROTOTYPE-WALKTHROUGH.md` | Everything needed to run the validation interviews |
