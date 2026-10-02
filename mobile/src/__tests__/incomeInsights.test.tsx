@@ -11,6 +11,7 @@ import Commitments from '../app/commitments';
 import EditItem from '../app/edit/[kind]/[id]';
 import Explain from '../app/explain/[metric]';
 import Index from '../app/index';
+import Investments from '../app/investments';
 import Onboarding from '../app/onboarding';
 import Scenario from '../app/scenario';
 import Settings from '../app/settings';
@@ -19,6 +20,7 @@ import Warning from '../app/warning/[id]';
 const routes = {
   _layout: RootLayout,
   index: Index,
+  investments: Investments,
   onboarding: Onboarding,
   commitments: Commitments,
   '(tabs)/_layout': TabsLayout,
@@ -66,9 +68,9 @@ describe('Income dashboard (P1-01)', () => {
   it('shows the headline income numbers', async () => {
     await openApp('/income');
 
-    expect(screen.getByLabelText(/Income each month: AED 17,750.00/)).toBeTruthy();
+    expect(screen.getByLabelText(/Income each month: AED 17,830.00/)).toBeTruthy();
     expect(
-      screen.getByLabelText(/Predictable income: AED 15,000.00. 85% of your income/),
+      screen.getByLabelText(/Predictable income: AED 15,000.00. 84% of your income/),
     ).toBeTruthy();
     expect(screen.getByLabelText(/Covers your spending: 102%/)).toBeTruthy();
   });
@@ -76,9 +78,10 @@ describe('Income dashboard (P1-01)', () => {
   it('breaks income down by source with monthly values and shares', async () => {
     await openApp('/income');
 
-    expect(screen.getByLabelText('Monthly salary: AED 15,000.00, 85%')).toBeTruthy();
+    expect(screen.getByLabelText('Monthly salary: AED 15,000.00, 84%')).toBeTruthy();
     expect(screen.getByLabelText('Side work: AED 1,500.00, 8%')).toBeTruthy();
     expect(screen.getByLabelText('Annual bonus: AED 1,250.00, 7%')).toBeTruthy(); // 15,000 a year
+    expect(screen.getByLabelText('Dubai property fund (income): AED 80.00, 0%')).toBeTruthy();
   });
 
   it('labels each source as predictable or varying in words', async () => {

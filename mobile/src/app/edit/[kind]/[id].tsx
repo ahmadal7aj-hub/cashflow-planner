@@ -14,9 +14,12 @@ import {
   type ExpenseItem,
   type Frequency,
   type IncomeItem,
+  type Investment,
+  type InvestmentType,
   type SavingsGoal,
 } from '../../../domain/budgetModel';
 import { addDays, daysBetween, nextOnOrAfter, type ISODate } from '../../../domain/dates';
+import { INVESTMENT_TYPES, getInvestmentType } from '../../../domain/investmentInsights';
 import { formatAed, parseAmountToFils, type Fils } from '../../../domain/money';
 import {
   EXPENSE_CATEGORIES,
@@ -28,7 +31,15 @@ import {
 import { t } from '../../../i18n/strings';
 import { usePrototype } from '../../../state/PrototypeContext';
 
-type Kind = 'income' | 'fixed' | 'variable' | 'goal' | 'employment' | 'savings-in' | 'savings-out';
+type Kind =
+  | 'income'
+  | 'fixed'
+  | 'variable'
+  | 'goal'
+  | 'employment'
+  | 'savings-in'
+  | 'savings-out'
+  | 'investment';
 
 const KINDS: readonly string[] = [
   'income',
@@ -38,6 +49,7 @@ const KINDS: readonly string[] = [
   'employment',
   'savings-in',
   'savings-out',
+  'investment',
 ];
 
 function isKind(v: string | undefined): v is Kind {
@@ -65,6 +77,12 @@ export default function EditItem() {
   if (kind === 'employment') return <EmploymentForm existing={store.plan.employment} />;
   if (kind === 'savings-in' || kind === 'savings-out') {
     return <SavingsMoveForm direction={kind === 'savings-in' ? 'in' : 'out'} />;
+  }
+
+  if (kind === 'investment') {
+    const inv = store.plan.investments.find((v) => v.id === id);
+    if (!isNew && !inv) return <NotFound />;
+    return <InvestmentForm existing={inv} />;
   }
 
   const existing =
@@ -589,6 +607,145 @@ function SavingsMoveForm({ direction }: { direction: 'in' | 'out' }) {
         onChangeText={setNote}
       />
       <Button label={t.edit.save} onPress={save} testID="edit-save" />
+    </Screen>
+  );
+}
+
+const INCOME_FREQUENCY_OPTIONS = FREQUENCY_OPTIONS.filter((o) => o.value !== 'once');
+
+function InvestmentForm({ existing }: { existing?: Investment | undefined }) {
+  const router = useRouter();
+  const { plan, upsertInvestment, removeInvestment } = usePrototype();
+  const first = INVESTMENT_TYPES[0]!;
+  const [type, setType] = useState<InvestmentType>(existing?.type ?? first.id);
+  const [name, setName] = useState(existing?.name ?? first.label);
+  const [invested, setInvested] = useState(existing ? toInput(existing.invested) : '');
+  const [value, setValue] = useState(existing ? toInput(existing.currentValue) : '');
+  const [contribution, setContribution] = useState(
+    existing ? toInput(existing.monthlyContribution) : '0',
+  );
+  const [income, setIncome] = useState(existing ? toInput(existing.incomeAmount) : '0');
+  const [incomeFrequency, setIncomeFrequency] = useState<Frequency>(
+    existing?.incomeFrequency ?? 'quarterly',
+  );
+  const [enabled, setEnabled] = useState<'yes' | 'no'>(existing?.enabled === false ? 'no' : 'yes');
+  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+
+  const pickType = (id: InvestmentType) => {
+    setType(id);
+    // A new investment gets the type name as a starting point; "Other" starts empty.
+    if (!existing) setName(id === 'other' ? '' : getInvestmentType(id).label);
+  };
+
+  const save = () => {
+    const inv = parseAmountToFils(invested);
+    const val = parseAmountToFils(value);
+    const con = parseAmountToFils(contribution);
+    const inc = parseAmountToFils(income);
+    const next: Record<string, string | undefined> = {};
+    if (name.trim() === '') next.name = t.edit.errorName;
+    if (!inv.ok || inv.fils <= 0) next.invested = t.investments.errorNumber;
+    if (!val.ok) next.value = t.investments.errorNumber;
+    if (!con.ok) next.contribution = t.investments.errorNumber;
+    if (!inc.ok) next.income = t.investments.errorNumber;
+    setErrors(next);
+    if (Object.keys(next).length > 0 || !inv.ok || !val.ok || !con.ok || !inc.ok) return;
+
+    upsertInvestment({
+      id: existing?.id ?? nextId('inv', plan.investments),
+      name: name.trim(),
+      type,
+      invested: inv.fils,
+      currentValue: val.fils,
+      monthlyContribution: con.fils,
+      enabled: enabled === 'yes',
+      incomeAmount: inc.fils,
+      incomeFrequency,
+    });
+    router.back();
+  };
+
+  return (
+    <Screen testID="edit-screen">
+      <Heading>{existing ? existing.name : t.investments.add}</Heading>
+      <Body muted>{t.investments.disclaimer}</Body>
+      <ChipGroup
+        label={t.investments.formType}
+        testID="type"
+        value={type}
+        onChange={pickType}
+        options={INVESTMENT_TYPES.map((x) => ({ value: x.id, label: x.label }))}
+      />
+      <Field
+        label={t.investments.formName}
+        testID="name"
+        value={name}
+        onChangeText={setName}
+        error={errors.name}
+      />
+      <Field
+        label={t.investments.formInvested}
+        testID="invested"
+        value={invested}
+        onChangeText={setInvested}
+        error={errors.invested}
+        keyboardType="decimal-pad"
+      />
+      <Field
+        label={t.investments.formValue}
+        testID="value"
+        value={value}
+        onChangeText={setValue}
+        error={errors.value}
+        keyboardType="decimal-pad"
+      />
+      <Field
+        label={t.investments.formContribution}
+        hint={t.investments.formContributionHint}
+        testID="contribution"
+        value={contribution}
+        onChangeText={setContribution}
+        error={errors.contribution}
+        keyboardType="decimal-pad"
+      />
+      <ChipGroup
+        label={t.investments.formEnabled}
+        testID="enabled"
+        value={enabled}
+        onChange={setEnabled}
+        options={[
+          { value: 'yes', label: t.investments.formEnabledYes },
+          { value: 'no', label: t.investments.formEnabledNo },
+        ]}
+      />
+      <Field
+        label={`${getInvestmentType(type).incomeLabel} (AED)`}
+        hint={t.investments.formIncomeHint}
+        testID="income"
+        value={income}
+        onChangeText={setIncome}
+        error={errors.income}
+        keyboardType="decimal-pad"
+      />
+      <ChipGroup
+        label={t.investments.formIncomeFrequency}
+        testID="income-frequency"
+        value={incomeFrequency}
+        onChange={setIncomeFrequency}
+        options={INCOME_FREQUENCY_OPTIONS}
+      />
+      <Button label={t.edit.save} onPress={save} testID="edit-save" />
+      {existing && (
+        <Button
+          label={t.edit.delete}
+          variant="secondary"
+          testID="edit-delete"
+          onPress={() => {
+            removeInvestment(existing.id);
+            router.back();
+          }}
+        />
+      )}
     </Screen>
   );
 }

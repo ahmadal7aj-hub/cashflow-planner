@@ -12,6 +12,7 @@ import Commitments from '../app/commitments';
 import EditItem from '../app/edit/[kind]/[id]';
 import Explain from '../app/explain/[metric]';
 import Index from '../app/index';
+import Investments from '../app/investments';
 import Onboarding from '../app/onboarding';
 import Scenario from '../app/scenario';
 import Settings from '../app/settings';
@@ -20,6 +21,7 @@ import Warning from '../app/warning/[id]';
 const routes = {
   _layout: RootLayout,
   index: Index,
+  investments: Investments,
   onboarding: Onboarding,
   commitments: Commitments,
   '(tabs)/_layout': TabsLayout,
@@ -62,7 +64,7 @@ describe('Savings dashboard (P1-01)', () => {
     await openApp('/savings');
 
     expect(
-      screen.getByLabelText(/Saved each month: AED 1,200.00. 6.8% of your income/),
+      screen.getByLabelText(/Saved each month: AED 1,200.00. 6.7% of your income/),
     ).toBeTruthy();
     expect(screen.getByTestId('current-savings-card')).toBeTruthy();
     expect(screen.getByText('AED 23,600.00')).toBeTruthy();
@@ -107,7 +109,7 @@ describe('Savings dashboard (P1-01)', () => {
     await openApp('/savings');
     expect(
       screen.getByText(
-        'After your average spending and your savings, about AED 1,891.67 a month is unallocated.',
+        'After your average spending and your savings, about AED 1,971.67 a month is unallocated.',
       ),
     ).toBeTruthy();
   });
@@ -260,17 +262,17 @@ describe('Current savings balance', () => {
     await openApp('/savings');
 
     expect(
-      screen.getByText('A typical month: AED 17,750.00 comes in and AED 14,658.33 goes out.'),
+      screen.getByText('A typical month: AED 17,830.00 comes in and AED 14,658.33 goes out.'),
     ).toBeTruthy();
     expect(
-      screen.getByText('That leaves about AED 3,091.67. Apply it to add it to your savings.'),
+      screen.getByText('That leaves about AED 3,171.67. Apply it to add it to your savings.'),
     ).toBeTruthy();
     expect(screen.getByText('AED 23,600.00')).toBeTruthy(); // nothing applied yet
 
     await fireEvent.press(screen.getByTestId('close-cycle'));
 
-    expect(screen.getByText('AED 26,691.67')).toBeTruthy(); // 23,600 + 3,091.67
-    expect(screen.getByLabelText('3 Oct 2026 · Pay cycle: +AED 3,091.67')).toBeTruthy();
+    expect(screen.getByText('AED 26,771.67')).toBeTruthy(); // 23,600 + 3,171.67
+    expect(screen.getByLabelText('3 Oct 2026 · Pay cycle: +AED 3,171.67')).toBeTruthy();
     expect(screen.queryByTestId('close-cycle')).toBeNull();
     expect(screen.getByTestId('cycle-done')).toBeTruthy();
   });
@@ -294,12 +296,12 @@ describe('Current savings balance', () => {
 
     expect(
       screen.getByText(
-        'That is about AED 1,908.33 more going out than coming in. Applying it reduces your savings.',
+        'That is about AED 1,828.33 more going out than coming in. Applying it reduces your savings.',
       ),
     ).toBeTruthy();
     await fireEvent.press(screen.getByTestId('close-cycle'));
-    expect(screen.getByText('AED 21,691.67')).toBeTruthy(); // 23,600 - 1,908.33
-    expect(screen.getByLabelText('3 Oct 2026 · Pay cycle: -AED 1,908.33')).toBeTruthy();
+    expect(screen.getByText('AED 21,771.67')).toBeTruthy(); // 23,600 - 1,828.33
+    expect(screen.getByLabelText('3 Oct 2026 · Pay cycle: -AED 1,828.33')).toBeTruthy();
     expect(screen.queryByTestId('below-zero-note')).toBeNull();
   });
 
@@ -322,7 +324,7 @@ describe('Current savings balance', () => {
 
     await fireEvent.press(screen.getByTestId('close-cycle'));
 
-    expect(screen.getByText('-AED 33,308.33')).toBeTruthy(); // 23,600 + 3,091.67 - 60,000
+    expect(screen.getByText('-AED 33,228.33')).toBeTruthy(); // 23,600 + 3,171.67 - 60,000
     expect(screen.getByTestId('below-zero-note')).toBeTruthy();
   });
 });

@@ -21,22 +21,35 @@ export interface IncomeSource {
 
 /** Income sources sorted by monthly value, largest first. One-off income has no monthly value and is omitted. */
 export function incomeBreakdown(plan: Plan): IncomeSource[] {
-  const withMonthly = plan.income
-    .map((i) => ({ item: i, monthly: monthlyEquivalent(i.amount, i.frequency) }))
-    .filter((x) => x.monthly > 0);
-  const total = withMonthly.reduce((s, x) => s + x.monthly, 0);
-  return withMonthly
-    .map(({ item, monthly }) => ({
-      id: item.id,
-      name: item.name,
-      kindLabel: getIncomeCategory(item.kind).label,
-      amount: item.amount,
-      frequency: item.frequency,
-      monthly,
-      share: total > 0 ? monthly / total : 0,
-      stable: item.stable,
-      nextInDays: item.nextInDays,
+  const fromIncome = plan.income
+    .map((i) => ({
+      id: i.id,
+      name: i.name,
+      kindLabel: getIncomeCategory(i.kind).label,
+      amount: i.amount,
+      frequency: i.frequency as string,
+      monthly: monthlyEquivalent(i.amount, i.frequency),
+      stable: i.stable,
+      nextInDays: i.nextInDays,
     }))
+    .filter((x) => x.monthly > 0);
+  // Dividends, rent and interest from investments count as (irregular) income too.
+  const fromInvestments = plan.investments
+    .map((v) => ({
+      id: `investment-${v.id}`,
+      name: `${v.name} (income)`,
+      kindLabel: 'Investment income',
+      amount: v.incomeAmount,
+      frequency: v.incomeFrequency as string,
+      monthly: monthlyEquivalent(v.incomeAmount, v.incomeFrequency),
+      stable: false,
+      nextInDays: 0,
+    }))
+    .filter((x) => x.monthly > 0);
+  const all = [...fromIncome, ...fromInvestments];
+  const total = all.reduce((s, x) => s + x.monthly, 0);
+  return all
+    .map((x) => ({ ...x, share: total > 0 ? x.monthly / total : 0 }))
     .sort((a, b) => b.monthly - a.monthly);
 }
 

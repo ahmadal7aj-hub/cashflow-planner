@@ -19,11 +19,12 @@ describe('incomeBreakdown (sample, hand-calculated)', () => {
       ['salary', aedToFils(15000)],
       ['side', aedToFils(1500)],
       ['bonus', aedToFils(1250)], // 15,000 a year
+      ['investment-reit', aedToFils(80)], // property fund: 240 every 3 months
     ]);
   });
 
   it('shares add up to one', () => {
-    expect(sources[0]?.share).toBeCloseTo(15000 / 17750, 5);
+    expect(sources[0]?.share).toBeCloseTo(15000 / 17830, 5);
     expect(sources.reduce((s, x) => s + x.share, 0)).toBeCloseTo(1, 5);
   });
 
@@ -47,7 +48,7 @@ describe('incomeBreakdown (sample, hand-calculated)', () => {
   });
 
   it('is empty with no income', () => {
-    expect(incomeBreakdown({ ...SAMPLE_PLAN, income: [] })).toEqual([]);
+    expect(incomeBreakdown({ ...SAMPLE_PLAN, income: [], investments: [] })).toEqual([]);
   });
 });
 
@@ -55,10 +56,10 @@ describe('incomeSummary (sample, hand-calculated)', () => {
   const s = incomeSummary(SAMPLE_PLAN);
 
   it('splits predictable from variable income', () => {
-    expect(s.monthlyTotal).toBe(aedToFils(17750));
+    expect(s.monthlyTotal).toBe(aedToFils(17830));
     expect(s.monthlyStable).toBe(aedToFils(15000));
-    expect(s.monthlyVariable).toBe(aedToFils(2750));
-    expect(s.stableShare).toBeCloseTo(0.845, 3);
+    expect(s.monthlyVariable).toBe(aedToFils(2830)); // side work + bonus + property fund income
+    expect(s.stableShare).toBeCloseTo(0.8413, 3);
   });
 
   it('predictable income covers spending (102%) but not spending plus savings', () => {
@@ -68,7 +69,13 @@ describe('incomeSummary (sample, hand-calculated)', () => {
   });
 
   it('copes with no income and no spending', () => {
-    const empty = incomeSummary({ ...SAMPLE_PLAN, income: [], expenses: [], goals: [] });
+    const empty = incomeSummary({
+      ...SAMPLE_PLAN,
+      income: [],
+      investments: [],
+      expenses: [],
+      goals: [],
+    });
     expect(empty.monthlyTotal).toBe(0);
     expect(empty.stableShare).toBe(0);
     expect(empty.stableCoverage).toBe(0);

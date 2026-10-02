@@ -133,22 +133,22 @@ describe('emergency cover (sample, hand-calculated)', () => {
 describe('savingsSummary (sample, hand-calculated)', () => {
   const s = savingsSummary(SAMPLE_PLAN);
 
-  it('income per month: salary 15,000 + side work 1,500 + bonus 15,000/12', () => {
-    expect(monthlyIncome(SAMPLE_PLAN)).toBe(aedToFils(17750));
-    expect(s.monthlyIncome).toBe(aedToFils(17750));
+  it('income per month: salary 15,000 + side work 1,500 + bonus 15,000/12 + property fund 240/3', () => {
+    expect(monthlyIncome(SAMPLE_PLAN)).toBe(aedToFils(17830));
+    expect(s.monthlyIncome).toBe(aedToFils(17830));
   });
 
-  it('saves 1,200 a month = 6.8% of income', () => {
+  it('saves 1,200 a month = 6.7% of income', () => {
     expect(s.monthlySaved).toBe(aedToFils(1200));
-    expect(s.savingsRate).toBeCloseTo(0.0676, 3);
+    expect(s.savingsRate).toBeCloseTo(0.0673, 3);
   });
 
   it('totals everything saved so far', () => {
     expect(s.totalSaved).toBe(aedToFils(18000 + 3200 + 2400));
   });
 
-  it('unallocated = income - monthly spending - savings = 17,750 - 14,658.33 - 1,200', () => {
-    expect(s.unallocatedMonthly).toBe(189167);
+  it('unallocated = income - monthly spending - savings = 17,830 - 14,658.33 - 1,200', () => {
+    expect(s.unallocatedMonthly).toBe(197167);
   });
 
   it('ignores paused goals in the monthly savings figure', () => {

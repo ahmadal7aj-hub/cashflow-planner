@@ -6,6 +6,7 @@ import {
   type Employment,
   type ExpenseItem,
   type IncomeItem,
+  type Investment,
   type Plan,
   type SavingsGoal,
 } from '../domain/budgetModel';
@@ -39,6 +40,8 @@ interface PrototypeState {
   upsertGoal: (goal: SavingsGoal) => void;
   removeGoal: (id: string) => void;
   setEmployment: (e: Employment) => void;
+  upsertInvestment: (inv: Investment) => void;
+  removeInvestment: (id: string) => void;
   /** Add money to current savings. */
   addToSavings: (amount: Fils, note: string) => void;
   /** Take money out of current savings. Refuses more than is saved. */
@@ -103,6 +106,10 @@ export function PrototypeProvider({
       upsertGoal: (goal) => setPlan((p) => ({ ...p, goals: upsert(p.goals, goal) })),
       removeGoal: (id) => setPlan((p) => ({ ...p, goals: p.goals.filter((g) => g.id !== id) })),
       setEmployment: (e) => setPlan((p) => ({ ...p, employment: e })),
+      upsertInvestment: (inv) =>
+        setPlan((p) => ({ ...p, investments: upsert(p.investments, inv) })),
+      removeInvestment: (id) =>
+        setPlan((p) => ({ ...p, investments: p.investments.filter((v) => v.id !== id) })),
       addToSavings: (amount, note) =>
         setPlan((p) => ({ ...p, savings: deposit(p.savings, amount, today, note) })),
       takeFromSavings: (amount, note) => {

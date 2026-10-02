@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { GoalBar, StatTile, TrendBars } from '../../components/dashboardParts';
 import { Body, Button, Card, Heading, Row, Screen } from '../../components/ui';
 import { formatDate } from '../../domain/dates';
+import { investmentSummary } from '../../domain/investmentInsights';
 import { formatAed } from '../../domain/money';
 import { SAMPLE_HISTORY } from '../../domain/sampleData';
 import {
@@ -148,6 +149,8 @@ export default function Savings() {
         />
       </Card>
 
+      <InvestmentsCard />
+
       <ActivityCard />
 
       <TrendBars
@@ -239,6 +242,29 @@ function ActivityCard() {
           />
         ))
       )}
+    </Card>
+  );
+}
+
+/** A short summary of investments with a link to the full Investments screen. */
+function InvestmentsCard() {
+  const router = useRouter();
+  const { plan } = usePrototype();
+  const s = investmentSummary(plan);
+  const gain = s.totalGain >= 0 ? `+${formatAed(s.totalGain)}` : formatAed(s.totalGain);
+  return (
+    <Card testID="investments-card">
+      <Heading>{t.investments.title}</Heading>
+      <Row label={t.investments.tileValue} value={formatAed(s.totalValue)} strong />
+      <Row label={s.totalGain >= 0 ? t.investments.gain : t.investments.loss} value={gain} />
+      <Row label={t.investments.tileIncome} value={formatAed(s.monthlyIncome)} />
+      <Body muted>{t.investments.summaryNote(s.count)}</Body>
+      <Button
+        label={t.investments.openCard}
+        variant="secondary"
+        onPress={() => router.push('/investments')}
+        testID="open-investments"
+      />
     </Card>
   );
 }
