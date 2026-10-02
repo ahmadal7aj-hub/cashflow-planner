@@ -33,6 +33,8 @@ A finding can be temporarily risk-accepted only by adding an entry to `mobile/au
 CI prints every active exception, so accepted risks are never hidden. Remove the entry as soon as a fixed
 version exists. Moderate and low advisories do not block, but are reviewed at each Expo SDK upgrade (ADR 0002).
 
+**Reminder:** a weekly workflow (`.github/workflows/exception-watch.yml`) opens a GitHub issue assigned to the owner when a fixed version is published, or an exception is within 7 days of expiring or has expired. It comments on the open issue each week until resolved. Scheduled workflows can be paused by GitHub after 60 days without repository activity, so re-enable them if that happens.
+
 **Active exceptions:** see `mobile/audit-exceptions.json`.
 
 ## Incident contacts
