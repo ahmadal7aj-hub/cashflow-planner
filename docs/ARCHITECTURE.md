@@ -1,23 +1,84 @@
 # Architecture
 
-> Draft skeleton (P0-01). Fill in as decisions are made; record each material decision as an ADR in `adr/`.
+Describes what exists today (the Phase 1 prototype) and the target for later phases. Record every material
+decision as an ADR in `adr/`.
 
-## System context
+## 1. Today: the prototype
 
-- Mobile app (React Native + Expo + TypeScript) for iOS/Android.
-- Backend: Supabase (PostgreSQL + RLS, Auth, Storage, Edge Functions).
-- No bank connectivity in MVP (deferred to Phase 7, separate go/no-go).
+A single Expo React Native app. **No backend, no network calls, no persistence.** All data is fictional sample data
+held in memory and reset when the app closes.
 
-## Components
+```
+mobile/src/
+  app/            screens and navigation (Expo Router, file based)
+    (tabs)/       Overview, Spending, Savings, Income, Insights (bottom tab bar)
+    commitments   "Your income and expenses" list
+    edit/[kind]/[id]   add / edit / delete form (income, bills, budgets, goals, employment)
+    onboarding, explain/[metric], warning/[id], scenario, settings, index (welcome)
+  components/     ui kit (ui.tsx), forms, charts, dashboard parts
+  domain/         PURE functions only: money, plan model, forecast, spending / savings / income / insight analytics,
+                  UAE categories, sample data
+  state/          PrototypeContext: the in-memory plan and CRUD actions
+  i18n/strings.ts all user-facing text
+  theme/tokens.ts colours, spacing, chart colours
+  analytics/      allow-listed, privacy-safe event recorder (memory only)
+  config/         environment resolution (development / staging / production)
+mobile/scripts/   audit-gate.js and exception-watch.js (CI tooling, with tests)
+```
 
-_TBD: app modules, domain layer (pure forecast functions), data access, shared Zod schemas._
+### Layering rules (enforced by review and tests)
 
-## Data flows and trust boundaries
+1. **`domain/` is pure.** No React, no I/O, no clocks, no random. Same input gives the same output. It is where every
+   formula lives.
+2. **Screens never do money maths.** They call a `domain/` function and render the result. No duplicated formulas.
+3. **Money is integer fils.** Floats are never used for money. Formatting is display-only (`formatAed`).
+4. **All text comes from `i18n/strings.ts`**, and all colours and spacing from `theme/tokens.ts`.
+5. **Status is never colour alone.** A symbol and written label always accompany colour.
+6. **Analytics are allow-listed.** Unknown event properties are dropped, so a financial value cannot be recorded.
 
-_TBD: device -> Supabase (TLS, user JWT, RLS). Service-role key is server-side only and never ships in the client._
+### Data flow
 
-## Key principles
+```
+sample data (domain/sampleData)
+        |
+        v
+PrototypeContext (plan: balance, buffer, income[], expenses[], goals[], employment)
+        |  deriveForecastInput(plan)           -> ForecastInput
+        |  computeForecast(input)              -> ForecastResult (baseline)
+        |  + what-if purchase                  -> ForecastResult (scenario, never mutates the plan)
+        v
+screens read: baseline / scenario / plan, and call pure analytics:
+  spendingInsights, savingsInsights, incomeInsights, insights, forecastCharts
+```
 
-- Deterministic, versioned, unit-tested financial engine; `calculation_version` stored with forecasts.
-- No duplicated financial formulas in UI components.
-- Strings, currency and date formatting centralized (localization readiness).
+### Planning model (prototype, ADR 0003)
+
+- **Horizon:** today until the day before the next payday, taken from the salary item. Capped at 62 days. When payday
+  is today, the horizon is the next pay cycle and today's salary is counted as arriving now.
+- **Safe to spend** = cash + expected income - bills due before payday - savings set aside - safety buffer - expected
+  everyday essentials. Clamped at zero; a shortfall is reported separately.
+- **Essentials vs discretionary:** the remaining budget of essential everyday categories (groceries, fuel, Salik,
+  parking...) is deducted. Dining, shopping and similar are funded *from* safe to spend, not deducted.
+- **Version:** every result carries `calculationVersion` (`prototype-0.1`).
+
+## 2. Target (later phases, not built)
+
+- **Mobile:** same Expo app. **Backend:** Supabase (PostgreSQL with Row Level Security, Auth, Edge Functions).
+- **Open decision before Phase 2:** cloud, on-device, or hybrid storage (see `HANDOVER.md` section 5).
+- **Engine:** replace `prototypeForecast.ts` with the Phase 3 engine: pure, versioned, property-tested, with
+  `calculation_version` stored alongside saved forecasts.
+- **Data boundaries:** Zod schemas at every boundary; the Supabase service-role key is server-side only and never
+  ships in the client.
+- **Trust boundaries (planned):** device to Supabase over TLS with a user JWT, authorised by RLS; privileged
+  operations (export, delete) in authenticated server functions with audit events.
+- **Bank connectivity** is Phase 7 and needs its own legal, regulatory and commercial go/no-go. The app never handles
+  banking credentials.
+
+## 3. Operations (today)
+
+- **CI** (`.github/workflows/ci.yml`): install, format, lint, typecheck, tests with coverage, `expo-doctor`, JS bundle
+  export, dependency audit gate, dependency review. **CodeQL** runs separately. **Exception watch** runs weekly.
+- **Branches:** `main` protected (PR, three required checks, admins included, linear history). `staging` exists but
+  has no deploy pipeline.
+- **Environments:** one app build; `EXPO_PUBLIC_APP_ENV` selects a label and shows a banner on non-production builds.
+  Separate Supabase projects per environment are not yet created.
