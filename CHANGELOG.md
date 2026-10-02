@@ -18,3 +18,4 @@ User-visible changes per release. Format: Keep a Changelog.
 - Income dashboard (sources and shares, predictable vs irregular income, 60-day arrivals, steadiness, 6-cycle trends) and an Insights tab of plain, non-judgmental notes that link to the numbers behind them (P1-01).
 - Feature-gap and roadmap document (built vs planned vs deferred; competitor claims marked unverified).
 - Competitor research (YooToo, YNAB, Monarch, Copilot): corrected the feature-gap document, revised the import proposal in ADR 0004, and added import, cloud-vs-local and Arabic/multi-currency questions to the interview guides.
+- Verified FinArt and Pocket Clear from their own pages and added Wally from listings; feature-gap document now notes that automatic capture without a bank login is a UAE market pattern.
