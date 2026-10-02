@@ -1,3 +1,4 @@
+import { daysBetween, nextOnOrAfter, type ISODate } from './dates';
 import type { Fils } from './money';
 import type { Commitment, ForecastInput } from './prototypeForecast';
 import type { IncomeKind } from './uaeCategories';
@@ -46,6 +47,10 @@ export interface ExpenseItem {
   essential: boolean;
   /** Variable items only: already spent this cycle. */
   spentSoFar: Fils;
+  /** Real due date of the first (or only) occurrence. When set, it overrides `nextDueInDays`. */
+  dueDate?: ISODate;
+  /** Fixed bills: remind this many days before each due date (0 = on the day). */
+  reminderDaysBefore?: number;
 }
 
 export interface IncomeItem {
@@ -56,6 +61,8 @@ export interface IncomeItem {
   frequency: Frequency;
   nextInDays: number;
   stable: boolean;
+  /** Real date of the next payment. When set, it overrides `nextInDays`. */
+  nextDate?: ISODate;
 }
 
 export interface SavingsGoal {
@@ -67,6 +74,8 @@ export interface SavingsGoal {
   enabled: boolean;
   /** Optional deadline in days from today. */
   targetInDays?: number;
+  /** Real deadline date. When set, it overrides `targetInDays`. */
+  targetDate?: ISODate;
   /** Marks the goal that counts as the emergency fund (used for months-of-cover). */
   purpose?: 'emergency';
 }
@@ -198,4 +207,33 @@ export function nextId(prefix: string, existing: readonly { id: string }[]): str
   let n = existing.length + 1;
   while (existing.some((e) => e.id === `${prefix}-${n}`)) n++;
   return `${prefix}-${n}`;
+}
+
+/**
+ * Turn real dates into the relative days the maths uses, for a given `today`.
+ *  - fixed bills with a due date: days until the next occurrence on or after today
+ *  - income with a next date: days until the next payment
+ *  - goals with a deadline date: days left (never negative)
+ * Items without dates are returned unchanged, so relative-day sample data keeps working.
+ */
+export function resolvePlan(plan: Plan, today: ISODate): Plan {
+  return {
+    ...plan,
+    expenses: plan.expenses.map((e) =>
+      e.dueDate
+        ? {
+            ...e,
+            nextDueInDays: daysBetween(today, nextOnOrAfter(e.dueDate, e.frequency, today)),
+          }
+        : e,
+    ),
+    income: plan.income.map((i) =>
+      i.nextDate
+        ? { ...i, nextInDays: daysBetween(today, nextOnOrAfter(i.nextDate, i.frequency, today)) }
+        : i,
+    ),
+    goals: plan.goals.map((g) =>
+      g.targetDate ? { ...g, targetInDays: Math.max(0, daysBetween(today, g.targetDate)) } : g,
+    ),
+  };
 }

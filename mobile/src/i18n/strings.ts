@@ -36,6 +36,7 @@ export const t = {
     addVariable: 'Add an everyday budget',
     spentOf: (spent: string, budget: string) => `${spent} spent of ${budget}`,
     nextIn: (days: number) => (days === 0 ? 'next today' : `next in ${days} days`),
+    nextOn: (date: string, relative: string) => `next ${date} (${relative})`,
     perFrequency: (amount: string, frequency: string) => `${amount} · ${frequency}`,
     reset: 'Reset to sample data',
   },
@@ -110,6 +111,44 @@ export const t = {
     },
     percent: (n: number) => `${n}%`,
     shortfall: (amount: string) => `Shortfall: this plan needs ${amount} more than you have.`,
+  },
+
+  dates: {
+    previousMonth: 'Previous month',
+    nextMonth: 'Next month',
+    today: 'today',
+    choose: 'Choose a date',
+    tapToChange: 'Opens a calendar',
+    clear: 'Clear the date',
+    dueDate: 'Due date',
+    dueDateHint: 'The next time this bill is due. Repeating bills keep this day each period.',
+    nextPayment: 'Next payment date',
+    deadline: 'Deadline (optional)',
+    errorDueDate: 'Please choose a due date.',
+    errorPastOneOff: 'A one-off bill needs today or a later date.',
+    errorSalaryDate: 'Choose a salary date within the next 62 days.',
+  },
+
+  reminder: {
+    label: 'Remind me',
+    none: 'No reminder',
+    custom: 'Pick a date',
+    pickLabel: 'Reminder date',
+    summary: (date: string, daysBefore: number) =>
+      daysBefore === 0
+        ? `You will see a reminder on the day (${date}).`
+        : `You will see a reminder from ${date}.`,
+    errorCustom: 'Choose a day that is before the due date and not in the past.',
+    set: (daysBefore: number) =>
+      daysBefore === 0
+        ? 'Reminder on the day'
+        : daysBefore === 1
+          ? 'Reminder 1 day before'
+          : `Reminder ${daysBefore} days before`,
+    cardTitle: 'Reminders',
+    line: (name: string, when: string, date: string) => `${name} is due ${when} (${date})`,
+    insightTitle: (name: string) => `Reminder: ${name}`,
+    insightBody: (when: string, amount: string) => `Due ${when}. The bill is ${amount}.`,
   },
 
   tabs: {

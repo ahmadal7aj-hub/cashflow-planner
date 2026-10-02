@@ -3,14 +3,20 @@ import { Pressable } from 'react-native';
 
 import { Body, Button, Card, Heading, Row, Screen } from '../components/ui';
 import { FREQUENCY_LABELS, type ExpenseItem, type IncomeItem } from '../domain/budgetModel';
+import { addDays, formatDate, relativeDays, type ISODate } from '../domain/dates';
 import { formatAed } from '../domain/money';
 import { getExpenseCategory, getIncomeCategory } from '../domain/uaeCategories';
 import { t } from '../i18n/strings';
 import { usePrototype } from '../state/PrototypeContext';
 
+/** "7 Oct 2026 (in 4 days)" for something due `days` from today. */
+function whenText(today: ISODate, days: number): string {
+  return t.commitments.nextOn(formatDate(addDays(today, days)), relativeDays(days));
+}
+
 export default function Commitments() {
   const router = useRouter();
-  const { plan, resetToSample } = usePrototype();
+  const { plan, today, resetToSample } = usePrototype();
   const fixed = plan.expenses.filter((e) => e.kind === 'fixed');
   const variable = plan.expenses.filter((e) => e.kind === 'variable');
 
@@ -21,7 +27,12 @@ export default function Commitments() {
 
       <Heading>{t.commitments.sectionIncome}</Heading>
       {plan.income.map((i) => (
-        <IncomeCard key={i.id} item={i} onPress={() => router.push(`/edit/income/${i.id}`)} />
+        <IncomeCard
+          key={i.id}
+          item={i}
+          today={today}
+          onPress={() => router.push(`/edit/income/${i.id}`)}
+        />
       ))}
       <Button
         label={t.commitments.addIncome}
@@ -32,7 +43,12 @@ export default function Commitments() {
 
       <Heading>{t.commitments.sectionFixed}</Heading>
       {fixed.map((e) => (
-        <ExpenseCard key={e.id} item={e} onPress={() => router.push(`/edit/fixed/${e.id}`)} />
+        <ExpenseCard
+          key={e.id}
+          item={e}
+          today={today}
+          onPress={() => router.push(`/edit/fixed/${e.id}`)}
+        />
       ))}
       <Button
         label={t.commitments.addFixed}
@@ -44,7 +60,12 @@ export default function Commitments() {
       <Heading>{t.commitments.sectionVariable}</Heading>
       <Body muted>{t.commitments.sectionVariableHint}</Body>
       {variable.map((e) => (
-        <ExpenseCard key={e.id} item={e} onPress={() => router.push(`/edit/variable/${e.id}`)} />
+        <ExpenseCard
+          key={e.id}
+          item={e}
+          today={today}
+          onPress={() => router.push(`/edit/variable/${e.id}`)}
+        />
       ))}
       <Button
         label={t.commitments.addVariable}
@@ -68,7 +89,15 @@ export default function Commitments() {
   );
 }
 
-function IncomeCard({ item, onPress }: { item: IncomeItem; onPress: () => void }) {
+function IncomeCard({
+  item,
+  today,
+  onPress,
+}: {
+  item: IncomeItem;
+  today: ISODate;
+  onPress: () => void;
+}) {
   const label = getIncomeCategory(item.kind).label;
   return (
     <Pressable
@@ -80,23 +109,35 @@ function IncomeCard({ item, onPress }: { item: IncomeItem; onPress: () => void }
       <Card>
         <Row label={item.name} value={formatAed(item.amount)} strong />
         <Body muted>
-          {`${label} · ${FREQUENCY_LABELS[item.frequency]} · ${t.commitments.nextIn(item.nextInDays)}`}
+          {`${label} · ${FREQUENCY_LABELS[item.frequency]} · ${whenText(today, item.nextInDays)}`}
         </Body>
       </Card>
     </Pressable>
   );
 }
 
-function ExpenseCard({ item, onPress }: { item: ExpenseItem; onPress: () => void }) {
+function ExpenseCard({
+  item,
+  today,
+  onPress,
+}: {
+  item: ExpenseItem;
+  today: ISODate;
+  onPress: () => void;
+}) {
   const category = getExpenseCategory(item.categoryId).label;
   const detail =
     item.kind === 'variable'
       ? t.commitments.spentOf(formatAed(item.spentSoFar), formatAed(item.amount))
-      : `${FREQUENCY_LABELS[item.frequency]} · ${t.commitments.nextIn(item.nextDueInDays)}`;
+      : `${FREQUENCY_LABELS[item.frequency]} · ${whenText(today, item.nextDueInDays)}`;
+  const reminder =
+    item.kind === 'fixed' && item.reminderDaysBefore !== undefined
+      ? t.reminder.set(item.reminderDaysBefore)
+      : null;
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={`${item.name}, ${formatAed(item.amount)}, ${detail}`}
+      accessibilityLabel={`${item.name}, ${formatAed(item.amount)}, ${detail}${reminder ? `, ${reminder}` : ''}`}
       onPress={onPress}
       testID={`expense-${item.id}`}
     >
@@ -106,6 +147,7 @@ function ExpenseCard({ item, onPress }: { item: ExpenseItem; onPress: () => void
           {`${category} · ${item.essential ? t.commitments.essential : t.commitments.optional}`}
         </Body>
         <Body muted>{detail}</Body>
+        {reminder ? <Body muted>{reminder}</Body> : null}
       </Card>
     </Pressable>
   );

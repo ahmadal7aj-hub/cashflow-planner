@@ -47,6 +47,20 @@ async function goToDashboard(getPathname: () => string) {
   await waitFor(() => expect(getPathname()).toBe('/dashboard'));
 }
 
+/** Today is pinned so date maths in the tests is deterministic. */
+beforeAll(() => {
+  jest.useFakeTimers({ now: new Date('2026-10-03T09:00:00') });
+});
+afterAll(() => {
+  jest.useRealTimers();
+});
+
+/** Open a date field and tap a day in its calendar. */
+async function pickDate(toggleTestId: string, iso: string) {
+  await fireEvent.press(screen.getByTestId(toggleTestId));
+  await fireEvent.press(screen.getByTestId(`date-day-${iso}`));
+}
+
 describe('income and expenses editor (P1-01)', () => {
   it('lists income, bills and everyday budgets with UAE categories', async () => {
     await openApp('/commitments');
@@ -66,7 +80,7 @@ describe('income and expenses editor (P1-01)', () => {
     await waitFor(() => expect(getPathname()).toBe('/edit/fixed/new'));
     await fireEvent.press(screen.getByTestId('category-chiller'));
     await fireEvent.changeText(screen.getByTestId('input-amount'), '600');
-    await fireEvent.changeText(screen.getByTestId('input-days'), '3');
+    await pickDate('due-date-toggle', '2026-10-06');
     await fireEvent.press(screen.getByTestId('edit-save'));
 
     await waitFor(() => expect(getPathname()).toBe('/commitments'));
@@ -106,7 +120,7 @@ describe('income and expenses editor (P1-01)', () => {
 
     await fireEvent.press(screen.getByTestId('income-side'));
     await waitFor(() => expect(getPathname()).toBe('/edit/income/side'));
-    await fireEvent.changeText(screen.getByTestId('input-days'), '5');
+    await pickDate('next-date-toggle', '2026-10-08');
     await fireEvent.press(screen.getByTestId('edit-save'));
     await waitFor(() => expect(getPathname()).toBe('/commitments'));
 
@@ -136,7 +150,7 @@ describe('income and expenses editor (P1-01)', () => {
 
     await fireEvent.press(screen.getByTestId('income-side'));
     await waitFor(() => expect(getPathname()).toBe('/edit/income/side'));
-    await fireEvent.changeText(screen.getByTestId('input-days'), '5');
+    await pickDate('next-date-toggle', '2026-10-08');
     await fireEvent.press(screen.getByTestId('edit-save'));
     await waitFor(() => expect(getPathname()).toBe('/commitments'));
     await fireEvent.press(screen.getByTestId('commitments-continue'));
@@ -153,10 +167,13 @@ describe('income and expenses editor (P1-01)', () => {
 
     await fireEvent.press(screen.getByTestId('income-salary'));
     await waitFor(() => expect(getPathname()).toBe('/edit/income/salary'));
-    await fireEvent.changeText(screen.getByTestId('input-days'), '200');
+    await fireEvent.press(screen.getByTestId('next-date-toggle'));
+    await fireEvent.press(screen.getByTestId('date-next'));
+    await fireEvent.press(screen.getByTestId('date-next'));
+    await fireEvent.press(screen.getByTestId('date-day-2026-12-31'));
     await fireEvent.press(screen.getByTestId('edit-save'));
 
-    expect(screen.getByText('Enter a salary date within the next 62 days.')).toBeTruthy();
+    expect(screen.getByText('Choose a salary date within the next 62 days.')).toBeTruthy();
     expect(getPathname()).toBe('/edit/income/salary');
   });
 
@@ -177,14 +194,13 @@ describe('income and expenses editor (P1-01)', () => {
     expect(getPathname()).toBe('/edit/fixed/new');
   });
 
-  it('rejects invalid days', async () => {
+  it('requires a next payment date', async () => {
     await openApp('/edit/income/new');
 
     await fireEvent.changeText(screen.getByTestId('input-amount'), '1000');
-    await fireEvent.changeText(screen.getByTestId('input-days'), '400');
     await fireEvent.press(screen.getByTestId('edit-save'));
 
-    expect(screen.getByTestId('error-days')).toBeTruthy();
+    expect(screen.getByTestId('error-next-date')).toBeTruthy();
   });
 
   it('shows a friendly message for an item that does not exist', async () => {

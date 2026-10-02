@@ -276,12 +276,22 @@ export const EXPENSE_CATEGORIES: readonly ExpenseCategory[] = [
     frequency: 'monthly',
   },
   {
+    id: 'other_bill',
+    label: 'Other bill (name it yourself)',
+    group: 'other',
+    kind: 'fixed',
+    essential: false,
+    frequency: 'monthly',
+    hint: 'For any bill that is not listed. Give it your own name below.',
+  },
+  {
     id: 'other',
     label: 'Other',
     group: 'other',
     kind: 'variable',
     essential: false,
     frequency: 'monthly',
+    hint: 'For any everyday spending that is not listed. Give it your own name below.',
   },
 ];
 

@@ -2,18 +2,26 @@ import { createContext, useContext, useMemo, useRef, useState, type ReactNode } 
 
 import {
   deriveForecastInput,
+  resolvePlan,
   type Employment,
   type ExpenseItem,
   type IncomeItem,
   type Plan,
   type SavingsGoal,
 } from '../domain/budgetModel';
+import { todayISO, type ISODate } from '../domain/dates';
 import type { Fils } from '../domain/money';
 import { computeForecast, type ForecastResult } from '../domain/prototypeForecast';
+import { remindersFor, type Reminder } from '../domain/reminders';
 import { SAMPLE_PLAN, SCENARIO_PRESET } from '../domain/sampleData';
 
 interface PrototypeState {
+  /** Today's date (device clock), used to turn real dates into days. */
+  today: ISODate;
+  /** The plan with real dates resolved to relative days for 	oday. Edit through the actions below. */
   plan: Plan;
+  /** Bill reminders, soonest due first (in-app only). */
+  reminders: Reminder[];
   setNumbers: (n: { balance: Fils; safetyBuffer: Fils }) => void;
   /** Add (unknown id) or replace (known id) an item. Nothing is persisted: prototype memory only. */
   upsertExpense: (item: ExpenseItem) => void;
@@ -42,12 +50,21 @@ function upsert<T extends { id: string }>(list: readonly T[], item: T): T[] {
     : [...list, item];
 }
 
-export function PrototypeProvider({ children }: { children: ReactNode }) {
-  const [plan, setPlan] = useState<Plan>(SAMPLE_PLAN);
+export function PrototypeProvider({
+  children,
+  today: todayOverride,
+}: {
+  children: ReactNode;
+  today?: ISODate;
+}) {
+  const [rawPlan, setPlan] = useState<Plan>(SAMPLE_PLAN);
+  // The device clock is read once per session; tests pass a fixed date.
+  const [today] = useState<ISODate>(todayOverride ?? todayISO);
   const [scenarioOn, setScenarioOn] = useState(false);
   const onboardingTracked = useRef(false);
 
   const value = useMemo<PrototypeState>(() => {
+    const plan = resolvePlan(rawPlan, today);
     const input = deriveForecastInput(plan);
     const baseline = computeForecast(input);
     const scenario = scenarioOn
@@ -57,7 +74,9 @@ export function PrototypeProvider({ children }: { children: ReactNode }) {
         })
       : baseline;
     return {
+      today,
       plan,
+      reminders: remindersFor(plan, today),
       setNumbers: (n) =>
         setPlan((p) => ({ ...p, availableCash: n.balance, safetyBuffer: n.safetyBuffer })),
       upsertExpense: (item) => setPlan((p) => ({ ...p, expenses: upsert(p.expenses, item) })),
@@ -79,7 +98,7 @@ export function PrototypeProvider({ children }: { children: ReactNode }) {
       baseline,
       scenario,
     };
-  }, [plan, scenarioOn]);
+  }, [rawPlan, today, scenarioOn]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
