@@ -62,3 +62,8 @@ The **Savings** tab shows goals with a written status, the emergency fund in mon
 (sample: about 1.4 months), the big bills ahead with the monthly amount to set aside (school fees due in 40 days:
 AED 4,500 a month), and an illustrative gratuity estimate (sample: AED 25,200). In the sample data, Summer travel is
 behind: it needs AED 1,120 a month to finish on time and sets aside 400.
+
+The **Income** tab splits income by source (sample: salary 85%), separates predictable from irregular income,
+lists money arriving in the next 60 days, and says how steady income is (sample: predictable income covers 102%
+of spending but not spending plus savings). The **Insights** tab turns the numbers into short notes, for example
+`Entertainment is over budget` and `School fees are coming up`. Tap one to open the screen behind it.

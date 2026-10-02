@@ -3,6 +3,8 @@ import { fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-li
 import RootLayout from '../app/_layout';
 import TabsLayout from '../app/(tabs)/_layout';
 import Dashboard from '../app/(tabs)/dashboard';
+import Income from '../app/(tabs)/income';
+import Insights from '../app/(tabs)/insights';
 import Savings from '../app/(tabs)/savings';
 import Spending from '../app/(tabs)/spending';
 import Commitments from '../app/commitments';
@@ -21,6 +23,8 @@ const routes = {
   commitments: Commitments,
   '(tabs)/_layout': TabsLayout,
   '(tabs)/dashboard': Dashboard,
+  '(tabs)/income': Income,
+  '(tabs)/insights': Insights,
   '(tabs)/savings': Savings,
   '(tabs)/spending': Spending,
   scenario: Scenario,
