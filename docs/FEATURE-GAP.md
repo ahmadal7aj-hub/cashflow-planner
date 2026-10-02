@@ -1,59 +1,76 @@
 # Feature gap and roadmap
 
-What the prototype does today, what common budgeting apps offer, and what could set this app apart.
+What the prototype does today, what competing apps offer, and where this app could be different.
 
-> **Read this first.**
-> - **Competitor columns are unverified.** They come from general knowledge of well-known budgeting apps
->   (for example YNAB, Monarch, Copilot, and UAE-focused apps). No feature-by-feature teardown has been done
->   yet; the BRD lists that as an open gap. Treat every "market offers" entry as a hypothesis to check.
-> - **Everything below runs on sample data in memory.** The prototype stores and sends nothing.
-> - **Status words:** *Built* = in the prototype. *Planned* = fits the BRD/PRD and is not built. *Deferred* =
->   the BRD says not until validated or approved. *Idea* = not in the BRD/PRD; needs a decision first.
+> **How to read this**
+> - **Competitor information was researched on 2026-10-02** from each vendor's own public pages and from
+>   web search results. It is **vendor marketing, not independently tested.** A feature that a page does not
+>   mention is **not proof it is absent.** Prices are as listed that day and change.
+> - **Everything in the prototype runs on sample data in memory.** It stores and sends nothing.
+> - **Status words:** *Built* = in the prototype. *Planned* = fits the BRD/PRD, not built. *Deferred* = the BRD says
+>   not until validated or approved. *Idea* = not in the BRD/PRD; needs a decision.
 > - The BRD gate still applies: **Phase 2 (accounts, database, real forecast engine) waits for interview evidence.**
 
-## 1. Features common in budgeting apps
+## 1. Competitor snapshot (researched 2026-10-02)
 
-| Capability | In this app | Notes |
+| Product | What it claims | Listed price | Sources |
+|---|---|---|---|
+| **YooToo** (UAE) | Category budgets with limit alerts; PDF statement import from major UAE banks; payslip upload (WPS and standard formats); receipt scanning; recurring-bill detection with reminders; donut charts, daily burn rate and **month-end projection**; CSV export; categories for rent, **DEWA, Salik, Nol and school fees**; AED; English only; data kept in a private database on the phone, no account needed, Face ID / PIN | Free with in-app purchases; Pro $7.99 a month or $59.99 a year | [App Store listing](https://apps.apple.com/us/app/yootoo-uae-budget-tracker/id6761253882) |
+| **YNAB** | Bank import, goals, debt-payoff loan calculator, spending and net-worth reports, mobile widgets, offline access, sharing with up to six people | $14.99 a month or $109 a year; 34-day trial | [Features page](https://www.ynab.com/features) |
+| **Monarch** | Category and "flex" budgets, goals (save up and pay down), net worth, recurring-bill recognition, cash-flow reports, **forecasting of cash flow and net worth with life events (Plus tier)**, free household sharing, AI features | Core and Plus tiers (prices not captured) | [Forecasting help](https://help.monarch.com/hc/en-us/articles/48344305092244-Forecasting-in-Monarch), [Budgeting](https://www.monarch.com/features/budgeting), [Goals](https://help.monarch.com/hc/en-us/articles/15000751305108-Using-Goals) |
+| **Copilot** | AI categorisation, rollover budgets, recurring detection, cash-flow summaries, net worth, investments, real-estate value tracking; web, iPhone, Mac, iPad | $7.92 a month or $95 a year | [Site](https://www.copilot.money/) |
+| **Other UAE apps** (Wally, FinArt, Pocket Clear, Wealthi and others) | Arabic support, multi-currency for remittances, tracking from bank SMS and email notifications without a bank login, offline use, bill payment in some apps | Not captured | Vendor blogs only, **low reliability:** [Wealthi roundup](https://getwealthi.ai/blog/best-expense-tracking-apps-uae-2026), [GrabOn roundup](https://grabonuae.ae/blog/best-money-saving-apps-uae/) |
+
+## 2. Feature comparison
+
+| Capability | This app | Competitor evidence |
 |---|---|---|
-| Category budgets, budget vs spent | **Built** (Spending tab) | Written status (on track / ahead / over), never colour alone |
-| Recurring bills and due dates | **Built** (manual entry) | Auto-detection needs transactions, see bank sync |
-| Savings goals | **Built** (Savings tab) | Deadline check, pause, emergency-fund flag |
-| Sinking funds for yearly bills | **Built** as the "Big bills ahead" planner | Monthly amount needed to be ready on time |
-| Income tracking, multiple sources | **Built** (Income tab) | Predictable vs irregular |
-| Trends and reports | **Built** with sample history | Real history needs real data (Phase 2+) |
-| What-if scenarios | **Built** (Overview) | Isolated from the real plan |
-| Alerts and insights | **Built** (Insights tab) | In-app only; push is Phase 5 |
-| Push or local reminders | **Planned** (P5-01) | No amounts on the lock screen by default |
-| Export and delete my data | **Planned** (P5-02, P5-03) | Never blocked by a paywall (PRD P6-02) |
-| Bank account sync | **Deferred** (Phase 7) | Separate legal, regulatory and commercial go/no-go |
-| PDF or CSV statement import | **Deferred** | Open decision, ADR 0004 item 5; test demand in interviews first |
-| Net worth (assets and liabilities) | **Idea** | Needs accounts and valuation inputs |
-| Shared household or partner budgets | **Idea** | Needs accounts, permissions and RLS design |
-| Zero-based or envelope budgeting | **Idea** | Today: essential budgets reserved, discretionary funded by safe-to-spend |
-| Multi-currency | **Deferred** | Out of scope until demand shown (BRD) |
-| Arabic and right-to-left | **Deferred** | Strings are centralised so it is an additive project |
-| AI-written insights | **Deferred** | BRD: AI may explain later, never be the source of financial arithmetic |
+| Category budgets, budget vs spent | **Built** | Common to all |
+| UAE categories (Salik, Nol, DEWA, school fees, rent) | **Built** (30 categories, editable) | **Already offered by YooToo.** Table stakes, not a differentiator |
+| Month-end or cycle projection | **Built** (until next payday) | YooToo: month-end projection. Monarch: forecasting (Plus) |
+| Recurring bills and reminders | **Built** (manual); reminders **Planned** (P5-01) | YooToo detects and reminds. Monarch and Copilot detect |
+| Savings goals | **Built** | YNAB, Monarch; debt-payoff in YNAB and Monarch |
+| Sinking funds for yearly and termly bills | **Built** (Big bills planner) | Not mentioned on the pages checked |
+| What-if purchase scenario | **Built** | Not mentioned on the pages checked (Monarch models life events) |
+| Income by source, steadiness | **Built** | Not mentioned on the pages checked |
+| Plain-language insights | **Built** | Copilot and Monarch advertise AI features |
+| Export and delete my data | **Planned** (P5-02, P5-03) | YooToo offers CSV export |
+| **Automatic data capture** (bank sync, PDF or CSV import, SMS or email parsing) | **Deferred** (Phase 7; import is an open decision) | YNAB, Monarch, Copilot sync; **YooToo imports UAE bank PDFs**; others parse SMS or email |
+| Receipt scanning, payslip upload | **Idea** | YooToo |
+| Arabic and right-to-left | **Deferred** | Wally (per vendor blogs) |
+| Multi-currency, remittances | **Deferred** | FinArt, Pocket Clear, Wally (per vendor blogs) |
+| Net worth, investments | **Idea** | YNAB, Monarch, Copilot |
+| Shared household budgets | **Idea** | YNAB (up to six), Monarch (free) |
+| Rollover budgets | **Idea** | Copilot |
+| AI categorisation | **Deferred** | Copilot. BRD: AI must never be the source of financial arithmetic |
+| Local-only private data (no account) | **Not the current plan** | **YooToo markets this.** The BRD architecture is cloud-based (Supabase) |
 
-## 2. What could make this app different
+## 3. Where this app could be different (hypotheses to test, not proven)
 
-| Differentiator | Status | Notes |
+These are what the prototype does that the pages checked **did not mention**. Whether people value them is what
+the interviews must show.
+
+1. **A payday-cycle "safe to spend" figure as the headline**, with the formula one tap away and no black-box score.
+2. **An isolated what-if** before a large purchase.
+3. **Yearly and termly bills turned into a monthly set-aside**, with the exact amount needed to be ready on time.
+4. **Awareness of irregular income** and how much of your spending depends on it.
+5. **Emergency fund shown in months of essential spending.**
+6. **Neutral, explainable insights** with no shame or manufactured urgency (a PRD rule).
+7. **End-of-service gratuity estimate** (illustrative; **not legally verified**, needs a UAE legal check).
+
+**Not differentiators:** UAE-specific categories and a month-end projection (YooToo has both).
+
+## 4. Risks this research exposes
+
+| Risk | Why it matters | Suggested response |
 |---|---|---|
-| **Safe-to-spend until payday** as the headline | **Built** | Forecast first, tracking second |
-| Every number explainable, one tap away | **Built** | Inputs and formula shown; no black-box score |
-| **UAE-native categories**: rent, chiller, DEWA, du / e&, Salik, parking, school fees, nanny, domestic help, remittances, car registration, visa and Emirates ID fees | **Built** | Editable; add your own |
-| Money sent home treated as a normal essential | **Built** (category) | FX or remittance planner is an **Idea** |
-| Termly and yearly bills planned month by month | **Built** | School terms, car registration, visa |
-| End-of-service gratuity estimate | **Built, illustrative** | **Not legally verified.** Needs a UAE legal check before it is shown as more than an estimate |
-| Awareness of irregular income | **Built** | "How steady is it?" and the Insights note |
-| Post-dated rent cheque schedule | **Idea** | Common in the UAE; today each cheque can be a one-off bill |
-| Seasonal planning: DEWA in summer, Ramadan and Eid, school terms | **Idea** | Needs real dates, not just sample offsets |
-| Salik and parking top-up reminders | **Planned** | Depends on notifications (P5-01) |
-| Renewal reminders: visa, Emirates ID, car registration | **Planned** | Partly covered by yearly bills today |
-| Debt payoff planner for loans and cards | **Idea** | Deterministic maths; fits the engine rules |
-| Gold savings with weight and price | **Idea** | A price feed is external data and needs a decision |
-| Zakat estimator | **Not planned yet** | Needs scholarly and legal review; keep out until reviewed |
+| **Manual entry is the biggest adoption risk** | Several competitors capture data automatically; YooToo imports UAE bank PDFs. Hypothesis H3 (users will maintain inputs) now carries more weight | Ask about import in every interview. Consider testing a PDF or CSV import earlier than the BRD sequence suggests (see ADR 0004, item 5) |
+| **Privacy positioning** | YooToo markets local-only storage and no account. A cloud database is a trust trade-off for a financial app | Decide deliberately: cloud, local-first, or hybrid. Ask interviewees how they feel about it |
+| **Arabic and multi-currency may be expected** | Wally and FinArt reportedly offer them, and remittances are common for UAE residents | Test demand; keep strings centralised so Arabic is additive |
+| **Price anchors** | YooToo Pro is $59.99 a year; Copilot $95; YNAB $109 | Ask willingness-to-pay in interviews; do not set a price yet |
+| **Crowded UAE market** | At least five UAE-focused apps appear in roundups | Differentiate on the hypotheses above, and validate before building more |
 
-## 3. What "enterprise grade" would require
+## 5. What "enterprise grade" would require
 
 None of these exist yet. The first group is already **mandatory in the BRD** before production; the second
 is **beyond the BRD** and would be a business decision.
@@ -75,18 +92,21 @@ is **beyond the BRD** and would be a business decision.
 - Single sign-on for corporate users, data-residency options, and service-level targets.
 - Independent security certification, only if a customer requires it.
 
-## 4. Suggested order
+## 6. Suggested order
 
-1. **Validate** (interviews and prototype sessions). This decides which ideas above matter. Nothing else moves
+1. **Validate** (interviews and prototype sessions). Use section 4 to shape the questions. Nothing else moves
    until the BRD gate is met.
-2. **Phase 2** foundations: auth, schema with RLS, real data entry.
-3. **Phase 3** the real forecast engine (replaces the prototype maths, versioned and property-tested).
-4. **Phase 5** notifications, export and delete, observability, backups.
-5. Then pick from the **Idea** and **Planned** rows by interview evidence: remittances, cheque schedule,
-   seasonal planning and the debt planner are the strongest candidates for UAE residents.
+2. **Decide the data question** (cloud, local-first or hybrid) and whether import is table stakes, before Phase 2.
+3. **Phase 2** foundations: auth, schema with RLS, real data entry.
+4. **Phase 3** the real forecast engine (replaces the prototype maths, versioned and property-tested).
+5. **Phase 5** notifications, export and delete, observability, backups.
+6. Then pick from the **Idea** rows by interview evidence. Candidates for UAE residents: remittances and
+   multi-currency, a post-dated rent-cheque schedule, seasonal planning (DEWA in summer, Ramadan and Eid,
+   school terms), and a debt-payoff planner.
 
-## 5. Open checks before relying on this document
+## 7. Still to check
 
-- Do a real competitor teardown (YooToo, YNAB, Monarch, Copilot) and replace the unverified entries.
+- Capture Monarch and Wally pricing and verify Wally and FinArt claims from their own pages, not roundups.
+- Install the competing apps and test the flows directly; marketing pages overstate and understate.
 - Get a UAE legal read on the gratuity estimate and on the wording of insights, so nothing reads as advice.
 - Confirm with interviewees which differentiators they actually care about.
