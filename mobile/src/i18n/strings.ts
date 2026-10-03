@@ -605,6 +605,17 @@ export const t = {
     devServer:
       'Connected to the local test server on your computer (testing only). Real accounts need the real backend.',
     open: 'Account and groups',
+    profileButton: 'My profile',
+    profileTitle: 'My profile',
+    usernameLabel: 'Username',
+    emailLabel: 'Email',
+    usernameHelp:
+      'Give your username to someone you want to share savings with. They invite you from Groups, and nothing is shared until you accept.',
+    shareUsername: 'Send my username',
+    shareMessage: (username: string) =>
+      `Invite me to a group in the Cash-Flow Planner with my username: ${username}`,
+    noNamePhone:
+      'Name and phone number are not collected yet. Your username is what other people use to find you.',
   },
 
   groupsPage: {

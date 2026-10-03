@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Tabs } from 'expo-router';
-import type { ColorValue } from 'react-native';
+import { Tabs, useRouter } from 'expo-router';
+import { Pressable, type ColorValue } from 'react-native';
 
 import { t } from '../../i18n/strings';
 import { useSharing } from '../../state/SharingContext';
@@ -18,12 +18,25 @@ function icon(filled: IconName, outline: IconName) {
 export default function TabsLayout() {
   const { colors } = useTheme();
   const sharing = useSharing();
+  const router = useRouter();
   return (
     <Tabs
       screenOptions={{
         headerStyle: { backgroundColor: colors.surface },
         headerTitleStyle: { color: colors.text, fontWeight: '700' },
         headerShadowVisible: false,
+        headerRight: () => (
+          <Pressable
+            onPress={() => router.push('/account')}
+            accessibilityRole="button"
+            accessibilityLabel={t.account.profileButton}
+            testID="profile-button"
+            hitSlop={8}
+            style={{ marginRight: 16 }}
+          >
+            <Ionicons name="person-circle-outline" size={30} color={colors.primary} />
+          </Pressable>
+        ),
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
         tabBarStyle: {

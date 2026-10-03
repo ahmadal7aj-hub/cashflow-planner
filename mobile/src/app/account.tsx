@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { Share } from 'react-native';
 
 import { Body, Button, Card, Heading, Screen } from '../components/ui';
 import { t } from '../i18n/strings';
@@ -34,8 +35,23 @@ export default function Account() {
     <Screen testID="account-screen">
       <Heading>{t.account.title}</Heading>
       <Card testID="account-card">
-        <Heading>{t.account.signedInAs(account.user.username || account.user.email)}</Heading>
-        <Body muted>{t.account.emailLine(account.user.email)}</Body>
+        <Heading>{t.account.profileTitle}</Heading>
+        <Body muted>{t.account.usernameLabel}</Body>
+        <Body testID="profile-username">{account.user.username || '-'}</Body>
+        <Body muted>{t.account.emailLabel}</Body>
+        <Body testID="profile-email">{account.user.email}</Body>
+        <Body muted>{t.account.usernameHelp}</Body>
+        <Body muted>{t.account.noNamePhone}</Body>
+        {account.user.username ? (
+          <Button
+            label={t.account.shareUsername}
+            variant="secondary"
+            onPress={() => {
+              void Share.share({ message: t.account.shareMessage(account.user.username) });
+            }}
+            testID="profile-share-username"
+          />
+        ) : null}
       </Card>
       {account.backend?.kind === 'dev-server' ? (
         <Body muted testID="dev-server-note">

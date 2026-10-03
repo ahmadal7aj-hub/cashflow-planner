@@ -197,7 +197,8 @@ describe('logout', () => {
     await backend.signInAs('sara@example.com');
     await openAccountsApp(db, '/account', { backend });
     await waitFor(() => expect(screen.getByTestId('account-card')).toBeTruthy());
-    expect(screen.getByText('Signed in as sara_a')).toBeTruthy();
+    expect(screen.getByTestId('profile-username')).toHaveTextContent('sara_a');
+    expect(screen.getByTestId('profile-email')).toHaveTextContent('sara@example.com');
 
     await fireEvent.press(screen.getByTestId('signout'));
     expect(screen.getByTestId('signout-ask')).toBeTruthy();
@@ -243,5 +244,20 @@ describe('password reset', () => {
     await fireEvent.press(screen.getByTestId('auth-submit'));
     await waitFor(() => expect(screen.getByTestId('auth-reset')).toBeTruthy()); // same next screen
     expect(backend.sentCodes).toEqual([]); // but nothing was sent
+  });
+});
+
+describe('my profile', () => {
+  it('opens from the user icon at the top right and shows the username and email to share', async () => {
+    const backend = new TestBackend(db);
+    await backend.createAccount('sara@example.com', 'sara_a');
+    await backend.signInAs('sara@example.com');
+    await openAccountsApp(db, '/dashboard', { backend });
+    await waitFor(() => expect(screen.getByTestId('profile-button')).toBeTruthy());
+    await fireEvent.press(screen.getByTestId('profile-button'));
+    await waitFor(() => expect(screen.getByTestId('profile-username')).toBeTruthy());
+    expect(screen.getByTestId('profile-username')).toHaveTextContent('sara_a');
+    expect(screen.getByTestId('profile-email')).toHaveTextContent('sara@example.com');
+    expect(screen.getByTestId('profile-share-username')).toBeTruthy();
   });
 });
