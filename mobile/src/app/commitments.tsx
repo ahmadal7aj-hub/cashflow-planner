@@ -75,6 +75,12 @@ export default function Commitments() {
       />
 
       <Button
+        label={t.monthlyPlan.open}
+        variant="secondary"
+        onPress={() => router.push('/monthly-plan')}
+        testID="commitments-plan"
+      />
+      <Button
         label={t.commitments.toDashboard}
         testID="commitments-continue"
         onPress={() => router.navigate('/dashboard')}

@@ -141,6 +141,8 @@ export interface Plan {
   income: readonly IncomeItem[];
   expenses: readonly ExpenseItem[];
   goals: readonly SavingsGoal[];
+  /** General amount the user sets aside each month, on top of goal contributions. Defaults to zero. */
+  monthlySavings?: Fils;
   employment?: Employment;
 }
 
@@ -234,8 +236,9 @@ export function deriveForecastInput(plan: Plan): ForecastInput {
     0,
   );
 
-  // Money set aside each cycle: savings goal contributions plus planned investment contributions.
+  // Money set aside each cycle: the general monthly saving, goal contributions and investment contributions.
   const savingsReserve =
+    (plan.monthlySavings ?? 0) +
     plan.goals.filter((g) => g.enabled).reduce((sum, g) => sum + g.monthlyContribution, 0) +
     plan.investments.filter((v) => v.enabled).reduce((sum, v) => sum + v.monthlyContribution, 0);
 

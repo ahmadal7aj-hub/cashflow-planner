@@ -448,6 +448,35 @@ export const t = {
     },
   },
 
+  monthlyPlan: {
+    title: 'Your monthly plan',
+    intro:
+      'Start with what comes in, decide what to save, and the rest is yours to spend. Everything here is a typical month.',
+    step1: '1. What comes in',
+    step1Note:
+      'Salary and other income, including investment income. Change them under Your income and expenses.',
+    editIncome: 'Edit my income',
+    step2: '2. What I save each month',
+    saveLabel: 'Amount to save each month (AED)',
+    saveHint: 'Type 0 if you are not saving yet. This is on top of any savings goals below.',
+    errorSave: 'Enter an amount of zero or more, for example 2000.',
+    goalsLine: 'Savings goals (already set)',
+    investLine: 'Investing (already set)',
+    totalSet: 'Set aside each month',
+    step3: '3. Left to spend',
+    leftNote:
+      'What is left of your income after saving. Bills and everyday spending come out of this.',
+    plannedLine: 'Spending you have entered',
+    roomLine: 'Room left over',
+    overLine: 'More than what is left',
+    overNote:
+      'The spending you entered is more than what is left after saving. Lower the savings or the spending.',
+    setAsideMore: 'You are setting aside more than your income. Lower the amount to save.',
+    open: 'Plan my monthly savings',
+    saved: 'Saved. Your safe to spend now sets this amount aside.',
+    save: 'Save my plan',
+  },
+
   scenario: {
     title: 'What if I buy this?',
     intro: 'Try a purchase without changing your real plan. Nothing here is saved.',

@@ -46,6 +46,11 @@ export default function Savings() {
 
   return (
     <Screen testID="savings-screen">
+      <Button
+        label={t.monthlyPlan.open}
+        onPress={() => router.push('/monthly-plan')}
+        testID="open-monthly-plan"
+      />
       <CurrentSavings />
       <CycleCard />
 

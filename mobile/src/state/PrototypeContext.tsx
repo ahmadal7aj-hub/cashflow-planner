@@ -39,6 +39,7 @@ interface PrototypeState {
   removeIncome: (id: string) => void;
   upsertGoal: (goal: SavingsGoal) => void;
   removeGoal: (id: string) => void;
+  setMonthlySavings: (amount: Fils) => void;
   setEmployment: (e: Employment) => void;
   upsertInvestment: (inv: Investment) => void;
   removeInvestment: (id: string) => void;
@@ -105,6 +106,7 @@ export function PrototypeProvider({
       removeIncome: (id) => setPlan((p) => ({ ...p, income: p.income.filter((i) => i.id !== id) })),
       upsertGoal: (goal) => setPlan((p) => ({ ...p, goals: upsert(p.goals, goal) })),
       removeGoal: (id) => setPlan((p) => ({ ...p, goals: p.goals.filter((g) => g.id !== id) })),
+      setMonthlySavings: (amount) => setPlan((p) => ({ ...p, monthlySavings: amount })),
       setEmployment: (e) => setPlan((p) => ({ ...p, employment: e })),
       upsertInvestment: (inv) =>
         setPlan((p) => ({ ...p, investments: upsert(p.investments, inv) })),
