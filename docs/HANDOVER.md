@@ -10,6 +10,56 @@ not, and exactly what to do next. Anything that needs a person's decision is mar
 
 ---
 
+## 0. Start here next session
+
+**State (2026-10-03):** `main` has everything built so far: the five-page app with saving on the phone, the adjustable
+what-if, and accounts with groups and a Shared Savings dashboard. CI is green and the earlier security block is cleared
+(an owner-approved exception for the `braces` advisory, expiring **2026-11-01**, next to the `node-forge` one).
+**Nothing in the app has been tried on a real phone by the assistant, and the backend has never run against a live
+Supabase project.**
+
+### Ask the owner first
+
+1. **Did you create the Supabase project** and follow `docs/BACKEND-SETUP.md`? What did the two-phone check show?
+2. **Did you try the app in Expo Go** (empty start, Add item, budgets and spending, savings, swipe delete, dark mode)?
+   What was confusing or ugly?
+3. **Interviews:** have any happened? The BRD gate was overridden for accounts; the product still needs real demand evidence.
+4. **Security exceptions:** a GitHub issue "Security exception needs attention" means a decision is due before 2026-11-01.
+
+### Then, in this order
+
+| # | Next step | Owner | Notes |
+|---|---|---|---|
+| 1 | **Create the Supabase project and run the two-phone check** | Owner | `docs/BACKEND-SETUP.md`. Until then accounts are switched off and the app runs on its own |
+| 2 | **Fix what the live backend and real phones show** | Claude | Likely areas: email codes, rate limits, Realtime delivery, `supabase-js` on a phone, swipe feel |
+| 3 | **Before any real users** | Both | Encrypt the saved plan and session token, account deletion, 2FA, own SMTP sender, UAE PDPL review and privacy notice, abuse limits |
+| 4 | **Phone notifications for bill reminders** | Claude, after go-ahead | `expo-notifications`, never show amounts on the lock screen |
+| 5 | **Interviews** (five first, then 20 to 30) | Owner | `docs/INTERVIEW-ONE-PAGER.md`, `docs/PROTOTYPE-WALKTHROUGH.md`; private notes only in `docs/private/` |
+| 6 | **Security exception window** | Owner decides | Renew-or-expire decision around 2026-10-26; check `npm view braces version` and `node-forge` |
+| 7 | **Run the Maestro flow** on a USB-connected Android phone | Owner provides the phone | Written and updated, never run. It replaces saved data, so use a test phone |
+| 8 | **Ideas, only if interviews support them** | Both | Import from bank statements, multi-currency, email summaries (weekly or monthly), personal records on a second phone |
+
+### Ready-to-paste prompt to resume
+
+> Read `docs/HANDOVER.md` (section 0 first), then check `git status`, open PRs and issues. Here is what happened with the
+> Supabase check and my phone test: (paste results or screenshots). Fix problems first, one small PR at a time, then tell me
+> what is next.
+
+### Working notes for the assistant
+
+- **Workflow:** short-lived branch, small PR, wait for the three required checks, squash merge. Always verify the PR number,
+  author, branch and that CI ran on the latest commit. Never push to `main`. Never weaken a scan or branch protection; adding
+  an expiring audit exception needs explicit owner approval.
+- **Windows tooling:** write long files with the Write tool (the Bash tool fails to parse long heredocs that contain
+  apostrophes); use PowerShell for `npx` and `node`; use `git commit -F` with a message file; `npm.cmd` if scripts are blocked.
+- **Tests:** `openApp` for screens, `openAccountsApp` and `accountScenario` for accounts, `startTestDb` for real-SQL tests.
+  The router test library can carry a previous test's route into the next one after long journeys: keep those in their own file.
+- **Money:** integer fils only; all maths in `mobile/src/domain/`; the database computes shared totals (`group_savings_summary`).
+- **Checkpoints and rollback:** `docs/ROLLBACK.md` (tags `checkpoint/pre-restructure-2026-10-03`, `checkpoint/pre-accounts-2026-10-03`).
+- **Public repo:** never commit the BRD/PRD, interview notes, secrets or the Supabase keys (`.env.local` is git-ignored).
+
+---
+
 ## 1. In one minute
 
 - **What it is:** a mobile-first cash-flow planner for UAE residents. The headline answer is **"how much can I safely
@@ -22,7 +72,7 @@ not, and exactly what to do next. Anything that needs a person's decision is mar
   owner still has to create (`docs/BACKEND-SETUP.md`); checkpoint `checkpoint/pre-accounts-2026-10-03`.
 - **The gate:** the BRD says **do not build Phase 2 (accounts, database, real engine) until 20 to 30 interviews show
   recurring demand.** Those interviews have **not started**. That is the single most important next step.
-- **Engineering health:** all work went through pull requests with CI. `main` is protected. 612 automated tests pass.
+- **Engineering health:** all work went through pull requests with CI. `main` is protected. 615 automated tests pass.
 - **One time-limited risk:** a security exception (node-forge) **expires 2026-11-01** (section 7).
 
 ---

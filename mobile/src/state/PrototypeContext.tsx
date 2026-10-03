@@ -59,6 +59,11 @@ import { transactionsBetween } from '../domain/spending';
 import { useTheme } from '../theme/ThemeProvider';
 import { getTestSeed } from './testSeed';
 
+export interface ScenarioItem {
+  label: string;
+  amount: Fils;
+}
+
 export type SavingsOutcome = 'ok' | 'amount' | 'no-opening' | 'before-opening' | 'insufficient';
 export type EditOutcome = SavingsOutcome | 'not-editable' | 'future';
 
@@ -110,6 +115,9 @@ interface PrototypeState {
   /** Replaces the plan with the demo sample data. For demos and interviews only. */
   loadSampleData: () => void;
   scenarioOn: boolean;
+  /** The what-if item: any name and price (fils). Starts as the sample laptop. */
+  scenarioItem: ScenarioItem;
+  setScenarioItem: (item: ScenarioItem) => void;
   setScenarioOn: (on: boolean) => void;
   /** Real plan. A what-if never mutates this. */
   baseline: ForecastResult;
@@ -186,6 +194,7 @@ export function PrototypeProvider({
   const canSave = useRef(true);
   const loaded = useRef(seeded !== undefined);
   const [scenarioOn, setScenarioOn] = useState(false);
+  const [scenarioItem, setScenarioItem] = useState<ScenarioItem>({ ...SCENARIO_PRESET });
   const onboardingTracked = useRef(false);
 
   useEffect(() => {
@@ -238,7 +247,7 @@ export function PrototypeProvider({
     const scenario = scenarioOn
       ? computeForecast({
           ...input,
-          plannedExpenses: input.plannedExpenses + SCENARIO_PRESET.amount,
+          plannedExpenses: input.plannedExpenses + scenarioItem.amount,
         })
       : baseline;
 
@@ -313,10 +322,12 @@ export function PrototypeProvider({
       loadSampleData: () => setRawPlan(maintainSavings(demoPlan(today), today)),
       scenarioOn,
       setScenarioOn,
+      scenarioItem,
+      setScenarioItem,
       baseline,
       scenario,
     };
-  }, [rawPlan, today, scenarioOn, deviceId]);
+  }, [rawPlan, today, scenarioOn, scenarioItem, deviceId]);
 
   // The screens stay mounted while the saved data loads; an opaque cover hides them and blocks touches, so
   // the navigator is never created late and nothing can be edited before the saved plan is in place.
