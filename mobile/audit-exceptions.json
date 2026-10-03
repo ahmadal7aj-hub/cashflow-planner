@@ -6,5 +6,13 @@
     "reason": "No patched version exists (advisory covers <=1.4.0; 1.4.0 is the latest release). Reached only through Expo's build tooling (@expo/cli, code-signing certificates). Not imported by app code, not in the shipped bundle, and no code signing of updates is configured. Re-check weekly; remove this entry as soon as a fixed version ships.",
     "expires": "2026-11-01",
     "acceptedBy": "Product owner, approved in-session on 2026-10-02"
+  },
+  {
+    "id": "GHSA-vfj7-8cjw-p6xm",
+    "package": "braces",
+    "fixedAfter": "3.0.3",
+    "reason": "No patched version exists (advisory covers <=3.0.3; 3.0.3 is the latest release). Reached only through Expo build tooling (@expo/cli > metro-file-map > micromatch). Denial of service on deeply nested glob patterns at build time; not in the shipped app bundle. Re-check weekly; remove as soon as a fixed version ships.",
+    "expires": "2026-11-01",
+    "acceptedBy": "Product owner, approved in-session on 2026-10-03"
   }
 ]
