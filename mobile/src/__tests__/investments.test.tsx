@@ -234,6 +234,7 @@ describe('adding, editing and deleting an investment', () => {
     await fireEvent.press(screen.getByTestId('investment-gold'));
     await waitFor(() => expect(getPathname()).toBe('/edit/investment/gold'));
     await fireEvent.press(screen.getByTestId('edit-delete'));
+    await fireEvent.press(screen.getByTestId('edit-delete'));
     await waitFor(() => expect(getPathname()).toBe('/investments'));
 
     expect(screen.queryByTestId('investment-gold')).toBeNull();
@@ -246,6 +247,7 @@ describe('adding, editing and deleting an investment', () => {
     for (const id of ['etf', 'gold', 'reit']) {
       await fireEvent.press(screen.getByTestId(`investment-${id}`));
       await waitFor(() => expect(getPathname()).toBe(`/edit/investment/${id}`));
+      await fireEvent.press(screen.getByTestId('edit-delete'));
       await fireEvent.press(screen.getByTestId('edit-delete'));
       await waitFor(() => expect(getPathname()).toBe('/investments'));
     }

@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Pressable, Text, View } from 'react-native';
+import { Pressable } from 'react-native';
 
 import { Body, Button, Card, Heading, Row, Screen } from '../components/ui';
 import { FREQUENCY_LABELS, type ExpenseItem, type IncomeItem } from '../domain/budgetModel';
@@ -8,42 +8,6 @@ import { formatAed } from '../domain/money';
 import { getExpenseCategory, getIncomeCategory } from '../domain/uaeCategories';
 import { t } from '../i18n/strings';
 import { usePrototype } from '../state/PrototypeContext';
-import { makeStyles } from '../theme/ThemeProvider';
-import { fontSize, minTouchTarget, spacing } from '../theme/tokens';
-
-const useStyles = makeStyles(({ colors }) => ({
-  remove: {
-    minHeight: minTouchTarget,
-    justifyContent: 'center',
-    alignItems: 'flex-end',
-    paddingHorizontal: spacing.sm,
-  },
-  removeText: { color: colors.dangerText, fontSize: fontSize.body, fontWeight: '600' },
-}));
-
-/** A visible way to delete an item from the list without opening it. */
-function RemoveLink({
-  name,
-  onPress,
-  testID,
-}: {
-  name: string;
-  onPress: () => void;
-  testID: string;
-}) {
-  const styles = useStyles();
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={t.commitments.remove(name)}
-      onPress={onPress}
-      style={styles.remove}
-      testID={testID}
-    >
-      <Text style={styles.removeText}>{t.commitments.removeShort}</Text>
-    </Pressable>
-  );
-}
 
 /** "7 Oct 2026 (in 4 days)" for something due `days` from today. */
 function whenText(today: ISODate, days: number): string {
@@ -52,8 +16,7 @@ function whenText(today: ISODate, days: number): string {
 
 export default function Commitments() {
   const router = useRouter();
-  const { plan, today, resetToSample, clearSampleData, removeIncome, removeExpense } =
-    usePrototype();
+  const { plan, today, resetToSample, clearSampleData } = usePrototype();
   const fixed = plan.expenses.filter((e) => e.kind === 'fixed');
   const variable = plan.expenses.filter((e) => e.kind === 'variable');
 
@@ -71,10 +34,12 @@ export default function Commitments() {
 
       <Heading>{t.commitments.sectionIncome}</Heading>
       {plan.income.map((i) => (
-        <View key={i.id}>
-          <IncomeCard item={i} today={today} onPress={() => router.push(`/edit/income/${i.id}`)} />
-          <RemoveLink name={i.name} onPress={() => removeIncome(i.id)} testID={`remove-${i.id}`} />
-        </View>
+        <IncomeCard
+          key={i.id}
+          item={i}
+          today={today}
+          onPress={() => router.push(`/edit/income/${i.id}`)}
+        />
       ))}
       <Button
         label={t.commitments.addIncome}
@@ -85,10 +50,12 @@ export default function Commitments() {
 
       <Heading>{t.commitments.sectionFixed}</Heading>
       {fixed.map((e) => (
-        <View key={e.id}>
-          <ExpenseCard item={e} today={today} onPress={() => router.push(`/edit/fixed/${e.id}`)} />
-          <RemoveLink name={e.name} onPress={() => removeExpense(e.id)} testID={`remove-${e.id}`} />
-        </View>
+        <ExpenseCard
+          key={e.id}
+          item={e}
+          today={today}
+          onPress={() => router.push(`/edit/fixed/${e.id}`)}
+        />
       ))}
       <Button
         label={t.commitments.addFixed}
@@ -100,14 +67,12 @@ export default function Commitments() {
       <Heading>{t.commitments.sectionVariable}</Heading>
       <Body muted>{t.commitments.sectionVariableHint}</Body>
       {variable.map((e) => (
-        <View key={e.id}>
-          <ExpenseCard
-            item={e}
-            today={today}
-            onPress={() => router.push(`/edit/variable/${e.id}`)}
-          />
-          <RemoveLink name={e.name} onPress={() => removeExpense(e.id)} testID={`remove-${e.id}`} />
-        </View>
+        <ExpenseCard
+          key={e.id}
+          item={e}
+          today={today}
+          onPress={() => router.push(`/edit/variable/${e.id}`)}
+        />
       ))}
       <Button
         label={t.commitments.addVariable}
@@ -158,6 +123,7 @@ function IncomeCard({
       accessibilityRole="button"
       accessibilityLabel={`${item.name}, ${formatAed(item.amount)}, ${FREQUENCY_LABELS[item.frequency]}`}
       onPress={onPress}
+      onLongPress={onPress}
       testID={`income-${item.id}`}
     >
       <Card>
@@ -195,6 +161,7 @@ function ExpenseCard({
       accessibilityRole="button"
       accessibilityLabel={`${item.name}, ${formatAed(item.amount)}, ${detail}${reminder ? `, ${reminder}` : ''}`}
       onPress={onPress}
+      onLongPress={onPress}
       testID={`expense-${item.id}`}
     >
       <Card>

@@ -106,15 +106,30 @@ describe('income can be zero or removed, and spending follows the balance', () =
     expect(screen.getByTestId('error-amount')).toBeTruthy();
   });
 
-  it('removes an item straight from the list, including the salary and the car loan', async () => {
-    await open('/commitments');
-    expect(screen.getByTestId('income-salary')).toBeTruthy();
-    await fireEvent.press(screen.getByTestId('remove-salary'));
-    expect(screen.queryByTestId('income-salary')).toBeNull();
+  it('has no always-visible Remove button on the list; delete is inside the item and asks twice', async () => {
+    const { getPathname } = await open('/commitments');
+    expect(screen.queryByTestId('remove-salary')).toBeNull();
+    expect(screen.queryByText('Remove')).toBeNull();
 
-    expect(screen.getByTestId('expense-car')).toBeTruthy(); // the sample car loan
-    await fireEvent.press(screen.getByTestId('remove-car'));
-    expect(screen.queryByTestId('expense-car')).toBeNull();
+    await fireEvent.press(screen.getByTestId('income-salary'));
+    await waitFor(() => expect(getPathname()).toBe('/edit/income/salary'));
+    await fireEvent.press(screen.getByTestId('edit-delete'));
+    // First tap only asks; nothing is deleted yet.
+    expect(screen.getByTestId('delete-confirm-note')).toBeTruthy();
+    expect(getPathname()).toBe('/edit/income/salary');
+    await fireEvent.press(screen.getByTestId('edit-delete-cancel'));
+    expect(screen.queryByTestId('delete-confirm-note')).toBeNull();
+
+    await fireEvent.press(screen.getByTestId('edit-delete'));
+    await fireEvent.press(screen.getByTestId('edit-delete'));
+    await waitFor(() => expect(getPathname()).toBe('/commitments'));
+    expect(screen.queryByTestId('income-salary')).toBeNull();
+  });
+
+  it('opens an item on a long press too', async () => {
+    const { getPathname } = await open('/commitments');
+    await fireEvent(screen.getByTestId('income-salary'), 'longPress');
+    await waitFor(() => expect(getPathname()).toBe('/edit/income/salary'));
   });
 
   it('accepts zero for an everyday budget', async () => {
@@ -130,6 +145,7 @@ describe('income can be zero or removed, and spending follows the balance', () =
     const { getPathname } = await open('/commitments');
     await fireEvent.press(screen.getByTestId('income-side'));
     await waitFor(() => expect(getPathname()).toBe('/edit/income/side'));
+    await fireEvent.press(screen.getByTestId('edit-delete'));
     await fireEvent.press(screen.getByTestId('edit-delete'));
     await waitFor(() => expect(getPathname()).toBe('/commitments'));
     expect(screen.queryByTestId('income-side')).toBeNull();

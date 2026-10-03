@@ -2,6 +2,7 @@ import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 
 import { DateField } from '../../../components/dates';
+import { DeleteButton } from '../../../components/DeleteButton';
 import { ChipGroup, Field } from '../../../components/forms';
 import { ReminderPicker } from '../../../components/ReminderPicker';
 import { Body, Button, Heading, Screen } from '../../../components/ui';
@@ -275,11 +276,8 @@ function ExpenseForm({ kind, existing }: { kind: 'fixed' | 'variable'; existing?
       />
       <Button label={t.edit.save} onPress={save} testID="edit-save" />
       {existing && (
-        <Button
-          label={t.edit.delete}
-          variant="secondary"
-          testID="edit-delete"
-          onPress={() => {
+        <DeleteButton
+          onConfirm={() => {
             removeExpense(existing.id);
             router.back();
           }}
@@ -398,11 +396,8 @@ function IncomeForm({ existing }: { existing?: IncomeItem }) {
       />
       <Button label={t.edit.save} onPress={save} testID="edit-save" />
       {existing && (
-        <Button
-          label={t.edit.delete}
-          variant="secondary"
-          testID="edit-delete"
-          onPress={() => {
+        <DeleteButton
+          onConfirm={() => {
             removeIncome(existing.id);
             router.back();
           }}
@@ -539,11 +534,8 @@ function GoalForm({ existing }: { existing?: SavingsGoal }) {
       />
       <Button label={t.edit.save} onPress={save} testID="edit-save" />
       {existing && (
-        <Button
-          label={t.edit.delete}
-          variant="secondary"
-          testID="edit-delete"
-          onPress={() => {
+        <DeleteButton
+          onConfirm={() => {
             removeGoal(existing.id);
             router.back();
           }}
@@ -772,11 +764,8 @@ function InvestmentForm({ existing }: { existing?: Investment | undefined }) {
       />
       <Button label={t.edit.save} onPress={save} testID="edit-save" />
       {existing && (
-        <Button
-          label={t.edit.delete}
-          variant="secondary"
-          testID="edit-delete"
-          onPress={() => {
+        <DeleteButton
+          onConfirm={() => {
             removeInvestment(existing.id);
             router.back();
           }}

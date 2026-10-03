@@ -110,6 +110,7 @@ describe('income and expenses editor (P1-01)', () => {
     await fireEvent.press(screen.getByTestId('expense-gym'));
     await waitFor(() => expect(getPathname()).toBe('/edit/fixed/gym'));
     await fireEvent.press(screen.getByTestId('edit-delete'));
+    await fireEvent.press(screen.getByTestId('edit-delete'));
     await waitFor(() => expect(getPathname()).toBe('/commitments'));
     expect(screen.queryByTestId('expense-gym')).toBeNull();
 
@@ -215,6 +216,7 @@ describe('income and expenses editor (P1-01)', () => {
 
     await fireEvent.press(screen.getByTestId('expense-gym'));
     await waitFor(() => expect(getPathname()).toBe('/edit/fixed/gym'));
+    await fireEvent.press(screen.getByTestId('edit-delete'));
     await fireEvent.press(screen.getByTestId('edit-delete'));
     await waitFor(() => expect(getPathname()).toBe('/commitments'));
     expect(screen.queryByTestId('expense-gym')).toBeNull();
