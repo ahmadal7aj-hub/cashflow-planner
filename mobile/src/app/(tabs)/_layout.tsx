@@ -4,6 +4,7 @@ import type { ColorValue } from 'react-native';
 
 import type { IconName } from '../../components/ui';
 import { t } from '../../i18n/strings';
+import { usePrototype } from '../../state/PrototypeContext';
 import { useTheme } from '../../theme/ThemeProvider';
 
 /** A tab icon that is outlined when the tab is not selected and filled when it is. */
@@ -15,6 +16,7 @@ function icon(filled: IconName, outline: IconName) {
 
 export default function TabsLayout() {
   const { colors } = useTheme();
+  const { sharing } = usePrototype();
   return (
     <Tabs
       screenOptions={{
@@ -62,6 +64,15 @@ export default function TabsLayout() {
           title: t.tabs.income,
           tabBarIcon: icon('trending-up', 'trending-up-outline'),
           tabBarButtonTestID: 'tab-income',
+        }}
+      />
+      <Tabs.Screen
+        name="shared"
+        options={{
+          title: t.tabs.shared,
+          href: sharing.linked ? undefined : null,
+          tabBarIcon: icon('people', 'people-outline'),
+          tabBarButtonTestID: 'tab-shared',
         }}
       />
       <Tabs.Screen

@@ -38,6 +38,12 @@ export default function Settings() {
         <Body>{t.settings.language}</Body>
       </Card>
       <Button
+        label={t.shared.linkAccount}
+        variant="secondary"
+        onPress={() => router.push('/link')}
+        testID="open-link"
+      />
+      <Button
         label={t.settings.editNumbers}
         variant="secondary"
         onPress={() => router.push('/onboarding')}

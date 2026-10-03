@@ -202,6 +202,7 @@ export const t = {
   },
 
   tabs: {
+    shared: 'Shared',
     overview: 'Overview',
     spending: 'Spending',
     savings: 'Savings',
@@ -451,6 +452,45 @@ export const t = {
       days: 'Days in plan',
       result: 'Result',
     },
+  },
+
+  shared: {
+    title: 'Shared dashboard',
+    previewNote:
+      'PREVIEW: this is a mock-up on this phone with a made-up partner. Nothing is stored or sent. Real linking needs accounts, which come later.',
+    notLinkedHint:
+      'Link your account with another person to share chosen savings and spending on a separate Shared dashboard. Nothing is shared unless you choose it, item by item.',
+    linkAccount: 'Link with another account',
+    linkTitle: 'Link with another account',
+    linkIntro:
+      'Enter the username of the person you want to link with. In the finished app they accept, and you both see a Shared dashboard. You choose exactly which items to share.',
+    usernameLabel: 'Their username',
+    usernameHint: 'For example sara_ahmed. The preview links you with a made-up partner.',
+    errorUsername: 'Enter a username of at least 3 characters.',
+    linkButton: 'Link accounts (preview)',
+    linkedTitle: 'Accounts linked',
+    linkedWith: (name: string) => `Linked with ${name}`,
+    linkedExplain:
+      'Only items you tap Share on appear on the Shared dashboard. Your own dashboard stays private.',
+    openShared: 'Open the Shared dashboard',
+    unlink: 'Unlink and stop sharing everything',
+    shareLabel: (name: string) => `Share with ${name}?`,
+    private: 'Private',
+    shared: 'Shared',
+    you: 'You',
+    combined: 'Together',
+    due: (when: string) => `due ${when}`,
+    nothingYet: 'Nothing shared here yet.',
+    emptyHint:
+      'You have not shared anything yet. Open an item and choose Shared, or add to your savings with Shared selected.',
+    stopSharing: 'Stop sharing this',
+    savingsTitle: 'Shared savings',
+    savingsNote: 'Savings you each chose to share.',
+    upcomingTitle: 'Upcoming essential spending',
+    upcomingNote: 'Bills you each shared, soonest first.',
+    spendingTitle: 'Shared spending',
+    spendingNote: 'Monthly spending budgets you each shared.',
+    manageLink: 'Manage the link',
   },
 
   monthlyPlan: {

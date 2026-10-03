@@ -5,6 +5,7 @@ import { DateField } from '../../../components/dates';
 import { DeleteButton } from '../../../components/DeleteButton';
 import { ChipGroup, Field } from '../../../components/forms';
 import { ReminderPicker } from '../../../components/ReminderPicker';
+import { ShareToggle } from '../../../components/ShareToggle';
 import { Body, Button, Heading, Screen } from '../../../components/ui';
 import {
   FREQUENCIES,
@@ -30,6 +31,7 @@ import {
   getIncomeCategory,
   type IncomeKind,
 } from '../../../domain/uaeCategories';
+import { sharedKey } from '../../../domain/sharedDashboard';
 import { t } from '../../../i18n/strings';
 import { usePrototype } from '../../../state/PrototypeContext';
 
@@ -110,7 +112,7 @@ function NotFound() {
 
 function ExpenseForm({ kind, existing }: { kind: 'fixed' | 'variable'; existing?: ExpenseItem }) {
   const router = useRouter();
-  const { plan, today, upsertExpense, removeExpense } = usePrototype();
+  const { plan, today, upsertExpense, removeExpense, sharing, setShared } = usePrototype();
   const categories = EXPENSE_CATEGORIES.filter((c) => c.kind === kind);
   const first = categories[0]!;
   const [categoryId, setCategoryId] = useState(existing?.categoryId ?? first.id);
@@ -124,6 +126,9 @@ function ExpenseForm({ kind, existing }: { kind: 'fixed' | 'variable'; existing?
   const [spent, setSpent] = useState(existing ? toInput(existing.spentSoFar) : '0');
   const [essential, setEssential] = useState<'yes' | 'no'>(
     (existing?.essential ?? first.essential) ? 'yes' : 'no',
+  );
+  const [share, setShare] = useState(
+    existing ? sharing.sharedKeys.includes(sharedKey('exp', existing.id)) : false,
   );
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
 
@@ -179,8 +184,10 @@ function ExpenseForm({ kind, existing }: { kind: 'fixed' | 'variable'; existing?
     setErrors(next);
     if (Object.keys(next).length > 0 || !a.ok) return;
 
+    const id = existing?.id ?? nextId('exp', plan.expenses);
+    if (sharing.linked) setShared(sharedKey('exp', id), share);
     upsertExpense({
-      id: existing?.id ?? nextId('exp', plan.expenses),
+      id,
       name: name.trim(),
       categoryId,
       amount: a.fils,
@@ -274,6 +281,7 @@ function ExpenseForm({ kind, existing }: { kind: 'fixed' | 'variable'; existing?
           { value: 'no', label: t.edit.essentialNo },
         ]}
       />
+      <ShareToggle value={share} onChange={setShare} />
       <Button label={t.edit.save} onPress={save} testID="edit-save" />
       {existing && (
         <DeleteButton
@@ -409,7 +417,10 @@ function IncomeForm({ existing }: { existing?: IncomeItem }) {
 
 function GoalForm({ existing }: { existing?: SavingsGoal }) {
   const router = useRouter();
-  const { plan, today, upsertGoal, removeGoal } = usePrototype();
+  const { plan, today, upsertGoal, removeGoal, sharing, setShared } = usePrototype();
+  const [share, setShare] = useState(
+    existing ? sharing.sharedKeys.includes(sharedKey('goal', existing.id)) : false,
+  );
   const [name, setName] = useState(existing?.name ?? '');
   const [target, setTarget] = useState(existing ? toInput(existing.target) : '');
   const [saved, setSaved] = useState(existing ? toInput(existing.saved) : '0');
@@ -437,6 +448,7 @@ function GoalForm({ existing }: { existing?: SavingsGoal }) {
     if (Object.keys(next).length > 0 || !tg.ok || !sv.ok || !mo.ok) return;
 
     const id = existing?.id ?? nextId('goal', plan.goals);
+    if (sharing.linked) setShared(sharedKey('goal', id), share);
     if (emergency === 'yes') {
       // Only one goal can be the emergency fund: clear the flag on any other goal.
       for (const g of plan.goals) {
@@ -532,6 +544,7 @@ function GoalForm({ existing }: { existing?: SavingsGoal }) {
           { value: 'no', label: 'No' },
         ]}
       />
+      <ShareToggle value={share} onChange={setShare} />
       <Button label={t.edit.save} onPress={save} testID="edit-save" />
       {existing && (
         <DeleteButton
@@ -593,6 +606,7 @@ function EmploymentForm({ existing }: { existing?: Employment | undefined }) {
 function SavingsMoveForm({ direction }: { direction: 'in' | 'out' }) {
   const router = useRouter();
   const { plan, addToSavings, takeFromSavings } = usePrototype();
+  const [share, setShare] = useState(false);
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
@@ -604,7 +618,7 @@ function SavingsMoveForm({ direction }: { direction: 'in' | 'out' }) {
       return;
     }
     if (direction === 'in') {
-      addToSavings(a.fils, note);
+      addToSavings(a.fils, note, share);
     } else {
       const result = takeFromSavings(a.fils, note);
       if (result !== 'ok') {
@@ -634,6 +648,7 @@ function SavingsMoveForm({ direction }: { direction: 'in' | 'out' }) {
         value={note}
         onChangeText={setNote}
       />
+      {direction === 'in' ? <ShareToggle value={share} onChange={setShare} /> : null}
       <Button label={t.edit.save} onPress={save} testID="edit-save" />
     </Screen>
   );

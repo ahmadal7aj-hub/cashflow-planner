@@ -25,6 +25,15 @@ import { remindersFor, type Reminder } from '../domain/reminders';
 import { SAMPLE_PLAN, SCENARIO_PRESET } from '../domain/sampleData';
 import { starterExpenses } from '../domain/starterPlan';
 
+/** Sharing preview state: one device, a made-up partner, nothing stored or sent. */
+export interface SharingState {
+  linked: boolean;
+  /** The username the user typed when linking (shown back to them). */
+  partnerUsername: string;
+  /** Keys of the items the user chose to share (see domain/sharedDashboard). */
+  sharedKeys: readonly string[];
+}
+
 interface PrototypeState {
   /** Today's date (device clock), used to turn real dates into days. */
   today: ISODate;
@@ -41,11 +50,16 @@ interface PrototypeState {
   upsertGoal: (goal: SavingsGoal) => void;
   removeGoal: (id: string) => void;
   setMonthlySavings: (amount: Fils) => void;
+  sharing: SharingState;
+  linkPartner: (username: string) => void;
+  unlinkPartner: () => void;
+  setShared: (key: string, shared: boolean) => void;
   setEmployment: (e: Employment) => void;
   upsertInvestment: (inv: Investment) => void;
   removeInvestment: (id: string) => void;
   /** Add money to current savings. */
-  addToSavings: (amount: Fils, note: string) => void;
+  /** Adds to savings. When `share` is true the new deposit is also shared on the Shared dashboard. */
+  addToSavings: (amount: Fils, note: string, share?: boolean) => void;
   /** Take money out of current savings. Refuses more than is saved. */
   takeFromSavings: (amount: Fils, note: string) => 'ok' | 'insufficient' | 'invalid';
   /** Add this pay cycle's result (income minus spending) to savings. False if already added. */
@@ -84,6 +98,11 @@ export function PrototypeProvider({
   // The device clock is read once per session; tests pass a fixed date.
   const [today] = useState<ISODate>(todayOverride ?? todayISO);
   const [scenarioOn, setScenarioOn] = useState(false);
+  const [sharing, setSharing] = useState<SharingState>({
+    linked: false,
+    partnerUsername: '',
+    sharedKeys: [],
+  });
   const onboardingTracked = useRef(false);
 
   const value = useMemo<PrototypeState>(() => {
@@ -115,8 +134,26 @@ export function PrototypeProvider({
         setPlan((p) => ({ ...p, investments: upsert(p.investments, inv) })),
       removeInvestment: (id) =>
         setPlan((p) => ({ ...p, investments: p.investments.filter((v) => v.id !== id) })),
-      addToSavings: (amount, note) =>
-        setPlan((p) => ({ ...p, savings: deposit(p.savings, amount, today, note) })),
+      addToSavings: (amount, note, share = false) => {
+        const next = deposit(rawPlan.savings, amount, today, note);
+        setPlan((p) => ({ ...p, savings: next }));
+        const entry = next.entries[0];
+        if (share && entry && sharing.linked)
+          setSharing((x) => ({ ...x, sharedKeys: [...x.sharedKeys, `sav:${entry.id}`] }));
+      },
+      sharing,
+      linkPartner: (username) =>
+        setSharing({ linked: true, partnerUsername: username.trim(), sharedKeys: [] }),
+      unlinkPartner: () => setSharing({ linked: false, partnerUsername: '', sharedKeys: [] }),
+      setShared: (key, shared) =>
+        setSharing((x) => ({
+          ...x,
+          sharedKeys: shared
+            ? x.sharedKeys.includes(key)
+              ? x.sharedKeys
+              : [...x.sharedKeys, key]
+            : x.sharedKeys.filter((k) => k !== key),
+        })),
       takeFromSavings: (amount, note) => {
         const r = withdraw(rawPlan.savings, amount, today, note);
         if (!r.ok) return r.reason;
@@ -151,7 +188,7 @@ export function PrototypeProvider({
       baseline,
       scenario,
     };
-  }, [rawPlan, today, scenarioOn]);
+  }, [rawPlan, today, scenarioOn, sharing]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
