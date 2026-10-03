@@ -10,6 +10,63 @@ not, and exactly what to do next. Anything that needs a person's decision is mar
 
 ---
 
+## 0. Start here next session
+
+**State at the end of the last session (2026-10-03):** `main` is clean, **no open pull requests, no open issues**,
+CI is green, **475 tests pass**, and everything the owner asked for so far is built and merged. Nothing is half done.
+The project is now **waiting on the owner** (feedback on the new features, decisions, interviews), not on code.
+
+### First, ask the owner (do not guess)
+
+1. **Did you try the newest features in Expo Go?** (calendar and reminders, the Other bill, the current savings
+   balance, investments, the new look and dark mode). What looked wrong, felt confusing, or was ugly? Screenshots help.
+2. **Did the in-app reminders feel right?** If yes, build **phone notifications** (see step 3 below).
+3. **Have you decided the ADR 0004 proposals** (especially cloud vs on-device storage, and whether statement import is
+   expected)?
+4. **Have any interviews happened?** How many? Any findings to summarise against H1 to H7?
+5. **Did a GitHub issue "Security exception needs attention" arrive?** The exception expires **2026-11-01**.
+
+### Then work in this order
+
+| # | Next step | Owner | Notes |
+|---|---|---|---|
+| 1 | **Fix whatever the owner found** in Expo Go | Claude | Small PRs, each with a test that fails without the fix. Screens never inspected by Claude: the new theme, hero card, calendar, Investments screen, savings card |
+| 2 | **Phone notifications for bill reminders** (agreed next step) | Claude, after owner go-ahead | Add `expo-notifications` (Expo-managed), ask permission on the first reminder, schedule one local notification per reminder date, **never put amounts on the lock screen**, cancel or reschedule when a bill changes, add privacy-safe analytics only, mock the module in tests. Check the SDK 57 docs first. Local notifications work in Expo Go; remote push does not on Android |
+| 3 | **ADR 0004 decisions and the cloud vs on-device decision** | Owner | Record the answers as ADR updates; decide before any Phase 2 work |
+| 4 | **Interviews** (five first, then 20 to 30) | Owner | Use `docs/INTERVIEW-ONE-PAGER.md` and `docs/PROTOTYPE-WALKTHROUGH.md`; private notes only in `docs/private/`. Claude can summarise against H1 to H7 |
+| 5 | **Security exception window** | Owner decides, Claude edits only on explicit approval | About **2026-10-26** renew-or-expire decision; **2026-11-01** expiry. Check `npm view node-forge version`: if above 1.4.0, upgrade and delete the exception |
+| 6 | **Run the Maestro E2E flow** once on a USB-connected Android phone | Owner provides the phone | Never run; low priority |
+| 7 | **Housekeeping on request** | Claude | Screenshots in PRs, a small-screen and accessibility pass, Monarch prices and Wally's own site for the competitor notes |
+| 8 | **Phase 2** (accounts, database, real engine) | Both | **Only if the interviews show demand.** Do not start before the BRD gate. See section 6D |
+
+### Ready-to-paste prompt to resume
+
+> Read `docs/HANDOVER.md` (section 0 first), then check `git status`, open PRs and issues. Here is my feedback on the
+> latest build: (paste your list or screenshots). Fix the bugs first, one small PR at a time, then tell me what is next.
+
+### Working notes for the assistant (read before touching anything)
+
+- **Workflow:** short-lived branch, small PR, wait for the three required checks (Quality, Security, CodeQL), then
+  squash merge. **Always verify the PR number, author and branch before merging**, and that CI ran on the latest
+  commit (an earlier mix-up merged the wrong PR). Never push to `main`. Never weaken a scan or branch protection.
+- **Commits and PRs on Windows PowerShell 5.1:** write the commit message and PR body to a file and use
+  `git commit -F` and `gh pr create --body-file` (double quotes in `-m` silently break the commit). Do not name a
+  helper `R` (alias of Invoke-History). Backticks followed by `t` or `n` become tab or newline: use the Edit tool for
+  source edits that contain backticks. Use `npm.cmd` / `npx.cmd`, and refresh PATH at the start of each shell call.
+- **Machine:** Windows, low free RAM (about 3 GB), so **no Android emulator**. A background job may be reaped if
+  memory is critical. Stale lint errors: delete `mobile/.expo/cache`.
+- **Tests:** React Native Testing Library v14 is async. Pin "today" with `jest.useFakeTimers({ now: ... })` for any
+  test that touches dates. Every route must be in a test's route map or the layouts log warnings. Do not call
+  `unmount()` un-awaited between two renders.
+- **Money:** integer fils only; all formulas live in `mobile/src/domain/`; screens never do maths. If a sample number
+  changes, update tests, the walkthrough and the Maestro flow together.
+- **Public repo:** never commit the BRD/PRD, interview notes, secrets or pricing strategy. Check
+  `git diff --cached --name-only` before every commit.
+- **Memory:** the assistant keeps notes on this project (repo rules, PowerShell pitfalls, machine limits, the security
+  exception date) in its own memory directory; they are not in the repo.
+
+---
+
 ## 1. In one minute
 
 - **What it is:** a mobile-first cash-flow planner for UAE residents. The headline answer is **"how much can I safely
@@ -17,13 +74,37 @@ not, and exactly what to do next. Anything that needs a person's decision is mar
 - **Where we are:** a large **clickable prototype** exists and runs in Expo Go. It uses **made-up sample data held in
   memory**: nothing is saved or sent. There is no backend, no accounts and no real forecast engine yet.
 - **The gate:** the BRD says **do not build Phase 2 (accounts, database, real engine) until 20 to 30 interviews show
-  recurring demand.** Those interviews have **not started**. That is the single most important next step.
+  recurring demand.** As far as the repository shows, those interviews have **not started** (ask the owner). That is
+  the single most important next step.
 - **Engineering health:** all work went through pull requests with CI. `main` is protected. 475 automated tests pass.
 - **One time-limited risk:** a security exception (node-forge) **expires 2026-11-01** (section 7).
 
 ---
 
 ## 2. What has been done
+
+### Everything completed to date (summary by theme)
+
+27 pull requests of mine are merged (plus 4 Dependabot updates), all through CI. Numbers in brackets are PR numbers.
+
+| Theme | What was delivered |
+|---|---|
+| **Project set-up** | Public repo with private business documents kept out; Expo SDK 57 + strict TypeScript app, lint, formatting and tests (#1); environment config with a non-production banner (#14); Maestro E2E smoke flow written (#17) |
+| **Engineering controls** | CI with format, lint, typecheck, tests and coverage, `expo-doctor`, bundle build, dependency audit, dependency review and CodeQL (#2); branch protection on `main` and `staging`, verified with a test PR (#3); Dependabot tuned so Expo-pinned packages are not bumped independently (#16, #20); secret scanning with push protection |
+| **Security** | Dependency audit gate that fails on high or critical advisories (#26); an owner-approved, advisory-specific exception for node-forge that expires 2026-11-01; a weekly watch that opens an issue for the owner (#32) |
+| **The prototype** | Clickable prototype with five tabs, sample data in memory (#15, #23, #25, #27, #28): Overview (safe to spend, charts, what-if, explanations), Spending, Savings, Income and Insights |
+| **Editing and UAE categories** | Add, edit and delete income, bills, everyday budgets and goals with 31 standard UAE categories (#24, #36) |
+| **Owner-requested features** | Real due dates with a calendar picker, bill reminders and an Other bill (#36); a current savings balance that goes up and down (#37); investments with profit, income and a reserved contribution (#38); a navy and gold theme with light and dark mode (#39) |
+| **Quality** | A full code review found and fixed 10 bugs (#34), the worst being the payday-today horizon; 475 tests, with contrast tests for both colour modes |
+| **Validation material** | Interview kit, one-page guide, walkthrough script, hypotheses H1 to H7, proposed answers to the PRD open decisions (#21, #22) |
+| **Research** | Competitor research from vendors' own pages with sources and corrections (#29, #30, #31): UAE categories are table stakes; automatic import is common in the UAE; privacy positioning matters |
+| **Documentation** | This handover, architecture, testing, README, feature gap and walkthrough, kept in step with the code (#35, #40) |
+
+**Owner actions already done:** installed Node and Expo Go, signed in to Expo on the phone and computer, ran the app on
+a phone, gave the feature requests above, and approved the 30-day security exception.
+
+**Not done, by design:** the interviews, Phase 2 (accounts, database, real engine), Supabase projects, phone
+notifications, the Maestro run, and any automatic data import. The BRD gates most of these on interview evidence.
 
 ### Foundation (Phase 0)
 
