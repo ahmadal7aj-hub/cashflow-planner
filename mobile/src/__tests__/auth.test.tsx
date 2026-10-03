@@ -43,7 +43,7 @@ describe('the app asks you to sign in when accounts are on', () => {
   it('shows the sign-in screen, not the app, while nobody is signed in', async () => {
     await openAccountsApp(db);
     await waitFor(() => expect(screen.getByTestId('auth-login')).toBeTruthy());
-    expect(screen.queryByTestId('dashboard-screen')).toBeNull();
+    expect(screen.queryByTestId('home-screen')).toBeNull();
   });
 
   it('runs on its own, without a sign-in, on a build with no accounts', async () => {
@@ -67,7 +67,7 @@ describe('registration and email verification', () => {
 
     await type('auth-code', SIGNUP_CODE);
     await fireEvent.press(screen.getByTestId('auth-submit'));
-    await waitFor(() => expect(screen.getByTestId('dashboard-screen')).toBeTruthy());
+    await waitFor(() => expect(screen.getByTestId('home-screen')).toBeTruthy());
 
     // A real profile now exists in the database, with a lower-case username.
     const rows = await db.admin<{ username: string }>('select username from public.profiles');
@@ -120,7 +120,7 @@ describe('registration and email verification', () => {
     await type('auth-code', '000000');
     await fireEvent.press(screen.getByTestId('auth-submit'));
     await waitFor(() => expect(screen.getByTestId('auth-form-error')).toBeTruthy());
-    expect(screen.queryByTestId('dashboard-screen')).toBeNull();
+    expect(screen.queryByTestId('home-screen')).toBeNull();
 
     await fireEvent.press(screen.getByTestId('auth-resend'));
     await waitFor(() => expect(screen.getByTestId('auth-notice')).toBeTruthy());
@@ -128,7 +128,7 @@ describe('registration and email verification', () => {
 
     await type('auth-code', SIGNUP_CODE);
     await fireEvent.press(screen.getByTestId('auth-submit'));
-    await waitFor(() => expect(screen.getByTestId('dashboard-screen')).toBeTruthy());
+    await waitFor(() => expect(screen.getByTestId('home-screen')).toBeTruthy());
   });
 });
 
@@ -141,7 +141,7 @@ describe('login with email and password', () => {
     await type('auth-email', ' Sara@Example.com ');
     await type('auth-password', 'correct-horse-battery');
     await fireEvent.press(screen.getByTestId('auth-submit'));
-    await waitFor(() => expect(screen.getByTestId('dashboard-screen')).toBeTruthy());
+    await waitFor(() => expect(screen.getByTestId('home-screen')).toBeTruthy());
   });
 
   it('says the same thing for a wrong password and an unknown email, and stays signed out', async () => {
@@ -161,7 +161,7 @@ describe('login with email and password', () => {
     await waitFor(() =>
       expect(screen.getByTestId('auth-form-error').props.children).toBe(wrongPassword),
     );
-    expect(screen.queryByTestId('dashboard-screen')).toBeNull();
+    expect(screen.queryByTestId('home-screen')).toBeNull();
   });
 
   it('sends someone who has not confirmed their email to the code screen', async () => {

@@ -1,6 +1,6 @@
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { Text, View } from 'react-native';
 
 import { appEnvironment, environmentLabel, isProduction } from '../config/environment';
@@ -71,11 +71,25 @@ function AccountGate({ children }: { children: ReactNode }) {
 /** Each account has its own saved plan, so switching accounts on a phone never shows another person's records. */
 function Scoped({ children }: { children: ReactNode }) {
   const userId = useUserId();
+  const account = useAccount();
+  const fromSignIn = account.status === 'signedIn' && account.cameFromSignIn;
   return (
     <PrototypeProvider key={userId ?? 'local'} userId={userId}>
-      <SharingProvider>{children}</SharingProvider>
+      <SharingProvider>
+        {children}
+        {fromSignIn ? <StartAtWelcome /> : null}
+      </SharingProvider>
     </PrototypeProvider>
   );
+}
+
+/** After signing in, start from the welcome page rather than wherever the previous person left the app. */
+function StartAtWelcome() {
+  useEffect(() => {
+    const timer = setTimeout(() => router.replace('/'), 0);
+    return () => clearTimeout(timer);
+  }, []);
+  return null;
 }
 
 export default function RootLayout() {

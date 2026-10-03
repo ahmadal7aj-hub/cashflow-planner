@@ -24,7 +24,7 @@ export type AccountStatus =
   | { status: 'unavailable' }
   | { status: 'loading' }
   | { status: 'signedOut' }
-  | { status: 'signedIn'; user: AccountUser };
+  | { status: 'signedIn'; user: AccountUser; cameFromSignIn: boolean };
 
 interface AccountActions {
   signUp: (
@@ -64,11 +64,14 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     backend ? { status: 'loading' } : { status: 'unavailable' },
   );
   const alive = useRef(true);
+  // True once the sign-in screen has been shown, so a later sign-in starts from the welcome page.
+  const sawSignIn = useRef(false);
 
   const establish = useCallback(
     async (u: AuthUser | null) => {
       if (!backend) return;
       if (!u) {
+        sawSignIn.current = true;
         if (alive.current) setState({ status: 'signedOut' });
         return;
       }
@@ -79,7 +82,12 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       } catch {
         // The profile is read again on the next start; the account still works without the label.
       }
-      if (alive.current) setState({ status: 'signedIn', user: { ...u, username } });
+      if (alive.current)
+        setState({
+          status: 'signedIn',
+          user: { ...u, username },
+          cameFromSignIn: sawSignIn.current,
+        });
     },
     [backend],
   );
@@ -91,7 +99,10 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     backend.auth
       .currentUser()
       .then((u) => establish(u))
-      .catch(() => alive.current && setState({ status: 'signedOut' }));
+      .catch(() => {
+        sawSignIn.current = true;
+        if (alive.current) setState({ status: 'signedOut' });
+      });
     unsubscribe = backend.auth.onAuthChange((u) => {
       void establish(u);
     });
