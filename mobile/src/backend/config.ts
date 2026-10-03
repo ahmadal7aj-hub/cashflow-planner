@@ -17,3 +17,15 @@ export function readBackendConfig(
   if (!/^https:\/\/[^\s/]+/.test(url)) return null;
   return { url: url.replace(/\/+$/, ''), anonKey };
 }
+
+/**
+ * The address of the LOCAL TEST SERVER (`npm run dev:server`), for testing on real phones without a Supabase project.
+ * Only used when no Supabase settings are present. Never use it for real people.
+ */
+export function readDevServerUrl(
+  env: Record<string, string | undefined> = process.env,
+): string | null {
+  const url = env['EXPO_PUBLIC_DEV_SERVER_URL']?.trim();
+  if (!url || !/^https?:\/\/[^\s/]+/.test(url)) return null;
+  return url.replace(/\/+$/, '');
+}

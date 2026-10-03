@@ -139,6 +139,7 @@ export function createSupabaseBackend(config: BackendConfig): Backend {
   };
 
   return {
+    kind: 'supabase',
     auth: createAuthService(client, rpc),
     rpc,
     onGroupChange(listener) {

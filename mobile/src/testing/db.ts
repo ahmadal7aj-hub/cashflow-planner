@@ -11,26 +11,10 @@ import { RPC_SHAPES, type RpcClient, type RpcName } from '../backend/contract';
  * stand-in for Supabase's auth schema. Queries run as the `authenticated` or `anon` role with a JWT subject set, so
  * Row Level Security and function checks behave as they do on Supabase.
  */
-const AUTH_SHIM = `
-  create schema auth;
-  create table auth.users (
-    id uuid primary key default gen_random_uuid(),
-    email text unique,
-    raw_user_meta_data jsonb not null default '{}'::jsonb
-  );
-  create function auth.uid() returns uuid language sql stable as $$
-    select nullif(
-      coalesce(
-        nullif(current_setting('request.jwt.claim.sub', true), ''),
-        nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'sub'
-      ), '')::uuid
-  $$;
-  create role anon nologin;
-  create role authenticated nologin;
-  grant usage on schema public to anon, authenticated;
-  grant usage on schema auth to anon, authenticated;
-  grant execute on function auth.uid() to anon, authenticated;
-`;
+const AUTH_SHIM = fs.readFileSync(
+  path.resolve(__dirname, '../../../supabase/test/auth_shim.sql'),
+  'utf8',
+);
 
 export interface UserSession extends RpcClient {
   readonly id: string | null;

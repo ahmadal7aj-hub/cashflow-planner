@@ -51,6 +51,8 @@ export interface AuthService {
 
 /** Everything the app needs from a backend. A real one (Supabase) or a test one. */
 export interface Backend {
+  /** Which kind of server this is: the real one, or the local test server on your computer. */
+  kind: 'supabase' | 'dev-server';
   auth: AuthService;
   /** Calls the database functions as the signed-in user. */
   rpc: RpcClient;

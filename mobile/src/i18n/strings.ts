@@ -602,6 +602,8 @@ export const t = {
     notAvailable:
       'Accounts are not set up on this build, so everything stays on this phone only. Shared savings need an account.',
     notAvailableShort: 'Accounts are not set up on this build.',
+    devServer:
+      'Connected to the local test server on your computer (testing only). Real accounts need the real backend.',
     open: 'Account and groups',
   },
 
@@ -715,7 +717,8 @@ export const t = {
     alreadyShared: 'Changing the group makes it private in the old one first.',
     changeNote:
       'Saving this makes it private in the group it is shared with now. It disappears from the group totals for every member, for all dates. It stays in your own savings.',
-    notAvailable: 'Accounts are not set up on this build, so savings cannot be shared.',
+    notAvailable:
+      'Accounts are switched off on this build, so savings cannot be shared yet. See docs/TEST-WITH-TWO-ACCOUNTS.md to turn them on for testing.',
   },
 
   sharedEntry: {

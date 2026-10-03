@@ -72,7 +72,7 @@ Supabase project.**
   owner still has to create (`docs/BACKEND-SETUP.md`); checkpoint `checkpoint/pre-accounts-2026-10-03`.
 - **The gate:** the BRD says **do not build Phase 2 (accounts, database, real engine) until 20 to 30 interviews show
   recurring demand.** Those interviews have **not started**. That is the single most important next step.
-- **Engineering health:** all work went through pull requests with CI. `main` is protected. 615 automated tests pass.
+- **Engineering health:** all work went through pull requests with CI. `main` is protected. 619 automated tests pass.
 - **One time-limited risk:** a security exception (node-forge) **expires 2026-11-01** (section 7).
 
 ---

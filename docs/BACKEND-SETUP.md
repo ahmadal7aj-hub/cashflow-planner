@@ -6,6 +6,9 @@ done the app still works exactly as before, on its own, with accounts switched o
 **What only you can do:** create the Supabase project and its keys. Nothing here uses a secret key; the two values the
 app needs are public by design.
 
+> **Want to try it first, without Supabase?** `docs/TEST-WITH-TWO-ACCOUNTS.md` runs a local test server on your
+> computer so you can test two accounts and shared savings on your phones today.
+
 ## 1. Create the project (about 5 minutes)
 
 1. Go to <https://supabase.com>, sign in, and choose **New project**. Pick a name, a strong database password (keep it

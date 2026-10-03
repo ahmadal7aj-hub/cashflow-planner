@@ -1,6 +1,6 @@
 # Testing
 
-**Current state:** 615 tests in 48 suites, all passing. Jest's per-test timeout is 20 seconds to avoid false failures on a cold start. Run them with one command (below).
+**Current state:** 619 tests in 49 suites, all passing. Jest's per-test timeout is 60 seconds (several suites start a database) to avoid false failures on a cold start. Run them with one command (below).
 
 ## Layers
 
@@ -45,6 +45,12 @@ signup code is always 123456, the reset code 654321) on top of that real databas
 Supabase account. **What they cannot show:** real Supabase emails, rate limits and Realtime delivery.
 
 Database tests use dates relative to the real current month (the database rejects dates in the future by its own clock).
+
+## The local test server
+
+`mobile/scripts/dev-server.mjs` (`npm run dev:server`) serves the real migrations from an embedded database over HTTP, with a
+tiny sign-in service (the code is always 123456). `src/backend/devServer.test.ts` starts it and talks to it through the app's own
+connector (`devBackend.ts`). It is for testing on real phones only; never expose it to the internet.
 
 ## Writing tests here
 

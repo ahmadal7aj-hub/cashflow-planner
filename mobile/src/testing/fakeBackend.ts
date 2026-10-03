@@ -19,6 +19,7 @@ interface Account {
  */
 export class TestBackend implements Backend {
   readonly accounts = new Map<string, Account>();
+  readonly kind = 'supabase' as const;
   readonly sentCodes: { email: string; kind: 'signup' | 'reset' }[] = [];
   private session: { userId: string; email: string } | null = null;
   private authListeners = new Set<(u: AuthUser | null) => void>();
