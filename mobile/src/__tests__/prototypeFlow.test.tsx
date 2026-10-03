@@ -139,6 +139,36 @@ describe('prototype journey (P1-01)', () => {
     expect(screen.queryByTestId('scenario-result')).toBeNull();
   });
 
+  it('lets the user type any item and price for the what-if', async () => {
+    const { getPathname } = await openApp('/dashboard');
+
+    await fireEvent.press(screen.getByTestId('open-scenario'));
+    await waitFor(() => expect(getPathname()).toBe('/scenario'));
+    await fireEvent.changeText(screen.getByTestId('input-scenario-name'), 'Bicycle');
+    await fireEvent.changeText(screen.getByTestId('input-scenario-price'), '2000');
+    await fireEvent.press(screen.getByTestId('scenario-toggle'));
+
+    expect(screen.getByText('With Bicycle')).toBeTruthy();
+    // 3,000 laptop was short by 1,230; a 2,000 bicycle is short by 230.
+    expect(screen.getByText(/Short by AED 230.00/)).toBeTruthy();
+
+    // Changing the price updates the result live.
+    await fireEvent.changeText(screen.getByTestId('input-scenario-price'), '500');
+    expect(screen.queryByText(/Short by/)).toBeNull();
+    expect(screen.getAllByText('AED 1,270.00').length).toBeGreaterThan(0);
+  });
+
+  it('refuses a what-if with no valid price', async () => {
+    const { getPathname } = await openApp('/dashboard');
+
+    await fireEvent.press(screen.getByTestId('open-scenario'));
+    await waitFor(() => expect(getPathname()).toBe('/scenario'));
+    await fireEvent.changeText(screen.getByTestId('input-scenario-price'), 'abc');
+    expect(screen.getByTestId('error-scenario-price')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('scenario-toggle'));
+    expect(screen.queryByTestId('scenario-result')).toBeNull();
+  });
+
   it('records only privacy-safe analytics events through the journey', async () => {
     const { getPathname } = await openApp();
 

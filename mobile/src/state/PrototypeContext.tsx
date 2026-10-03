@@ -24,6 +24,11 @@ import { computeForecast, type ForecastResult } from '../domain/prototypeForecas
 import { remindersFor, type Reminder } from '../domain/reminders';
 import { SAMPLE_PLAN, SCENARIO_PRESET } from '../domain/sampleData';
 
+export interface ScenarioItem {
+  label: string;
+  amount: Fils;
+}
+
 interface PrototypeState {
   /** Today's date (device clock), used to turn real dates into days. */
   today: ISODate;
@@ -54,6 +59,9 @@ interface PrototypeState {
   claimOnboardingCompletion: () => boolean;
   resetToSample: () => void;
   scenarioOn: boolean;
+  /** The what-if item: free text name and price (fils). Defaults to the sample laptop. */
+  scenarioItem: ScenarioItem;
+  setScenarioItem: (item: ScenarioItem) => void;
   setScenarioOn: (on: boolean) => void;
   /** Real plan. A what-if never mutates this. */
   baseline: ForecastResult;
@@ -80,6 +88,7 @@ export function PrototypeProvider({
   // The device clock is read once per session; tests pass a fixed date.
   const [today] = useState<ISODate>(todayOverride ?? todayISO);
   const [scenarioOn, setScenarioOn] = useState(false);
+  const [scenarioItem, setScenarioItem] = useState<ScenarioItem>({ ...SCENARIO_PRESET });
   const onboardingTracked = useRef(false);
 
   const value = useMemo<PrototypeState>(() => {
@@ -89,7 +98,7 @@ export function PrototypeProvider({
     const scenario = scenarioOn
       ? computeForecast({
           ...input,
-          plannedExpenses: input.plannedExpenses + SCENARIO_PRESET.amount,
+          plannedExpenses: input.plannedExpenses + scenarioItem.amount,
         })
       : baseline;
     return {
@@ -133,10 +142,12 @@ export function PrototypeProvider({
       resetToSample: () => setPlan(SAMPLE_PLAN),
       scenarioOn,
       setScenarioOn,
+      scenarioItem,
+      setScenarioItem,
       baseline,
       scenario,
     };
-  }, [rawPlan, today, scenarioOn]);
+  }, [rawPlan, today, scenarioOn, scenarioItem]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }
