@@ -25,6 +25,7 @@ app needs are public by design.
    every one, and creates the functions the app calls. It does not touch anything else.
 4. Do the same with the second file, `supabase/migrations/20261004000000_profile_name_phone.sql` (optional name and phone
    on the profile). Always run the migrations in file-name order.
+5. Then `supabase/migrations/20261005000000_delete_my_account.sql` (lets a person delete their own account).
 
 ## 3. Authentication settings
 

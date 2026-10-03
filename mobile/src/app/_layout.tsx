@@ -6,6 +6,7 @@ import { Text, View } from 'react-native';
 import { appEnvironment, environmentLabel, isProduction } from '../config/environment';
 import { t } from '../i18n/strings';
 import { AuthFlow } from '../auth/AuthFlow';
+import { NotificationsProvider } from '../notifications/NotificationsContext';
 import { AccountProvider, useAccount, useUserId } from '../state/AccountContext';
 import { PrototypeProvider } from '../state/PrototypeContext';
 import { SharingProvider } from '../state/SharingContext';
@@ -76,8 +77,10 @@ function Scoped({ children }: { children: ReactNode }) {
   return (
     <PrototypeProvider key={userId ?? 'local'} userId={userId}>
       <SharingProvider>
-        {children}
-        {fromSignIn ? <StartAtWelcome /> : null}
+        <NotificationsProvider>
+          {children}
+          {fromSignIn ? <StartAtWelcome /> : null}
+        </NotificationsProvider>
       </SharingProvider>
     </PrototypeProvider>
   );

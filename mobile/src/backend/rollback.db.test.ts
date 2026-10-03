@@ -80,3 +80,22 @@ describe('the profile name and phone migration can be undone on its own', () => 
     }
   }, 120_000);
 });
+
+describe('the delete-my-account migration can be undone on its own', () => {
+  it('removes only the function, and running it twice is harmless', async () => {
+    const db3 = await startTestDb();
+    try {
+      const alice = await db3.signUp('alice@example.com', 'alice');
+      const script = fs.readFileSync(
+        path.resolve(__dirname, '../../../supabase/rollback/20261005000000_down.sql'),
+        'utf8',
+      );
+      await db3.admin(script);
+      await expect(alice.rpc('delete_my_account')).rejects.toThrow();
+      expect(await alice.rpc('list_my_groups')).toEqual([]);
+      await expect(db3.admin(script)).resolves.toBeDefined();
+    } finally {
+      await db3.close();
+    }
+  }, 120_000);
+});

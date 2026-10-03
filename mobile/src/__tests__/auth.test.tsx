@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-library';
 import { act, cleanup } from '@testing-library/react-native';
 import { router } from 'expo-router';
@@ -316,5 +317,61 @@ describe('name and phone', () => {
     await act(async () => router.push('/account'));
     await waitFor(() => expect(screen.getByTestId('profile-name')).toBeTruthy());
     expect(screen.getByTestId('profile-name')).toHaveTextContent('Not set');
+  });
+});
+
+describe('delete my account', () => {
+  async function openAccountPage() {
+    const backend = new TestBackend(db);
+    const id = await backend.createAccount('sara@example.com', 'sara_a');
+    await backend.signInAs('sara@example.com');
+    await openAccountsApp(db, '/account', { backend });
+    await settle(db);
+    await waitFor(() => expect(screen.getByTestId('delete-start')).toBeTruthy());
+    return { backend, id };
+  }
+
+  it('asks you to type DELETE, can be cancelled, and changes nothing until you confirm', async () => {
+    await openAccountPage();
+    await fireEvent.press(screen.getByTestId('delete-start'));
+    expect(screen.getByTestId('delete-ask')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('delete-confirm'));
+    expect(screen.getByTestId('delete-error')).toBeTruthy();
+    await type('delete-word', 'delete me');
+    await fireEvent.press(screen.getByTestId('delete-confirm'));
+    expect(await db.admin('select 1 from auth.users')).toHaveLength(1);
+    await fireEvent.press(screen.getByTestId('delete-cancel'));
+    expect(screen.queryByTestId('delete-ask')).toBeNull();
+    expect(await db.admin('select 1 from auth.users')).toHaveLength(1);
+  });
+
+  it('deletes the account, signs out, wipes this account on the phone, and the email can register again', async () => {
+    const { backend, id } = await openAccountPage();
+    await AsyncStorage.setItem(`cashflow.plan.${id}`, '{"plan":1}');
+    await AsyncStorage.setItem(`cashflow.backup.v1.2026.cashflow.plan.${id}`, '{}');
+    await AsyncStorage.setItem('cashflow.plan.someone-else', '{"plan":2}');
+    await fireEvent.press(screen.getByTestId('delete-start'));
+    await type('delete-word', 'DELETE');
+    await fireEvent.press(screen.getByTestId('delete-confirm'));
+    await settle(db, 8);
+    await waitFor(() => expect(screen.getByTestId('auth-login')).toBeTruthy());
+    expect(await db.admin('select 1 from auth.users')).toHaveLength(0);
+    expect(backend.userId).toBeNull();
+    expect(await AsyncStorage.getItem(`cashflow.plan.${id}`)).toBeNull();
+    expect(await AsyncStorage.getItem(`cashflow.backup.v1.2026.cashflow.plan.${id}`)).toBeNull();
+    expect(await AsyncStorage.getItem('cashflow.plan.someone-else')).toBe('{"plan":2}');
+  });
+
+  it('keeps everything and says so when the server cannot be reached', async () => {
+    const { backend, id } = await openAccountPage();
+    await AsyncStorage.setItem(`cashflow.plan.${id}`, '{"plan":1}');
+    backend.offline = true;
+    await fireEvent.press(screen.getByTestId('delete-start'));
+    await type('delete-word', 'DELETE');
+    await fireEvent.press(screen.getByTestId('delete-confirm'));
+    await settle(db, 4);
+    await waitFor(() => expect(screen.getByTestId('delete-error')).toBeTruthy());
+    expect(await db.admin('select 1 from auth.users')).toHaveLength(1);
+    expect(await AsyncStorage.getItem(`cashflow.plan.${id}`)).toBe('{"plan":1}');
   });
 });

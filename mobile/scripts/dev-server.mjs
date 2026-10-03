@@ -244,6 +244,15 @@ const routes = {
     if (m) await admin('delete from dev.tokens where token = $1', [m[1]]);
     return {};
   },
+  async 'POST /auth/delete'(_body, req) {
+    const user = await userFor(req);
+    if (!user) throw fail(401, 'invalid_credentials');
+    await callRpc(user.id, 'delete_my_account', {}); // removes the profile, memberships and shared entries
+    await admin('delete from dev.tokens where user_id = $1', [user.id]);
+    await admin('delete from dev.accounts where user_id = $1', [user.id]);
+    version++;
+    return {};
+  },
   async 'GET /changes'() {
     return { version };
   },

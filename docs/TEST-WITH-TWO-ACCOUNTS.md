@@ -73,7 +73,9 @@ You can use **two phones**, or **one phone** and switch accounts (Settings, **Ac
    **Home** selected.
 3. Both accounts now show **AED 8,000** under **Total savings**: AED 5,000 from A, AED 3,000 from B. B never sees A's
    private AED 2,000 or A's personal total.
-4. Try the date buttons, **Period savings / Total savings**, **Make private**, editing, and **Leave this group**.
+4. Account B can delete their account from the person icon, **Delete my account** (type DELETE). Their shared savings leave
+   the group; A keeps the group and becomes its admin.
+5. Try the date buttons, **Period savings / Total savings**, **Make private**, editing, and **Leave this group**.
 
 ## If something does not work
 

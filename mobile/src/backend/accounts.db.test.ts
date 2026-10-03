@@ -1,5 +1,5 @@
 /** @jest-environment node */
-import { startTestDb, type TestDb } from '../testing/db';
+import { startTestDb, type TestDb, type UserSession } from '../testing/db';
 
 let db: TestDb;
 beforeAll(async () => {
@@ -172,5 +172,91 @@ describe('optional name and phone', () => {
     expect(
       await denied(alice.query("update public.profiles set username = 'other' where true")),
     ).toBeTruthy();
+  });
+});
+
+describe('deleting my own account', () => {
+  const share = (s: UserSession, group: string, id: string) =>
+    s.rpc('share_entry', {
+      p_group: group,
+      p_local_id: id,
+      p_kind: 'deposit',
+      p_amount: 100000,
+      p_date: '2020-01-01',
+      p_note: '',
+    });
+
+  it('removes the account, profile and shared savings, and keeps the group for the other members', async () => {
+    const alice = await db.signUp('alice@example.com', 'alice');
+    const bob = await db.signUp('bob@example.com', 'bob');
+    const group = await alice.rpc<string>('create_group', { p_name: 'Home' });
+    await alice.rpc('invite_to_group', { p_group: group, p_identifier: 'bob' });
+    await bob.rpc('respond_to_invitation', { p_group: group, p_accept: true });
+    await share(alice, group, 'a:1');
+    await share(bob, group, 'b:1');
+
+    await alice.rpc('delete_my_account');
+
+    expect(
+      await db.admin("select 1 from auth.users where email = 'alice@example.com'"),
+    ).toHaveLength(0);
+    expect(await db.admin("select 1 from public.profiles where username = 'alice'")).toHaveLength(
+      0,
+    );
+    // Alice's shared saving is gone; Bob's stays; Bob is now the admin and the group carries on.
+    const entries = await bob.rpc<{ local_id: string }[]>('list_group_entries', { p_group: group });
+    expect(entries.map((e) => e.local_id)).toEqual(['b:1']);
+    const g = await db.admin<{ created_by: string }>('select created_by from public.groups');
+    const bobRow = await db.admin<{ id: string }>(
+      "select id from public.profiles where username = 'bob'",
+    );
+    expect(g[0]!.created_by).toBe(bobRow[0]!.id);
+    const members = await bob.rpc<{ username: string; role: string }[]>('list_group_members', {
+      p_group: group,
+    });
+    expect(members).toEqual([expect.objectContaining({ username: 'bob', role: 'admin' })]);
+    // The history keeps no name for the deleted person.
+    const events = await db.admin<{ actor_id: string | null }>(
+      'select actor_id from public.group_events where actor_id is null',
+    );
+    expect(events.length).toBeGreaterThan(0);
+    // The username can be used again by somebody else.
+    expect(await db.as(null).rpc('username_available', { p_username: 'alice' })).toBe(true);
+  });
+
+  it('removes a group when nobody else is in it, including one with only a pending invitee', async () => {
+    const alice = await db.signUp('alice@example.com', 'alice');
+    await db.signUp('bob@example.com', 'bob');
+    const group = await alice.rpc<string>('create_group', { p_name: 'Solo' });
+    await alice.rpc('invite_to_group', { p_group: group, p_identifier: 'bob' }); // bob never answers
+    await share(alice, group, 'a:1');
+    await alice.rpc('delete_my_account');
+    expect(await db.admin('select 1 from public.groups')).toHaveLength(0);
+    expect(await db.admin('select 1 from public.shared_entries')).toHaveLength(0);
+    expect(await db.admin('select 1 from public.group_members')).toHaveLength(0);
+    expect(await db.admin('select 1 from auth.users')).toHaveLength(1); // bob is untouched
+  });
+
+  it('hands over a group the person made but had left, and refuses anonymous callers', async () => {
+    const alice = await db.signUp('alice@example.com', 'alice');
+    const bob = await db.signUp('bob@example.com', 'bob');
+    const group = await alice.rpc<string>('create_group', { p_name: 'Home' });
+    await alice.rpc('invite_to_group', { p_group: group, p_identifier: 'bob' });
+    await bob.rpc('respond_to_invitation', { p_group: group, p_accept: true });
+    await bob
+      .rpc('invite_to_group', { p_group: group, p_identifier: 'alice' })
+      .catch(() => undefined);
+    await alice.rpc('leave_group', { p_group: group });
+    await alice.rpc('delete_my_account');
+    expect(await db.admin('select 1 from public.groups')).toHaveLength(1);
+    expect(await denied(db.as(null).rpc('delete_my_account'))).toBeTruthy();
+  });
+
+  it('only ever deletes the caller', async () => {
+    const alice = await db.signUp('alice@example.com', 'alice');
+    await db.signUp('bob@example.com', 'bob');
+    await alice.rpc('delete_my_account');
+    const left = await db.admin<{ email: string }>('select email from auth.users');
+    expect(left.map((u) => u.email)).toEqual(['bob@example.com']);
   });
 });

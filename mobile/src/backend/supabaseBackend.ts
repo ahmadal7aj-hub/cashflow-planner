@@ -1,4 +1,3 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   createClient,
   type AuthError as SupabaseAuthError,
@@ -8,6 +7,7 @@ import { AppState } from 'react-native';
 
 import type { BackendConfig } from './config';
 import type { RpcClient, RpcName } from './contract';
+import { secureStorage } from './secureStorage';
 import {
   AuthError,
   type AuthErrorCode,
@@ -91,6 +91,11 @@ function createAuthService(client: SupabaseClient, rpc: RpcClient): AuthService 
       const { error } = await auth.signOut();
       if (error) throw mapAuthError(error);
     },
+    async deleteAccount() {
+      await rpc.rpc('delete_my_account');
+      // The account is gone, so only this phone's saved session is left to clear.
+      await auth.signOut({ scope: 'local' }).catch(() => undefined);
+    },
     async requestPasswordReset(email) {
       // The result is ignored on purpose so the screen never reveals whether an account exists.
       await auth.resetPasswordForEmail(email).catch(() => undefined);
@@ -118,7 +123,7 @@ function createAuthService(client: SupabaseClient, rpc: RpcClient): AuthService 
 export function createSupabaseBackend(config: BackendConfig): Backend {
   const client = createClient(config.url, config.anonKey, {
     auth: {
-      storage: AsyncStorage,
+      storage: secureStorage,
       autoRefreshToken: true,
       persistSession: true,
       detectSessionInUrl: false,

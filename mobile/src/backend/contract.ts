@@ -8,6 +8,7 @@ export const RPC_SHAPES = {
   username_available: 'scalar',
   my_profile: 'rows',
   update_my_contact: 'void',
+  delete_my_account: 'void',
   create_group: 'scalar',
   invite_to_group: 'void',
   my_invitations: 'rows',
