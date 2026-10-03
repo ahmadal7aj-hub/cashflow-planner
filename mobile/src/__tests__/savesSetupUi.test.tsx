@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fireEvent, screen, waitFor } from 'expo-router/testing-library';
 
 import { loadPlan } from '../domain/persistence';
-import { aed, installTestLifecycle, openApp } from '../testing/app';
+import { aed, flush, installTestLifecycle, openApp } from '../testing/app';
 
 installTestLifecycle();
 
@@ -20,7 +20,8 @@ describe('the first-run questions save on the device', () => {
     await fireEvent.press(screen.getByTestId('setup-save'));
     await waitFor(() => expect(getPathname()).toBe('/income'));
 
-    await waitFor(async () => expect((await saved()).setupDone).toBe(true));
+    await flush();
+    expect((await saved()).setupDone).toBe(true);
     const plan = await saved();
     expect(plan.savings.opening).toEqual({ amount: aed(5000), date: '2026-10-15' });
     expect(plan.savings.targets).toEqual([{ from: '2026-10', amount: aed(1000) }]);

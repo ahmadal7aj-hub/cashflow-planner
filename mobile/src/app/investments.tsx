@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { Pressable } from 'react-native';
 
 import { HorizontalBars, StatTile } from '../components/dashboardParts';
+import { SwipeableCard } from '../components/SwipeableCard';
 import { Body, Button, Card, Heading, Screen } from '../components/ui';
 import { FREQUENCY_LABELS } from '../domain/budgetModel';
 import {
@@ -27,7 +28,7 @@ function signedPercent(ratio: number): string {
 
 export default function Investments() {
   const router = useRouter();
-  const { plan } = usePrototype();
+  const { plan, removeInvestment } = usePrototype();
   const s = investmentSummary(plan);
   const lines = plan.investments.map(investmentLine);
   const slices = allocationByType(plan);
@@ -77,12 +78,20 @@ export default function Investments() {
           <Body muted>{t.investments.empty}</Body>
         ) : (
           lines.map((l) => (
-            <InvestmentCard
+            <SwipeableCard
               key={l.id}
-              line={l}
-              frequency={plan.investments.find((v) => v.id === l.id)?.incomeFrequency ?? 'monthly'}
-              onPress={() => router.push(`/edit/investment/${l.id}`)}
-            />
+              testID={`swipe-investment-${l.id}`}
+              name={l.name}
+              onDelete={() => removeInvestment(l.id)}
+            >
+              <InvestmentCard
+                line={l}
+                frequency={
+                  plan.investments.find((v) => v.id === l.id)?.incomeFrequency ?? 'monthly'
+                }
+                onPress={() => router.push(`/edit/investment/${l.id}`)}
+              />
+            </SwipeableCard>
           ))
         )}
         <Button
@@ -121,6 +130,7 @@ function InvestmentCard({
       accessibilityRole="button"
       accessibilityLabel={`${line.name}, worth ${formatAed(line.currentValue)}. ${profit}. ${income}`}
       onPress={onPress}
+      onLongPress={onPress}
       testID={`investment-${line.id}`}
     >
       <Card>

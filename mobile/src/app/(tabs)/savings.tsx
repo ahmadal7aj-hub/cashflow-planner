@@ -211,6 +211,11 @@ export default function Savings() {
       <Card testID="investments-card">
         <Heading>{t.investments.title}</Heading>
         <Row label={t.investments.tileValue} value={formatAed(inv.totalValue)} strong />
+        <Row
+          label={inv.totalGain >= 0 ? t.investments.gain : t.investments.loss}
+          value={inv.totalGain >= 0 ? `+${formatAed(inv.totalGain)}` : formatAed(inv.totalGain)}
+        />
+        <Row label={t.investments.tileIncome} value={formatAed(inv.monthlyIncome)} />
         <Body muted>{t.investments.summaryNote(inv.count)}</Body>
         <Button
           label={t.investments.openCard}

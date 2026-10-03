@@ -22,6 +22,8 @@ import Warning from '../app/warning/[id]';
 import { emptyPlan, type ExpenseItem, type IncomeItem, type Plan } from '../domain/budgetModel';
 import { aedToFils } from '../domain/money';
 import {
+  addSavings,
+  addTransaction,
   setOpeningSavings,
   setSavingsTarget,
   upsertExpenseItem,
@@ -185,4 +187,37 @@ export async function swipeLeft(swipeTestID: string, distance = 140) {
 export async function pickDate(toggleTestID: string, iso: string) {
   await fireEvent.press(screen.getByTestId(toggleTestID));
   await fireEvent.press(screen.getByTestId(`date-day-${iso}`));
+}
+
+/**
+ * A user since August 2026: salary AED 10,000 on the 25th, a groceries budget of AED 3,000, existing savings
+ * AED 10,000 (from 2 Aug) with a target of AED 1,000. AED 800 spent in September, AED 500 in October, and
+ * AED 2,000 added to savings on 6 Oct. With today = 15 Oct 2026, total savings is AED 14,000.
+ */
+export function dashboardWorld(): Plan {
+  let p: Plan = { ...emptyPlan(), setupDone: true };
+  p = setOpeningSavings(p, aed(10000), '2026-08-02', '2026-08-02');
+  p = setSavingsTarget(p, aed(1000), '2026-08-02');
+  p = upsertIncomeItem(p, salary(10000, '2026-08-25'), '2026-08-02');
+  p = upsertExpenseItem(p, everyday('groc', 'groceries', 'Groceries', 3000), '2026-08-02');
+  p = addTransaction(
+    p,
+    { date: '2026-09-10', categoryId: 'groceries', amount: aed(800), note: '' },
+    TODAY,
+  );
+  p = addTransaction(
+    p,
+    { date: '2026-10-05', categoryId: 'groceries', amount: aed(500), note: '' },
+    TODAY,
+  );
+  const r = addSavings(p, aed(2000), '2026-10-06', 'Extra', TODAY);
+  if (!r.ok) throw new Error('setup');
+  return r.plan;
+}
+
+/** Lets pending saves and loads finish (storage resolves on the microtask queue). */
+export async function flush() {
+  await act(async () => {
+    for (let i = 0; i < 20; i++) await Promise.resolve();
+  });
 }

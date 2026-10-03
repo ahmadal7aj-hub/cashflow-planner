@@ -4,11 +4,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { track } from '../../analytics/events';
-import { DateField } from '../../components/dates';
-import { ChipGroup } from '../../components/forms';
+import { ChipGroup, Field } from '../../components/forms';
 import { Body, Button, Card, Heading, HeroCard, Row, Screen } from '../../components/ui';
 import {
   RANGE_PRESETS,
+  coversWholeMonths,
   presetRange,
   summarize,
   validateRange,
@@ -75,14 +75,6 @@ export default function Dashboard() {
   const overall = sp.totalRemaining;
   const monthView = preset === 'current-month';
   const periodLabel = monthView ? t.dashboardPage.thisMonthSavings : t.dashboardPage.periodSavings;
-  const errorText =
-    customError === 'invalid-start'
-      ? t.dashboardPage.errorStart
-      : customError === 'invalid-end'
-        ? t.dashboardPage.errorEnd
-        : customError === 'order'
-          ? t.dashboardPage.errorOrder
-          : undefined;
   const showSafe = plan.availableCash > 0;
 
   return (
@@ -96,27 +88,28 @@ export default function Dashboard() {
       />
       {preset === 'custom' ? (
         <Card testID="custom-range">
-          <DateField
+          <Field
             label={t.dashboardPage.from}
-            value={customFrom}
-            today={today}
-            onChange={setCustomFrom}
+            hint={t.dashboardPage.dateHint}
             testID="range-from"
+            value={customFrom}
+            onChangeText={setCustomFrom}
+            error={customError === 'invalid-start' ? t.dashboardPage.errorStart : undefined}
           />
-          <DateField
+          <Field
             label={t.dashboardPage.to}
-            value={customTo}
-            today={today}
-            onChange={setCustomTo}
             testID="range-to"
+            value={customTo}
+            onChangeText={setCustomTo}
+            error={customError === 'invalid-end' ? t.dashboardPage.errorEnd : undefined}
           />
-          {errorText ? (
+          {customError === 'order' ? (
             <Text
               accessibilityLiveRegion="polite"
               testID="range-error"
               style={{ color: colors.dangerText }}
             >
-              {errorText}
+              {t.dashboardPage.errorOrder}
             </Text>
           ) : null}
         </Card>
@@ -145,7 +138,7 @@ export default function Dashboard() {
         {sp.unbudgetedActual > 0 ? (
           <Body muted>{t.dashboardPage.unbudgeted(formatAed(sp.unbudgetedActual))}</Body>
         ) : null}
-        {!monthView ? <Body muted>{t.dashboardPage.prorated}</Body> : null}
+        {!coversWholeMonths(range) ? <Body muted>{t.dashboardPage.prorated}</Body> : null}
       </Card>
 
       <Card tone="info" testID="savings-summary">

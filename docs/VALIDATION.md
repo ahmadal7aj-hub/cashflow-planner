@@ -47,7 +47,7 @@ Run the prototype (Expo Go). Ask the participant to think aloud and do **not** c
 | T6. Find where to change an assumption. | Reaches settings or edits the numbers |
 
 Capture per task: completed (yes/no), time, errors, confusion points, and the participant's own words.
-Do not record real balances; the prototype uses sample data only.
+Do not record real balances. Use Settings > Load sample data for sessions, and do not enter a participant's real figures; the app saves what is entered on that phone.
 
 ## Decision gates
 

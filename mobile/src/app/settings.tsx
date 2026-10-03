@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
+import { Share } from 'react-native';
 
 import { track } from '../analytics/events';
 import { ChipGroup } from '../components/forms';
@@ -14,7 +15,7 @@ export default function Settings() {
   const [dataMessage, setDataMessage] = useState<string | null>(null);
 
   const { mode, setMode } = useThemeMode();
-  const { loadSampleData } = usePrototype();
+  const { loadSampleData, exportJson } = usePrototype();
 
   return (
     <Screen testID="settings-screen">
@@ -70,9 +71,15 @@ export default function Settings() {
         <Button
           label={t.settings.export}
           variant="secondary"
-          onPress={() => {
-            track('export_requested', { format: 'none_prototype' });
-            setDataMessage(t.settings.exportMessage);
+          onPress={async () => {
+            track('export_requested', { format: 'json_share_sheet' });
+            try {
+              // The user chooses where the copy goes (Files, Notes, email...). Nothing is sent by the app.
+              await Share.share({ title: t.settings.exportTitle, message: exportJson() });
+              setDataMessage(t.settings.exportMessage);
+            } catch {
+              setDataMessage(t.settings.exportFailed);
+            }
           }}
           testID="export-data"
         />

@@ -1,5 +1,5 @@
 import { emptyPlan, type ExpenseItem, type IncomeItem, type Plan } from './budgetModel';
-import { presetRange, summarize, validateRange } from './dashboardRange';
+import { coversWholeMonths, presetRange, summarize, validateRange } from './dashboardRange';
 import { aedToFils as aed } from './money';
 import {
   addSavings,
@@ -58,6 +58,15 @@ describe('date presets', () => {
 
   it('last year is the previous calendar year', () => {
     expect(presetRange('last-year', today)).toEqual({ from: '2025-01-01', to: '2025-12-31' });
+  });
+});
+
+describe('whole-month detection', () => {
+  it('knows when budgets apply in full', () => {
+    expect(coversWholeMonths({ from: '2026-10-01', to: '2026-10-31' })).toBe(true);
+    expect(coversWholeMonths({ from: '2026-07-01', to: '2026-09-30' })).toBe(true);
+    expect(coversWholeMonths({ from: '2026-10-05', to: '2026-10-11' })).toBe(false);
+    expect(coversWholeMonths({ from: '2026-10-01', to: '2026-10-30' })).toBe(false);
   });
 });
 

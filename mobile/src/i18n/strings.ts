@@ -161,8 +161,9 @@ export const t = {
     rangeLabel: 'Date range',
     from: 'From',
     to: 'To',
-    errorStart: 'Choose a valid start date.',
-    errorEnd: 'Choose a valid end date.',
+    dateHint: 'Type a date as YYYY-MM-DD, for example 2026-01-01. Any start and end date works.',
+    errorStart: 'Enter a valid start date, for example 2026-01-01.',
+    errorEnd: 'Enter a valid end date, for example 2026-12-31.',
     errorOrder: 'The end date cannot be before the start date.',
     incomeTitle: 'Income',
     received: 'Received',
@@ -388,38 +389,6 @@ export const t = {
     shared: 'Shared',
   },
 
-  spending: {
-    title: 'Spending',
-    cycleNote: (elapsedPct: number, daysLeft: number) =>
-      `${elapsedPct}% of this pay cycle has passed. ${daysLeft} days to payday.`,
-    tileEveryday: 'Everyday spending',
-    tileEverydayNote: (spent: string, budget: string) => `${spent} of ${budget} budgeted`,
-    tileBills: 'Bills before payday',
-    tileBillsNote: (count: number) => (count === 1 ? '1 bill to pay' : `${count} bills to pay`),
-    tileFlex: 'Left for dining, shopping and fun',
-    tileFlexNote: 'Remaining non-essential budgets',
-    headroomOk: (amount: string) =>
-      `Those budgets fit inside your safe to spend, with ${amount} to spare.`,
-    headroomShort: (amount: string) =>
-      `Those budgets would go ${amount} beyond what you can safely spend. Consider trimming one.`,
-    budgetsTitle: 'Budgets this cycle',
-    budgetsCaption:
-      'The bar shows what you have spent. The thin line shows where an even pace would be by today.',
-    groupsTitle: 'Where your money goes each month',
-    groupsCaption: 'Average monthly cost by type, including yearly and termly bills spread out.',
-    drivingTitle: 'Driving in the UAE',
-    drivingBody: (spent: string, budget: string) =>
-      `Salik, parking and fuel: ${spent} spent of ${budget} this cycle.`,
-    drivingTip: 'Keep your Salik account topped up so tolls never fail to charge.',
-    trendTitle: 'Spending, last 6 cycles',
-    trendCaption: 'Sample history. The darker bar is your most recent cycle.',
-    trendFirst: '6 cycles ago',
-    trendLast: 'Last cycle',
-    trendSummary: (first: string, last: string) =>
-      `Spending over the last six cycles, from ${first} to ${last}.`,
-    editExpenses: 'Edit my expenses',
-  },
-
   savings: {
     title: 'Savings',
     tileMonthly: 'Saved each month',
@@ -501,77 +470,6 @@ export const t = {
     trendCaption: 'Sample history. The darker bar is your most recent cycle.',
     trendSummary: (first: string, last: string) =>
       `Amount saved each cycle over the last six cycles, from ${first} to ${last}.`,
-  },
-
-  income: {
-    title: 'Income',
-    tileTotal: 'Income each month',
-    tileTotalNote: 'Average, including yearly and irregular income',
-    tileStable: 'Predictable income',
-    tileStableNote: (pct: number) => `${pct}% of your income`,
-    tileCover: 'Covers your spending',
-    tileCoverNote: 'Predictable income vs average monthly spending',
-    sourcesTitle: 'Where your income comes from',
-    sourcesCaption: 'Average monthly value of each source, yearly and quarterly income spread out.',
-    predictable: 'Predictable',
-    varies: 'Varies',
-    sourceLine: (kind: string, frequency: string, next: string) =>
-      `${kind} · ${frequency} · ${next}`,
-    addIncome: 'Add income',
-    upcomingTitle: 'Money coming in',
-    upcomingCaption: 'The next 60 days.',
-    inDays: (n: number) => (n === 0 ? 'today' : n === 1 ? 'tomorrow' : `in ${n} days`),
-    noUpcoming: 'No income expected in the next 60 days.',
-    stabilityTitle: 'How steady is it?',
-    stabilityGap: (coverage: number, gap: string) =>
-      `Your predictable income covers ${coverage}% of your average spending. After savings, about ${gap} a month comes from irregular income. That is common; a little extra buffer helps in months it comes in lower.`,
-    stabilityOk: (spare: string) =>
-      `Your predictable income covers your average spending and savings, with about ${spare} a month to spare.`,
-    rangeTitle: 'Last 6 cycles',
-    rangeBody: (min: string, max: string, avg: string) =>
-      `Your income ranged from ${min} to ${max}, averaging ${avg}.`,
-    trendTitle: 'Income, last 6 cycles',
-    netTitle: 'Left after spending, last 6 cycles',
-    trendCaption: 'Sample history. The darker bar is your most recent cycle.',
-    trendSummary: (first: string, last: string) =>
-      `Income each cycle over the last six cycles, from ${first} to ${last}.`,
-    netSummary: (first: string, last: string) =>
-      `Money left after spending each cycle over the last six cycles, from ${first} to ${last}.`,
-  },
-
-  insights: {
-    title: 'Insights',
-    intro: 'Plain-language notes from your plan. Tap one to see the numbers behind it.',
-    empty: 'Nothing needs your attention right now.',
-    severity: {
-      attention: '⚠ Needs attention',
-      'heads-up': '▲ Heads-up',
-      info: '• Good to know',
-    },
-    shortfallTitle: 'This plan is short before payday',
-    shortfallBody: (amount: string) =>
-      `The plan needs ${amount} more than you have. Delaying a purchase or trimming a budget would close the gap.`,
-    overTitle: (name: string) => `${name} is over budget`,
-    overBody: (amount: string) =>
-      `You are ${amount} past the budget you set. You could move money from another budget or raise this one.`,
-    aheadTitle: (name: string) => `${name} is ahead of pace`,
-    aheadBody: (amount: string) =>
-      `${amount} is left for the rest of the cycle. A slightly slower pace keeps you inside the budget.`,
-    billTitle: (name: string) => `${name} is coming up`,
-    billBody: (days: number, perMonth: string) =>
-      `Due in ${days} days. Setting aside ${perMonth} a month from now would have it covered.`,
-    tightTitle: 'Your fun budgets are bigger than what is safe to spend',
-    tightBody: (amount: string) =>
-      `They would go ${amount} beyond what you can safely spend this cycle. Trimming one would help.`,
-    cashTitle: 'Your emergency fund is small',
-    cashBody: (amount: string) =>
-      `Three months of essential spending is a common goal and you are ${amount} away. Even a small monthly top-up helps.`,
-    goalTitle: (name: string) => `${name} needs a bigger monthly amount`,
-    goalBody: (amount: string) =>
-      `To finish on time it needs ${amount} a month. You can raise the amount or move the deadline.`,
-    gapTitle: 'You rely on irregular income',
-    gapBody: (amount: string) =>
-      `Your predictable income falls ${amount} short of spending plus savings each month. Irregular income fills the gap, so a little extra buffer is wise.`,
   },
 
   warning: {
@@ -671,47 +569,6 @@ export const t = {
     manageLink: 'Manage the link',
   },
 
-  monthlyPlan: {
-    title: 'Your monthly plan',
-    intro:
-      'Start with what comes in, decide what to save, and the rest is yours to spend. Everything here is a typical month.',
-    step1: '1. What comes in',
-    step1Note:
-      'Salary and other income, including investment income. Change them under Your income and expenses.',
-    editIncome: 'Edit my income',
-    step2: '2. What I save each month',
-    saveLabel: 'Amount to save each month (AED)',
-    saveHint: 'Type 0 if you are not saving yet. This is on top of any savings goals below.',
-    errorSave: 'Enter an amount of zero or more, for example 2000.',
-    goalsLine: 'Savings goals (already set)',
-    investLine: 'Investing (already set)',
-    totalSet: 'Set aside each month',
-    step3: '3. Left to spend',
-    leftNote:
-      'What is left of your income after saving. Bills and everyday spending come out of this.',
-    plannedLine: 'Spending you have entered',
-    roomLine: 'Room left over',
-    overLine: 'More than what is left',
-    overNote:
-      'The spending you entered is more than what is left after saving. Lower the savings or the spending.',
-    setAsideMore: 'You are setting aside more than your income. Lower the amount to save.',
-    unbudgetedAfter: (amount: string) =>
-      `After this, ${amount} of your monthly balance is still unbudgeted.`,
-    overAfter: (amount: string) =>
-      `After this, your spending is ${amount} more than your monthly balance.`,
-    spendingTitle: 'Your spending budget',
-    spendingIntro: 'What is left after saving is the most your budgets can add up to.',
-    spendingLeft: 'Left to spend each month',
-    spendingBudgeted: 'Already budgeted',
-    spendingUnbudgeted: 'Still unbudgeted',
-    spendingOver: 'Over your balance by',
-    zeroIncome: 'Not receiving this month',
-    clearSample: 'Clear sample data and start fresh',
-    open: 'Plan my monthly savings',
-    saved: 'Saved. Your safe to spend now sets this amount aside.',
-    save: 'Save my plan',
-  },
-
   scenario: {
     title: 'What if I buy this?',
     intro: 'Try a purchase without changing your real plan. Nothing here is saved.',
@@ -740,14 +597,16 @@ export const t = {
     export: 'Export my data',
     delete: 'Delete my account',
     notAvailable:
-      'Your entries are saved on this phone only. Export and deleting everything at once are not available yet; you can delete items one by one.',
+      'Your entries are saved on this phone only. You can export a copy; deleting everything at once is not available yet, but you can delete items one by one.',
     appearance: 'Appearance',
     appearanceHint: 'Match your phone, or always use light or dark.',
     appearanceSystem: 'Match my phone',
     appearanceLight: 'Light',
     appearanceDark: 'Dark',
+    exportTitle: 'My cash-flow planner data',
     exportMessage:
-      'Export is not available in this prototype yet. In the real app you will be able to download all of your own data.',
+      'A copy of everything saved on this phone was offered to the share sheet. Keep it somewhere safe: it contains your financial details.',
+    exportFailed: 'The copy could not be shared. Nothing was changed.',
     deleteMessage:
       'Deleting everything at once is not available yet. Delete items one by one on each page; earlier months are kept.',
   },

@@ -1,6 +1,6 @@
 # Project handover
 
-**Snapshot date:** 2026-10-03 · **Stage:** Validation / pre-build (BRD) · **App:** clickable prototype on sample data
+**Snapshot date:** 2026-10-03 · **Stage:** Validation / pre-build (BRD) · **App:** working prototype, data saved on the phone only
 
 This is the one document to read to pick the project up cold. It says what exists, what is done, what is
 not, and exactly what to do next. Anything that needs a person's decision is marked **OWNER**.
@@ -14,11 +14,14 @@ not, and exactly what to do next. Anything that needs a person's decision is mar
 
 - **What it is:** a mobile-first cash-flow planner for UAE residents. The headline answer is **"how much can I safely
   spend until payday?"**, with every number explainable. It is not primarily an expense tracker.
-- **Where we are:** a large **clickable prototype** exists and runs in Expo Go. It uses **made-up sample data held in
-  memory**: nothing is saved or sent. There is no backend, no accounts and no real forecast engine yet.
+- **Where we are:** a **working prototype** runs in Expo Go with five pages (Dashboard, Income, Savings planning,
+  Budgeting, Actual spending). A new user starts empty; what is entered is **saved on the phone only** (nothing is
+  sent; ADR 0005). Sample data is only for demos (Settings, Load sample data). There is no backend, no accounts and no
+  real forecast engine yet. **To undo the restructure see `docs/ROLLBACK.md`** (checkpoint tag
+  `checkpoint/pre-restructure-2026-10-03`).
 - **The gate:** the BRD says **do not build Phase 2 (accounts, database, real engine) until 20 to 30 interviews show
   recurring demand.** Those interviews have **not started**. That is the single most important next step.
-- **Engineering health:** all work went through pull requests with CI. `main` is protected. 475 automated tests pass.
+- **Engineering health:** all work went through pull requests with CI. `main` is protected. 500 automated tests pass.
 - **One time-limited risk:** a security exception (node-forge) **expires 2026-11-01** (section 7).
 
 ---
@@ -40,19 +43,20 @@ not, and exactly what to do next. Anything that needs a person's decision is mar
 
 ### The prototype (Phase 1)
 
-Five tabs plus supporting screens. All numbers are hand-verified in tests.
+Five pages plus supporting screens. All numbers are hand-verified in tests.
 
 | Area | What it does |
 |---|---|
-| **Overview** | Safe to spend until payday, daily safe amount, expected balance, upcoming bills, warnings, a day-by-day balance chart with a kept-aside line (and table view), a stacked "where your money goes" bar, a what-if purchase scenario, and an explanation screen for every headline number |
-| **Spending** | Everyday budgets with a written status (on track, ahead of pace, over budget), monthly cost by type, Salik / parking / fuel together, room left for dining and shopping, 6-cycle trend |
-| **Savings** | **Current savings balance** you can add to, take out of, and update with an end-of-pay-cycle result (up if you saved, down if you spent more than you earned); goals with deadline checks; emergency fund in months of essential spending; a big-bills planner; unallocated monthly surplus; an **illustrative** gratuity estimate; recent activity; 6-cycle trend |
-| **Investments** (screen, opened from Savings) | Type of investment (stocks, funds and ETFs, gold, crypto, real estate, sukuk/bonds/deposits, business, other), amount put in, what it is worth now, **profit or loss**, income received (dividends, rent, interest), allocation by type, and a planned monthly contribution that is set aside in the forecast. **Tracking only, not advice** |
-| **Income** | Income by source (including investment income), predictable vs irregular, money arriving in the next 60 days, how steady income is, income and net trends |
-| **Insights** | Short, neutral notes (shortfall, budget over, big bill coming, bill reminder, small emergency fund...) that open the screen with the numbers |
-| **Editing** | Add, edit and delete income, bills, everyday budgets, goals and investments, using **31 standard UAE categories** (rent, chiller, DEWA, du / e&, Salik, parking, fuel, school fees, nanny, money sent home, car registration, visa fees, **Other bill: name it yourself**...). Edits change the forecast immediately |
-| **Due dates and reminders** | A calendar date picker for bill due dates, next payment dates and goal deadlines. Bills can have a reminder: on the day, 1 day, 3 days, 1 week or 2 weeks before, or an exact date. Active reminders show on the Overview and in Insights. **In-app only; no phone notifications yet** |
-| **Look and feel** | Navy and gold theme in **light and dark mode** (Settings: match my phone, light or dark), a navy hero card for Safe to spend, icons, a redesigned welcome screen |
+| **Dashboard** | Income, spending against budget and savings for a date range. Default: the current calendar month. Presets: current month, last week, last month, last quarter, last year, and a typed custom range. A toggle shows **period savings** (net added in the range) or **total savings** (cumulative balance at the end of the range, or "not available" before the balance began). The safe-to-spend card, what-if and reminders appear when a spendable balance is set |
+| **Income** | Empty for a new user, with an Add item button. Category, name, amount (zero allowed), frequency, next payment date and predictability. Edit, delete, or swipe left to delete |
+| **Savings planning** | Existing savings with its date, a monthly target (a plan), a projection for the unfinished month (labelled projected), add and take out money (dated), the month-end results, goals, and an Investments screen. Overspending beyond the plan reduces savings (see ARCHITECTURE) |
+| **Budgeting** | **Bills and fixed expenses** (due date, reminder, Mark as paid) and **Everyday budgets** (monthly amount per category). Empty for a new user. Every UAE category stays in the forms, including Other bill |
+| **Actual spending** | Dated purchases per category against the monthly budget: budget, spent and remaining, negative shown as overspending, unbudgeted spending labelled. Month navigation |
+| **Saving and history** | Everything is saved on the device with a backup before any migration. Edits apply from the current month; deleting never removes past spending; each finished month is closed once; export a copy from Settings |
+| **Investments** (opened from Savings) | Type, amount put in, worth now, profit or loss, income, allocation, planned monthly contribution. Tracking only, not advice |
+| **Shared dashboard (preview)** | Link with another account (a made-up partner on this phone), choose items to share, see a separate Shared page. Nothing is stored or sent; real linking needs accounts (`docs/HOUSEHOLD-SHARING.md`) |
+| **Due dates and reminders** | Calendar date picker; bill reminders on the day, 1 day, 3 days, 1 week, 2 weeks before, or an exact date. In-app only; no phone notifications yet |
+| **Look and feel** | Navy and gold theme in light and dark mode, a navy hero card for Safe to spend, icons, a welcome screen |
 
 Design rules baked in: money as integer fils; centralised strings and design tokens; written status and symbols,
 never colour alone; 48px touch targets; accessible error messages; no shame-based wording; privacy-minimised
@@ -109,7 +113,7 @@ See `docs/ARCHITECTURE.md` for the structure and `docs/TESTING.md` for how to ru
 
 ### Known limitations (be honest about these)
 
-- **Prototype only.** Sample data, in memory, nothing persists. Closing the app resets everything.
+- **Prototype.** Data is saved on the phone only, unencrypted by the app (ADR 0005); uninstalling erases it. No sync, no accounts, no sharing between phones.
 - **The forecast maths is prototype maths** (`prototypeForecast.ts`, version `prototype-0.1`). The real, versioned,
   property-tested engine is Phase 3.
 - **The gratuity estimate is not legally verified.** It is labelled illustrative and must get a UAE legal check.

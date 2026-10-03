@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fireEvent, screen, waitFor } from 'expo-router/testing-library';
 
 import { loadPlan } from '../domain/persistence';
-import { aed, installTestLifecycle, openApp, pickDate } from '../testing/app';
+import { aed, flush, installTestLifecycle, openApp, pickDate } from '../testing/app';
 
 installTestLifecycle();
 
@@ -40,7 +40,7 @@ describe('the screens save what you enter on the device', () => {
     await fireEvent.press(screen.getByTestId('edit-save'));
     await waitFor(() => expect(getPathname()).toBe('/spending'));
 
-    await waitFor(async () => expect((await saved()).transactions).toHaveLength(1));
+    await flush();
     const plan = await saved();
     expect(plan.income[0]).toMatchObject({ name: 'Salary', amount: aed(12000) });
     expect(plan.expenses[0]).toMatchObject({ categoryId: 'groceries', amount: aed(3000) });

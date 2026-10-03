@@ -179,10 +179,23 @@ export const SAMPLE_PLAN: Plan = {
   employment: { yearsOfService: 4, basicMonthly: aedToFils(9000) },
 };
 
-/** Demo plan for Settings > Load sample data: the sample items plus an opening savings balance dated `today`. */
+/**
+ * Demo plan for Settings > Load sample data: the sample items, an opening savings balance dated `today`, and
+ * this month's spending so far as dated transactions (so budgets show spent and remaining amounts).
+ */
 export function demoPlan(today: string): Plan {
+  const transactions = SAMPLE_EXPENSES.filter((e) => e.kind === 'variable' && e.spentSoFar > 0).map(
+    (e, i) => ({
+      id: `tx-${i + 1}`,
+      date: today,
+      categoryId: e.categoryId,
+      amount: e.spentSoFar,
+      note: e.name,
+    }),
+  );
   return {
     ...SAMPLE_PLAN,
+    transactions,
     savings: {
       ...EMPTY_LEDGER,
       opening: { amount: aedToFils(23600), date: today },

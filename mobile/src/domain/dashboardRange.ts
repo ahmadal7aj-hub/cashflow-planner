@@ -69,6 +69,11 @@ export function presetRange(preset: Exclude<RangePreset, 'custom'>, today: ISODa
   }
 }
 
+/** True when the range starts on the 1st and ends on the last day of a month, so budgets apply in full. */
+export function coversWholeMonths(range: DateRange): boolean {
+  return range.from === monthStart(monthOf(range.from)) && range.to === monthEnd(monthOf(range.to));
+}
+
 export type RangeError = 'invalid-start' | 'invalid-end' | 'order';
 
 /** A custom range may be any valid start and end, for example ten days, two years or all of January 2026. */

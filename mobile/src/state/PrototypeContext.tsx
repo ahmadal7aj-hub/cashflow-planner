@@ -25,7 +25,7 @@ import {
 import { todayISO, type ISODate } from '../domain/dates';
 import type { Fils } from '../domain/money';
 import { monthEnd, monthOf, monthStart } from '../domain/months';
-import { loadPlan, savePlan, type KeyValueStore } from '../domain/persistence';
+import { CURRENT_SCHEMA, loadPlan, savePlan, type KeyValueStore } from '../domain/persistence';
 import {
   addSavings,
   addTransaction,
@@ -96,6 +96,8 @@ interface PrototypeState {
   removeSavingsEntry: (id: string) => void;
   /** True only the first time it is called, so onboarding_completed is recorded once per session. */
   claimOnboardingCompletion: () => boolean;
+  /** Everything saved on this phone as a JSON text, for the user to keep (Settings > Export my data). */
+  exportJson: () => string;
   /** Replaces the plan with the demo sample data. For demos and interviews only. */
   loadSampleData: () => void;
   scenarioOn: boolean;
@@ -289,6 +291,17 @@ export function PrototypeProvider({
         onboardingTracked.current = true;
         return true;
       },
+      exportJson: () =>
+        JSON.stringify(
+          {
+            app: 'uae-cashflow-planner',
+            schemaVersion: CURRENT_SCHEMA,
+            exportedOn: today,
+            plan: rawPlan,
+          },
+          null,
+          2,
+        ),
       loadSampleData: () => setRawPlan(maintainSavings(demoPlan(today), today)),
       scenarioOn,
       setScenarioOn,

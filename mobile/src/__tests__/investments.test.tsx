@@ -1,48 +1,13 @@
 import { router } from 'expo-router';
-import { act, fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-library';
+import { act, fireEvent, screen, waitFor } from 'expo-router/testing-library';
 
-import RootLayout from '../app/_layout';
-import TabsLayout from '../app/(tabs)/_layout';
-import Dashboard from '../app/(tabs)/dashboard';
-import Income from '../app/(tabs)/income';
-import Insights from '../app/(tabs)/insights';
-import Savings from '../app/(tabs)/savings';
-import Spending from '../app/(tabs)/spending';
-import Commitments from '../app/commitments';
-import EditItem from '../app/edit/[kind]/[id]';
-import Explain from '../app/explain/[metric]';
-import Index from '../app/index';
-import Investments from '../app/investments';
-import Onboarding from '../app/onboarding';
-import Scenario from '../app/scenario';
-import Settings from '../app/settings';
-import Warning from '../app/warning/[id]';
+import { demoPlan } from '../domain/sampleData';
+import { installTestLifecycle, openApp as openWith, TODAY } from '../testing/app';
 
-const routes = {
-  _layout: RootLayout,
-  index: Index,
-  investments: Investments,
-  onboarding: Onboarding,
-  commitments: Commitments,
-  '(tabs)/_layout': TabsLayout,
-  '(tabs)/dashboard': Dashboard,
-  '(tabs)/income': Income,
-  '(tabs)/insights': Insights,
-  '(tabs)/savings': Savings,
-  '(tabs)/spending': Spending,
-  scenario: Scenario,
-  settings: Settings,
-  'warning/[id]': Warning,
-  'explain/[metric]': Explain,
-  'edit/[kind]/[id]': EditItem,
-};
+installTestLifecycle();
 
-/** RNTL v14 renders asynchronously and expo-router attaches getPathname to the returned promise. */
-async function openApp(initialUrl: string) {
-  const rendered = renderRouter(routes, { initialUrl });
-  await rendered;
-  return { getPathname: () => rendered.getPathname() };
-}
+/** The investments screens are tested with the demo investments (a Global index fund, gold and a property fund). */
+const openApp = (url: string) => openWith(url, { seed: demoPlan(TODAY) });
 
 describe('Investments (summary card on the Savings tab)', () => {
   it('summarises what is held and links to the full screen', async () => {

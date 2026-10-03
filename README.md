@@ -4,17 +4,20 @@ A mobile-first personal cash-flow planning app for UAE residents. Its core job i
 position and answer: *How much can I safely spend? Where will I finish the month? What problem is coming next?* It is
 not primarily an expense tracker.
 
-**Status (2026-10-02):** Validation / pre-build. A **clickable prototype** (sample data, in memory, nothing saved or
-sent) is built and tested. Backend, accounts and the real forecast engine wait for interview evidence of demand.
+**Status (2026-10-03):** Validation / pre-build. A **working prototype** (what you enter is saved on the phone only;
+nothing is sent) is built and tested. Backend, accounts and the real forecast engine wait for interview evidence of demand.
 **Start with [`docs/HANDOVER.md`](docs/HANDOVER.md):** what is done, what is next, and who owns each step.
 
 ## What the prototype shows
 
-Five tabs: **Overview** (safe to spend until payday, balance chart, what-if), **Spending**, **Savings** (with a
-current savings balance and an Investments screen), **Income** and **Insights**. Income, bills, everyday budgets,
-goals and investments are editable, with real due dates and bill reminders and standard UAE categories (rent, DEWA,
-du / e&, Salik, parking, school fees, money sent home, or an Other bill you name). Navy and gold theme in light and
-dark mode. Every headline number can be explained.
+Five pages: **Dashboard** (income, spending against budget and savings for any date range, with a Period / Total
+savings toggle), **Income**, **Savings planning** (existing balance, monthly target, projection, goals, Investments),
+**Budgeting** (Bills and fixed expenses, Everyday budgets) and **Actual spending** (each purchase against its
+category budget, with the remaining balance). A new user starts with empty sections and an **Add item** button; every
+category (rent, DEWA, du / e&, Salik, parking, school fees, money sent home, or an Other bill) stays available in the
+forms. Items can be deleted from inside the item or by swiping left, always with a confirmation. A Shared dashboard
+preview shows how linking two people could work (single phone, made-up partner). Navy and gold theme, light and dark.
+To undo the restructure see [`docs/ROLLBACK.md`](docs/ROLLBACK.md).
 
 ## Source of truth
 

@@ -2,6 +2,7 @@ import { Alert } from 'react-native';
 import { fireEvent, screen, waitFor, within } from 'expo-router/testing-library';
 
 import { addTransaction } from '../domain/planOps';
+import { demoPlan } from '../domain/sampleData';
 import {
   aed,
   everyday,
@@ -9,6 +10,7 @@ import {
   openApp,
   salary,
   swipeLeft,
+  TODAY,
   userWith,
 } from '../testing/app';
 
@@ -183,5 +185,29 @@ describe('deleting a budget never deletes past spending', () => {
         within(screen.getByTestId('cat-groceries')).getByLabelText('Remaining: AED 3,000.00'),
       ).toBeTruthy(),
     );
+  });
+});
+
+describe('swipe delete works on goals and investments too', () => {
+  it('a savings goal and an investment can be swiped away, with confirmation', async () => {
+    const { getPathname } = await openApp('/savings', { seed: demoPlan(TODAY) });
+    const confirm = spyOnConfirm();
+
+    await swipeLeft('swipe-goal-gold');
+    await fireEvent.press(screen.getByTestId('swipe-goal-gold-delete'));
+    expect(confirm.title()).toBe('Delete Gold savings?');
+    confirm.press('Delete');
+    await waitFor(() => expect(screen.queryByTestId('goal-gold')).toBeNull());
+
+    await fireEvent.press(screen.getByTestId('open-investments'));
+    await waitFor(() => expect(getPathname()).toBe('/investments'));
+    await swipeLeft('swipe-investment-etf');
+    await fireEvent.press(screen.getByTestId('swipe-investment-etf-delete'));
+    confirm.press('Cancel');
+    expect(screen.getByTestId('investment-etf')).toBeTruthy();
+    await swipeLeft('swipe-investment-etf');
+    await fireEvent.press(screen.getByTestId('swipe-investment-etf-delete'));
+    confirm.press('Delete');
+    await waitFor(() => expect(screen.queryByTestId('investment-etf')).toBeNull());
   });
 });
