@@ -718,7 +718,7 @@ export const t = {
     changeNote:
       'Saving this makes it private in the group it is shared with now. It disappears from the group totals for every member, for all dates. It stays in your own savings.',
     notAvailable:
-      'Accounts are switched off on this build, so savings cannot be shared yet. See docs/TEST-WITH-TWO-ACCOUNTS.md to turn them on for testing.',
+      'Sharing needs an account, and this app is not connected to a server yet (or you are signed out). Connect it with docs/TEST-WITH-TWO-ACCOUNTS.md, sign in, then create or join a group: your groups will appear here next to Keep private.',
   },
 
   sharedEntry: {
