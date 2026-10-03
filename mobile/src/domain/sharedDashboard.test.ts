@@ -1,7 +1,7 @@
 import { aedToFils } from './money';
 import { SAMPLE_PLAN } from './sampleData';
 import { buildSharedView, mySharedLines, SAMPLE_PARTNER, sharedKey } from './sharedDashboard';
-import { deposit } from './savingsBalance';
+import { addSavings, setOpeningSavings } from './planOps';
 
 describe('shared dashboard preview', () => {
   it('shows only the partner sample items when nothing of mine is shared', () => {
@@ -13,11 +13,11 @@ describe('shared dashboard preview', () => {
   });
 
   it('shares a 5,000 savings deposit and combines it with the partner', () => {
-    const plan = {
-      ...SAMPLE_PLAN,
-      savings: deposit(SAMPLE_PLAN.savings, aedToFils(5000), '2026-10-03', 'Payday saving'),
-    };
-    const id = plan.savings.entries[0]!.id;
+    const base = setOpeningSavings(SAMPLE_PLAN, 0, '2026-10-01', '2026-10-03');
+    const added = addSavings(base, aedToFils(5000), '2026-10-03', 'Payday saving', '2026-10-03');
+    if (!added.ok) throw new Error('setup');
+    const plan = added.plan;
+    const id = plan.savings.movements.find((m) => m.kind === 'deposit')!.id;
     const v = buildSharedView(plan, [sharedKey('sav', id)]);
     expect(v.sections.savings.mine).toBe(aedToFils(5000));
     expect(v.sections.savings.combined).toBe(aedToFils(13000));

@@ -49,7 +49,7 @@ export default function Onboarding() {
         duration_bucket: seconds < 30 ? 'lt_30s' : seconds < 120 ? 'lt_2m' : 'gte_2m',
       });
     }
-    router.push('/commitments');
+    router.back();
   };
 
   return (

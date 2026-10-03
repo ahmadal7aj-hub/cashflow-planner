@@ -1,6 +1,6 @@
 import { aedToFils } from './money';
 import type { ExpenseItem, IncomeItem, Investment, Plan, SavingsGoal } from './budgetModel';
-import { deriveForecastInput } from './budgetModel';
+import { deriveForecastInput, EMPTY_LEDGER } from './budgetModel';
 import { getExpenseCategory } from './uaeCategories';
 
 /** Fictional sample data only. Never put real user data in fixtures. */
@@ -165,16 +165,31 @@ export const SAMPLE_INVESTMENTS: readonly Investment[] = [
 ];
 
 export const SAMPLE_PLAN: Plan = {
+  setupDone: true,
   investments: SAMPLE_INVESTMENTS,
-  // Matches the sum of the goals' saved amounts (18,000 + 3,200 + 2,400): goals earmark this pot.
-  savings: { balance: aedToFils(23600), entries: [] },
+  savings: EMPTY_LEDGER,
   availableCash: aedToFils(12000),
   safetyBuffer: aedToFils(300),
   income: SAMPLE_INCOME,
   expenses: SAMPLE_EXPENSES,
+  retiredIncome: [],
+  retiredExpenses: [],
+  transactions: [],
   goals: SAMPLE_GOALS,
   employment: { yearsOfService: 4, basicMonthly: aedToFils(9000) },
 };
+
+/** Demo plan for Settings > Load sample data: the sample items plus an opening savings balance dated `today`. */
+export function demoPlan(today: string): Plan {
+  return {
+    ...SAMPLE_PLAN,
+    savings: {
+      ...EMPTY_LEDGER,
+      opening: { amount: aedToFils(23600), date: today },
+      targets: [{ from: today.slice(0, 7), amount: aedToFils(1200) }],
+    },
+  };
+}
 
 /** Fictional last six pay cycles (oldest first). Used for trend charts only. */
 export const SAMPLE_HISTORY = {

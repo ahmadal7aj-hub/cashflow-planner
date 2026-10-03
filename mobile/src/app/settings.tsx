@@ -5,6 +5,7 @@ import { track } from '../analytics/events';
 import { ChipGroup } from '../components/forms';
 import { Body, Button, Card, Heading, Screen } from '../components/ui';
 import { t } from '../i18n/strings';
+import { usePrototype } from '../state/PrototypeContext';
 import { useThemeMode, type ThemeMode } from '../theme/ThemeProvider';
 
 export default function Settings() {
@@ -13,6 +14,7 @@ export default function Settings() {
   const [dataMessage, setDataMessage] = useState<string | null>(null);
 
   const { mode, setMode } = useThemeMode();
+  const { loadSampleData } = usePrototype();
 
   return (
     <Screen testID="settings-screen">
@@ -49,6 +51,19 @@ export default function Settings() {
         onPress={() => router.push('/onboarding')}
         testID="edit-numbers"
       />
+      <Card>
+        <Heading>{t.settings.loadSample}</Heading>
+        <Body muted>{t.settings.loadSampleHint}</Body>
+        <Button
+          label={t.settings.loadSample}
+          variant="secondary"
+          onPress={() => {
+            loadSampleData();
+            setDataMessage(t.settings.loadSampleDone);
+          }}
+          testID="load-sample"
+        />
+      </Card>
       <Card>
         <Heading>{t.settings.data}</Heading>
         <Body muted>{t.settings.notAvailable}</Body>

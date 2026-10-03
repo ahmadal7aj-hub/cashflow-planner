@@ -2,7 +2,7 @@
 export const t = {
   appName: 'UAE Cash-Flow Planner',
   tagline: 'Know what is safe to spend before your next payday.',
-  prototypeNote: 'Prototype: sample data only. Nothing is saved or sent.',
+  prototypeNote: 'Prototype: what you enter is saved on this phone only. Nothing is sent anywhere.',
   welcome: {
     benefit1: 'See what is safe to spend until your next payday.',
     benefit2: 'Never miss a bill, with reminders you choose.',
@@ -11,6 +11,184 @@ export const t = {
   start: 'Get started',
   continue: 'Continue',
   back: 'Back',
+
+  addItem: 'Add item',
+
+  swipe: {
+    delete: 'Delete',
+    cancel: 'Cancel',
+    deleteLabel: (name: string) => `Delete ${name}`,
+    confirmTitle: (name: string) => `Delete ${name}?`,
+    confirmBody: 'This removes it from your plan. Earlier months and past spending are kept.',
+  },
+
+  setup: {
+    title: 'Your savings',
+    intro:
+      'Tell us what you have saved so far and what you plan to save each month. You can leave either at 0 and change it later.',
+    openingLabel: 'Savings you already have (AED)',
+    openingHint:
+      'This is your starting balance. It is not counted as income or as saved this month.',
+    dateLabel: 'Balance as of',
+    targetLabel: 'Monthly savings target (AED)',
+    targetHint:
+      'What you plan to put aside each month. A target is a plan, not money already saved.',
+    errorAmount: 'Use numbers only, for example 5000 or 0.',
+    errorDate: 'Choose the date this balance applies from.',
+    errorFuture: 'The balance date cannot be in the future.',
+    save: 'Save and continue',
+  },
+
+  incomePage: {
+    title: 'Income',
+    emptyTitle: 'No income added yet',
+    emptyBody:
+      'Add your salary and any other income. Choose a category, then enter the amount, how often you are paid and the next payment date.',
+    predictable: 'Predictable',
+    varies: 'Varies',
+    zero: 'Not receiving this month',
+  },
+
+  budgetPage: {
+    title: 'Budgeting',
+    billsTitle: 'Bills and fixed expenses',
+    billsEmptyTitle: 'No bills added yet',
+    billsEmptyBody:
+      'Add rent, utilities, loans and other bills that fall due on a date. Choose a category, enter the amount and the due date.',
+    everydayTitle: 'Everyday budgets',
+    everydayHint:
+      'A monthly amount for each kind of spending, such as groceries or petrol. Record what you actually spend on the Actual spending page.',
+    everydayEmptyTitle: 'No everyday budgets yet',
+    everydayEmptyBody:
+      'Add a monthly budget for each category you want to keep track of, for example groceries AED 3,000.',
+    monthly: (amount: string) => `${amount} a month`,
+    paid: (date: string) => `Paid on ${date}`,
+    markPaid: 'Mark as paid',
+    markPaidLabel: (name: string) => `Mark ${name} as paid`,
+    dueOn: (date: string) => `Due ${date}`,
+    nextDue: (date: string) => `Next due ${date}`,
+  },
+
+  spendingPage: {
+    title: 'Actual spending',
+    previousMonth: 'Previous month',
+    nextMonth: 'Next month',
+    summaryBudget: 'Monthly budget',
+    summarySpent: 'Spent',
+    summaryRemaining: 'Remaining',
+    summaryOver: 'Over budget by',
+    emptyTitle: 'No spending recorded yet',
+    emptyBody:
+      'Add each purchase when you make it: choose the category, the amount and the date. It is compared with that category budget.',
+    categoriesTitle: 'Budget against spending',
+    budget: 'Budget',
+    spent: 'Spent',
+    remaining: 'Remaining',
+    overBy: (amount: string) => `Over by ${amount}`,
+    unbudgeted: 'Unbudgeted: no budget set for this category',
+    onBudget: 'Within budget',
+    recordsTitle: 'Spending records',
+    noRecords: 'Nothing recorded this month.',
+  },
+
+  spendForm: {
+    titleNew: 'Add spending',
+    titleEdit: 'Edit spending',
+    category: 'Category',
+    note: 'Note (optional)',
+    amount: 'Amount (AED)',
+    date: 'Date',
+    errorAmount: 'Enter an amount above zero, for example 200.',
+    errorDate: 'Choose a date.',
+    save: 'Save',
+  },
+
+  savingsPage: {
+    title: 'Savings planning',
+    totalTitle: 'Total savings',
+    totalAsOf: (date: string) => `As of ${date}`,
+    notSet: 'Not set yet',
+    openingLine: (amount: string, date: string) => `Existing savings: ${amount} as of ${date}`,
+    editOpening: 'Change existing savings',
+    targetTitle: 'Monthly savings target',
+    targetNote: 'A plan, not money already saved.',
+    editTarget: 'Change target',
+    projectedTitle: 'This month (projected)',
+    projectedNote:
+      'An estimate, not money saved yet. It assumes you spend your plan, or what you have already spent if that is more.',
+    projectedSaving: 'Projected to add to savings',
+    projectedTaken: 'Projected to come from existing savings',
+    projectedClosing: 'Projected balance at month end',
+    addMoney: 'Add money',
+    takeOut: 'Take out',
+    activityTitle: 'Savings activity',
+    noActivity: 'No savings activity yet.',
+    monthClose: (month: string) => `Month result: ${month}`,
+    correction: (month: string) => `Correction for ${month}`,
+    deposit: 'Added',
+    withdrawal: 'Taken out',
+    monthsTitle: 'Finished months',
+    monthLine: (income: string, spending: string) => `Income ${income} · Spending ${spending}`,
+    goalsTitle: 'Savings goals',
+    goalsEmptyTitle: 'No savings goals yet',
+    goalsEmptyBody:
+      'Add something you are saving for, with a target amount and what you put aside each month.',
+    investments: 'Investments',
+    formTitleIn: 'Add money to savings',
+    formTitleOut: 'Take money out of savings',
+    formAmount: 'Amount (AED)',
+    formNote: 'Note (optional)',
+    formDate: 'Date',
+    errorAmount: 'Enter an amount above zero, for example 500.',
+    errorInsufficient: (balance: string) => `You only have ${balance} saved.`,
+    errorBeforeOpening: 'That date is before your savings balance starts.',
+    errorNoOpening: 'Set your existing savings first.',
+    targetFormTitle: 'Monthly savings target',
+    openingFormTitle: 'Existing savings',
+  },
+
+  dashboardPage: {
+    title: 'Dashboard',
+    showing: (from: string, to: string) => `Showing ${from} to ${to}`,
+    presets: {
+      'current-month': 'Current month',
+      'last-week': 'Last week',
+      'last-month': 'Last month',
+      'last-quarter': 'Last quarter',
+      'last-year': 'Last year',
+      custom: 'Custom range',
+    },
+    rangeLabel: 'Date range',
+    from: 'From',
+    to: 'To',
+    errorStart: 'Choose a valid start date.',
+    errorEnd: 'Choose a valid end date.',
+    errorOrder: 'The end date cannot be before the start date.',
+    incomeTitle: 'Income',
+    received: 'Received',
+    expected: 'Still expected',
+    spendingTitle: 'Spending against budget',
+    budget: 'Budget for these dates',
+    spent: 'Actual spending',
+    remaining: 'Remaining budget',
+    overBy: 'Over budget by',
+    prorated:
+      'For part of a month, everyday budgets are shared out by days and bills count when they fall due.',
+    unbudgeted: (amount: string) => `Unbudgeted spending included: ${amount}`,
+    savingsTitle: 'Savings',
+    thisMonthSavings: 'This month’s savings',
+    periodSavings: 'Period savings',
+    totalSavings: 'Total savings',
+    periodNote:
+      'Net savings added in these dates, including any reductions. Your starting balance is not included.',
+    totalNote: (date: string) => `Cumulative balance at the end of ${date}`,
+    totalUnknown: 'Not available: your savings balance starts after these dates.',
+    projectedNote: (amount: string) => `Projected balance at month end: ${amount}`,
+    budgetsTitle: 'Budgets',
+    budgetsNone: 'No budgets set yet.',
+    openSpending: 'Open actual spending',
+    openBudget: 'Open budgeting',
+  },
 
   onboarding: {
     title: 'Your starting point',
@@ -202,12 +380,12 @@ export const t = {
   },
 
   tabs: {
-    shared: 'Shared',
-    overview: 'Overview',
-    spending: 'Spending',
-    savings: 'Savings',
+    dashboard: 'Dashboard',
     income: 'Income',
-    insights: 'Insights',
+    savings: 'Savings planning',
+    budget: 'Budgeting',
+    spending: 'Actual spending',
+    shared: 'Shared',
   },
 
   spending: {
@@ -553,11 +731,16 @@ export const t = {
     horizonRule: 'Plan until: the day before next payday',
     currency: 'Currency: AED',
     language: 'Language: English (Arabic is not in this prototype)',
-    editNumbers: 'Edit my starting numbers',
+    editNumbers: 'Edit my spendable balance and safety buffer',
+    loadSample: 'Load sample data (for demos)',
+    loadSampleHint:
+      'Replaces what you have entered with made-up sample data. Use it only for demos and interviews.',
+    loadSampleDone: 'Sample data loaded.',
     data: 'Your data',
     export: 'Export my data',
     delete: 'Delete my account',
-    notAvailable: 'Not available in the prototype. Both will always be free and never blocked.',
+    notAvailable:
+      'Your entries are saved on this phone only. Export and deleting everything at once are not available yet; you can delete items one by one.',
     appearance: 'Appearance',
     appearanceHint: 'Match your phone, or always use light or dark.',
     appearanceSystem: 'Match my phone',
@@ -566,7 +749,7 @@ export const t = {
     exportMessage:
       'Export is not available in this prototype yet. In the real app you will be able to download all of your own data.',
     deleteMessage:
-      'Nothing is saved in this prototype, so there is nothing to delete. In the real app, deleting will remove your account and data.',
+      'Deleting everything at once is not available yet. Delete items one by one on each page; earlier months are kept.',
   },
 
   env: { prefix: 'Environment' },

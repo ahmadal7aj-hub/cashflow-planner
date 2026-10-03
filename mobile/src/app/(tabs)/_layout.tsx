@@ -2,10 +2,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import type { ColorValue } from 'react-native';
 
-import type { IconName } from '../../components/ui';
 import { t } from '../../i18n/strings';
 import { usePrototype } from '../../state/PrototypeContext';
 import { useTheme } from '../../theme/ThemeProvider';
+
+type IconName = React.ComponentProps<typeof Ionicons>['name'];
 
 /** A tab icon that is outlined when the tab is not selected and filled when it is. */
 function icon(filled: IconName, outline: IconName) {
@@ -25,10 +26,11 @@ export default function TabsLayout() {
         headerShadowVisible: false,
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarLabelStyle: { fontSize: 12, fontWeight: '600' },
         tabBarStyle: {
           backgroundColor: colors.surface,
           borderTopColor: colors.border,
+          height: 64,
+          paddingBottom: 8,
           paddingTop: 4,
         },
         sceneStyle: { backgroundColor: colors.background },
@@ -37,25 +39,9 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="dashboard"
         options={{
-          title: t.tabs.overview,
+          title: t.tabs.dashboard,
           tabBarIcon: icon('home', 'home-outline'),
-          tabBarButtonTestID: 'tab-overview',
-        }}
-      />
-      <Tabs.Screen
-        name="spending"
-        options={{
-          title: t.tabs.spending,
-          tabBarIcon: icon('card', 'card-outline'),
-          tabBarButtonTestID: 'tab-spending',
-        }}
-      />
-      <Tabs.Screen
-        name="savings"
-        options={{
-          title: t.tabs.savings,
-          tabBarIcon: icon('wallet', 'wallet-outline'),
-          tabBarButtonTestID: 'tab-savings',
+          tabBarButtonTestID: 'tab-dashboard',
         }}
       />
       <Tabs.Screen
@@ -67,20 +53,36 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="savings"
+        options={{
+          title: t.tabs.savings,
+          tabBarIcon: icon('wallet', 'wallet-outline'),
+          tabBarButtonTestID: 'tab-savings',
+        }}
+      />
+      <Tabs.Screen
+        name="budget"
+        options={{
+          title: t.tabs.budget,
+          tabBarIcon: icon('pie-chart', 'pie-chart-outline'),
+          tabBarButtonTestID: 'tab-budget',
+        }}
+      />
+      <Tabs.Screen
+        name="spending"
+        options={{
+          title: t.tabs.spending,
+          tabBarIcon: icon('card', 'card-outline'),
+          tabBarButtonTestID: 'tab-spending',
+        }}
+      />
+      <Tabs.Screen
         name="shared"
         options={{
           title: t.tabs.shared,
           href: sharing.linked ? undefined : null,
           tabBarIcon: icon('people', 'people-outline'),
           tabBarButtonTestID: 'tab-shared',
-        }}
-      />
-      <Tabs.Screen
-        name="insights"
-        options={{
-          title: t.tabs.insights,
-          tabBarIcon: icon('bulb', 'bulb-outline'),
-          tabBarButtonTestID: 'tab-insights',
         }}
       />
     </Tabs>

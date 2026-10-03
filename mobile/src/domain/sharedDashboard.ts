@@ -53,8 +53,8 @@ export function mySharedLines(plan: Plan, keys: readonly string[]): SharedLine[]
     const [kind, ...rest] = key.split(':');
     const id = rest.join(':');
     if (kind === 'sav') {
-      const e = plan.savings.entries.find((x) => x.id === id);
-      if (e && e.change > 0)
+      const e = plan.savings.movements.find((x) => x.id === id);
+      if (e && e.kind === 'deposit' && e.change > 0)
         out.push({
           key,
           owner: 'me',

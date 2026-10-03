@@ -1,7 +1,9 @@
 import { daysBetween, nextOnOrAfter, type ISODate } from './dates';
 import type { Fils } from './money';
 import type { Commitment, ForecastInput } from './prototypeForecast';
+import type { MonthKey } from './months';
 import type { IncomeKind } from './uaeCategories';
+import type { Versioned } from './versioned';
 
 /**
  * Editable plan model (prototype). Pure functions only; integer fils; no UI or storage here.
@@ -34,7 +36,7 @@ const PERIOD_DAYS: Record<Exclude<Frequency, 'once'>, number> = {
   annual: 365,
 };
 
-export interface ExpenseItem {
+export interface ExpenseItem extends Versioned {
   id: string;
   name: string;
   categoryId: string;
@@ -53,7 +55,7 @@ export interface ExpenseItem {
   reminderDaysBefore?: number;
 }
 
-export interface IncomeItem {
+export interface IncomeItem extends Versioned {
   id: string;
   name: string;
   kind: IncomeKind;
@@ -88,26 +90,61 @@ export interface Employment {
   basicMonthly: Fils;
 }
 
-export type SavingsEntryKind = 'deposit' | 'withdrawal' | 'cycle';
-
-/** One change to the current savings balance. `change` is signed: positive adds, negative reduces. */
-export interface SavingsEntry {
+/** One dated actual expense. Planned bills and budgets are NOT transactions; paying a bill creates one. */
+export interface Transaction {
   id: string;
-  kind: SavingsEntryKind;
-  change: Fils;
-  /** The balance right after this change. */
-  balanceAfter: Fils;
   date: ISODate;
+  categoryId: string;
+  /** Always more than zero. */
+  amount: Fils;
   note: string;
+  /** Set when this transaction is a planned bill marked as paid, so the bill is counted once. */
+  billId?: string;
+  /** The due date of the bill occurrence that was paid. */
+  billDue?: ISODate;
 }
 
-/** The user's current savings pot. Goals earmark parts of it; they do not add to it. */
-export interface SavingsAccount {
-  balance: Fils;
-  /** Newest first. */
-  entries: readonly SavingsEntry[];
-  /** The payday date of the last pay cycle whose result was added, so a cycle is only added once. */
-  lastClosedCycle?: ISODate;
+export type SavingsMovementKind = 'deposit' | 'withdrawal' | 'month-close' | 'correction';
+
+/** One dated change to the savings balance. `change` is signed: positive adds, negative reduces. */
+export interface SavingsMovement {
+  id: string;
+  date: ISODate;
+  kind: SavingsMovementKind;
+  change: Fils;
+  note: string;
+  /** The month a month-close or a correction belongs to. */
+  month?: MonthKey;
+}
+
+/** The frozen result of a finished month. Written once per month; later edits add corrections instead. */
+export interface ClosedMonth {
+  month: MonthKey;
+  income: Fils;
+  spending: Fils;
+  /** Total monthly budget (the spending plan) for the month. */
+  plan: Fils;
+  target: Fils;
+  /** income - spending. */
+  result: Fils;
+  /** Added to savings (never more than the target). */
+  added: Fils;
+  /** Taken from existing savings because spending went beyond income. */
+  taken: Fils;
+  /** added - taken, plus any corrections applied since. */
+  net: Fils;
+}
+
+/**
+ * Savings, kept as dated records. Balance = opening + every movement dated on or after the opening date.
+ * The opening balance is neither income nor savings earned in any period.
+ */
+export interface SavingsLedger {
+  opening: { amount: Fils; date: ISODate } | null;
+  /** Monthly savings target, effective-dated; the last entry on or before a month applies to it. */
+  targets: { from: MonthKey; amount: Fils }[];
+  movements: SavingsMovement[];
+  closed: ClosedMonth[];
 }
 
 export type InvestmentType =
@@ -134,16 +171,46 @@ export interface Investment {
 }
 
 export interface Plan {
+  /** False until the new user has answered the savings questions. */
+  setupDone: boolean;
   investments: readonly Investment[];
-  savings: SavingsAccount;
+  savings: SavingsLedger;
+  /** Optional spendable balance and safety buffer, used only by the safe-to-spend forecast. */
   availableCash: Fils;
   safetyBuffer: Fils;
   income: readonly IncomeItem[];
+  /** Bills and fixed expenses (kind fixed) and everyday budgets (kind variable). */
   expenses: readonly ExpenseItem[];
+  /** Deleted items, kept so earlier months can still be reported. Never shown as cards. */
+  retiredIncome: readonly IncomeItem[];
+  retiredExpenses: readonly ExpenseItem[];
+  transactions: readonly Transaction[];
   goals: readonly SavingsGoal[];
-  /** General amount the user sets aside each month, on top of goal contributions. Defaults to zero. */
-  monthlySavings?: Fils;
   employment?: Employment;
+}
+
+export const EMPTY_LEDGER: SavingsLedger = {
+  opening: null,
+  targets: [],
+  movements: [],
+  closed: [],
+};
+
+/** A brand-new user: nothing entered, no sample amounts. */
+export function emptyPlan(): Plan {
+  return {
+    setupDone: false,
+    investments: [],
+    savings: EMPTY_LEDGER,
+    availableCash: 0,
+    safetyBuffer: 0,
+    income: [],
+    expenses: [],
+    retiredIncome: [],
+    retiredExpenses: [],
+    transactions: [],
+    goals: [],
+  };
 }
 
 /** Average monthly value of a recurring amount. One-off items have no monthly equivalent. */
@@ -236,10 +303,13 @@ export function deriveForecastInput(plan: Plan): ForecastInput {
     0,
   );
 
-  // Money set aside each cycle: the general monthly saving, goal contributions and investment contributions.
+  // Money set aside each cycle: the monthly savings target (goal contributions sit inside it, so the larger of
+  // the two is used) plus planned investment contributions.
+  const goalContributions = plan.goals
+    .filter((g) => g.enabled)
+    .reduce((sum, g) => sum + g.monthlyContribution, 0);
   const savingsReserve =
-    (plan.monthlySavings ?? 0) +
-    plan.goals.filter((g) => g.enabled).reduce((sum, g) => sum + g.monthlyContribution, 0) +
+    Math.max(savingsTargetNow(plan), goalContributions) +
     plan.investments.filter((v) => v.enabled).reduce((sum, v) => sum + v.monthlyContribution, 0);
 
   return {
@@ -251,6 +321,12 @@ export function deriveForecastInput(plan: Plan): ForecastInput {
     safetyBuffer: plan.safetyBuffer,
     plannedExpenses,
   };
+}
+
+/** The monthly savings target that applies now (the newest effective-dated entry). */
+function savingsTargetNow(plan: Plan): Fils {
+  const last = plan.savings.targets[plan.savings.targets.length - 1];
+  return last ? last.amount : 0;
 }
 
 /** Unique-id helper for new items; ids only need to be unique within the session. */

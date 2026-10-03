@@ -1,21 +1,22 @@
 import { useRouter } from 'expo-router';
 
-import { GoalBar, StatTile, TrendBars } from '../../components/dashboardParts';
+import { GoalBar } from '../../components/dashboardParts';
+import { EmptyState } from '../../components/EmptyState';
+import { SwipeableCard } from '../../components/SwipeableCard';
 import { Body, Button, Card, Heading, Row, Screen } from '../../components/ui';
+import type { SavingsMovement } from '../../domain/budgetModel';
 import { formatDate } from '../../domain/dates';
 import { investmentSummary } from '../../domain/investmentInsights';
 import { formatAed } from '../../domain/money';
-import { SAMPLE_HISTORY } from '../../domain/sampleData';
-import {
-  bigBills,
-  emergencyCover,
-  goalProgress,
-  gratuityEstimate,
-  savingsSummary,
-  type GoalProgress,
-} from '../../domain/savingsInsights';
+import { formatMonthKey, monthOf } from '../../domain/months';
+import { balanceAsOf, projectMonth, targetInMonth } from '../../domain/savingsEngine';
+import { goalProgress, type GoalProgress } from '../../domain/savingsInsights';
 import { t } from '../../i18n/strings';
 import { usePrototype } from '../../state/PrototypeContext';
+
+function signed(fils: number): string {
+  return fils > 0 ? `+${formatAed(fils)}` : formatAed(fils);
+}
 
 function goalStatus(g: GoalProgress): string {
   switch (g.status) {
@@ -34,242 +35,190 @@ function goalStatus(g: GoalProgress): string {
   }
 }
 
+function movementLabel(m: SavingsMovement): string {
+  if (m.kind === 'month-close') return t.savingsPage.monthClose(formatMonthKey(m.month ?? ''));
+  if (m.kind === 'correction') return t.savingsPage.correction(formatMonthKey(m.month ?? ''));
+  const kind = m.kind === 'deposit' ? t.savingsPage.deposit : t.savingsPage.withdrawal;
+  return m.note ? `${kind}: ${m.note}` : kind;
+}
+
 export default function Savings() {
   const router = useRouter();
-  const { plan } = usePrototype();
-  const summary = savingsSummary(plan);
-  const cover = emergencyCover(plan);
-  const goals = plan.goals.map(goalProgress);
-  const bills = bigBills(plan);
-  const history = SAMPLE_HISTORY.saved;
-  const emp = plan.employment;
+  const { plan, today, removeSavingsEntry, removeGoal } = usePrototype();
+  const ledger = plan.savings;
+  const balance = balanceAsOf(ledger, today);
+  const month = monthOf(today);
+  const target = targetInMonth(ledger, month);
+  const projection = ledger.opening ? projectMonth(plan, month, today) : null;
+  const movements = [...ledger.movements].sort(
+    (a, b) => b.date.localeCompare(a.date) || b.id.localeCompare(a.id),
+  );
+  const closed = [...ledger.closed].sort((a, b) => b.month.localeCompare(a.month));
+  const inv = investmentSummary(plan);
 
   return (
     <Screen testID="savings-screen">
-      <Button
-        label={t.monthlyPlan.open}
-        onPress={() => router.push('/monthly-plan')}
-        testID="open-monthly-plan"
-      />
-      <CurrentSavings />
-      <CycleCard />
-
-      <StatTile
-        testID="tile-monthly-saved"
-        label={t.savings.tileMonthly}
-        value={formatAed(summary.monthlySaved)}
-        note={t.savings.tileMonthlyNote(`${(summary.savingsRate * 100).toFixed(1)}%`)}
-      />
-      <StatTile
-        testID="tile-cover"
-        label={t.savings.tileCover}
-        value={cover ? t.savings.tileCoverValue(cover.months.toFixed(1)) : t.savings.tileCoverNone}
-        note={cover ? t.savings.levels[cover.level] : t.savings.coverMissing}
-      />
-
-      <Card testID="cover-card">
-        <Heading>{t.savings.coverTitle}</Heading>
-        {cover ? (
-          cover.gapToThreeMonths > 0 ? (
-            <Body>
-              {t.savings.coverBody(
-                formatAed(cover.essentialMonthly),
-                formatAed(cover.threeMonthTarget),
-                formatAed(cover.gapToThreeMonths),
-              )}
-            </Body>
-          ) : (
-            <Body>{t.savings.coverReached(formatAed(cover.threeMonthTarget))}</Body>
-          )
-        ) : (
-          <Body muted>{t.savings.coverMissing}</Body>
-        )}
+      <Card tone={balance !== null && balance < 0 ? 'danger' : 'info'} testID="total-savings-card">
+        <Body muted>{t.savingsPage.totalTitle}</Body>
+        <Heading>{balance === null ? t.savingsPage.notSet : formatAed(balance)}</Heading>
+        {ledger.opening ? (
+          <Body muted>
+            {t.savingsPage.openingLine(
+              formatAed(ledger.opening.amount),
+              formatDate(ledger.opening.date),
+            )}
+          </Body>
+        ) : null}
+        {balance !== null && balance < 0 ? (
+          <Body testID="below-zero-note">{t.savings.belowZero}</Body>
+        ) : null}
+        <Button
+          label={t.savingsPage.editOpening}
+          variant="secondary"
+          onPress={() => router.push('/edit/savings-opening/new')}
+          testID="edit-opening"
+        />
+        <Button
+          label={t.savingsPage.addMoney}
+          onPress={() => router.push('/edit/savings-in/new')}
+          testID="savings-add"
+        />
+        <Button
+          label={t.savingsPage.takeOut}
+          variant="secondary"
+          onPress={() => router.push('/edit/savings-out/new')}
+          testID="savings-take"
+        />
       </Card>
 
-      <Card testID="goals-card">
-        <Heading>{t.savings.goalsTitle}</Heading>
-        {goals.map((g) => (
-          <GoalBar
-            key={g.id}
-            testID={`goal-${g.id}`}
-            name={g.name}
-            pct={g.pct}
-            line={t.savings.goalLine(
-              formatAed(g.saved),
-              formatAed(g.target),
-              Math.round(g.pct * 100),
-            )}
-            status={goalStatus(g)}
-            onPress={() => router.push(`/edit/goal/${g.id}`)}
-          />
-        ))}
+      <Card testID="target-card">
+        <Body muted>{t.savingsPage.targetTitle}</Body>
+        <Heading>{formatAed(target)}</Heading>
+        <Body muted>{t.savingsPage.targetNote}</Body>
         <Button
-          label={t.savings.addGoal}
+          label={t.savingsPage.editTarget}
           variant="secondary"
-          onPress={() => router.push('/edit/goal/new')}
+          onPress={() => router.push('/edit/savings-target/new')}
+          testID="edit-target"
+        />
+      </Card>
+
+      {projection ? (
+        <Card tone={projection.taken > 0 ? 'warn' : 'default'} testID="projection-card">
+          <Heading>{t.savingsPage.projectedTitle}</Heading>
+          <Body muted>{t.savingsPage.projectedNote}</Body>
+          {projection.taken > 0 ? (
+            <Row label={t.savingsPage.projectedTaken} value={formatAed(projection.taken)} />
+          ) : (
+            <Row label={t.savingsPage.projectedSaving} value={formatAed(projection.added)} />
+          )}
+          {projection.projectedClosing !== null ? (
+            <Row
+              label={t.savingsPage.projectedClosing}
+              value={formatAed(projection.projectedClosing)}
+              strong
+            />
+          ) : null}
+        </Card>
+      ) : null}
+
+      <Heading>{t.savingsPage.activityTitle}</Heading>
+      {movements.length === 0 ? <Body muted>{t.savingsPage.noActivity}</Body> : null}
+      {movements.map((m) => {
+        const card = (
+          <Card testID={`movement-${m.id}`}>
+            <Row label={movementLabel(m)} value={signed(m.change)} strong />
+            <Body muted>{formatDate(m.date)}</Body>
+          </Card>
+        );
+        return m.kind === 'deposit' || m.kind === 'withdrawal' ? (
+          <SwipeableCard
+            key={m.id}
+            testID={`swipe-movement-${m.id}`}
+            name={movementLabel(m)}
+            onDelete={() => removeSavingsEntry(m.id)}
+          >
+            {card}
+          </SwipeableCard>
+        ) : (
+          <Card key={m.id} testID={`movement-${m.id}`}>
+            <Row label={movementLabel(m)} value={signed(m.change)} strong />
+            <Body muted>{formatDate(m.date)}</Body>
+          </Card>
+        );
+      })}
+
+      {closed.length > 0 ? (
+        <>
+          <Heading>{t.savingsPage.monthsTitle}</Heading>
+          {closed.map((c) => (
+            <Card key={c.month} testID={`closed-${c.month}`}>
+              <Row label={formatMonthKey(c.month)} value={signed(c.net)} strong />
+              <Body muted>
+                {t.savingsPage.monthLine(formatAed(c.income), formatAed(c.spending))}
+              </Body>
+            </Card>
+          ))}
+        </>
+      ) : null}
+
+      <Heading>{t.savingsPage.goalsTitle}</Heading>
+      {plan.goals.length === 0 ? (
+        <EmptyState
+          title={t.savingsPage.goalsEmptyTitle}
+          body={t.savingsPage.goalsEmptyBody}
+          actionLabel={t.addItem}
+          onAction={() => router.push('/edit/goal/new')}
           testID="add-goal"
         />
-      </Card>
+      ) : (
+        <>
+          {plan.goals.map((g) => {
+            const p = goalProgress(g);
+            return (
+              <SwipeableCard
+                key={g.id}
+                testID={`swipe-goal-${g.id}`}
+                name={g.name}
+                onDelete={() => removeGoal(g.id)}
+              >
+                <Card>
+                  <GoalBar
+                    testID={`goal-${g.id}`}
+                    name={g.name}
+                    pct={p.pct}
+                    line={t.savings.goalLine(
+                      formatAed(g.saved),
+                      formatAed(g.target),
+                      Math.round(p.pct * 100),
+                    )}
+                    status={goalStatus(p)}
+                    onPress={() => router.push(`/edit/goal/${g.id}`)}
+                  />
+                </Card>
+              </SwipeableCard>
+            );
+          })}
+          <Button
+            label={t.addItem}
+            icon="add"
+            onPress={() => router.push('/edit/goal/new')}
+            testID="add-goal"
+          />
+        </>
+      )}
 
-      <Card testID="bills-card">
-        <Heading>{t.savings.billsTitle}</Heading>
-        <Body muted>{t.savings.billsCaption}</Body>
-        {bills.length === 0 ? (
-          <Body muted>{t.savings.noBills}</Body>
-        ) : (
-          bills.map((b) => (
-            <Card key={b.id} testID={`bill-${b.id}`}>
-              <Row label={b.name} value={formatAed(b.amount)} strong />
-              <Body muted>{t.savings.billLine(b.dueInDays, formatAed(b.neededPerMonth))}</Body>
-            </Card>
-          ))
-        )}
-      </Card>
-
-      <Card tone={summary.unallocatedMonthly >= 0 ? 'info' : 'warn'} testID="surplus-card">
-        <Heading>{t.savings.surplusTitle}</Heading>
-        <Body>
-          {summary.unallocatedMonthly >= 0
-            ? t.savings.surplusPositive(formatAed(summary.unallocatedMonthly))
-            : t.savings.surplusNegative(formatAed(-summary.unallocatedMonthly))}
-        </Body>
-      </Card>
-
-      <Card testID="gratuity-card">
-        <Heading>{t.savings.gratuityTitle}</Heading>
-        {emp ? (
-          <>
-            <Heading>{formatAed(gratuityEstimate(emp))}</Heading>
-            <Body>
-              {t.savings.gratuityBody(String(emp.yearsOfService), formatAed(emp.basicMonthly))}
-            </Body>
-          </>
-        ) : null}
-        <Body muted>{t.savings.gratuityNote}</Body>
+      <Card testID="investments-card">
+        <Heading>{t.investments.title}</Heading>
+        <Row label={t.investments.tileValue} value={formatAed(inv.totalValue)} strong />
+        <Body muted>{t.investments.summaryNote(inv.count)}</Body>
         <Button
-          label={emp ? t.savings.gratuityEdit : t.savings.gratuityAdd}
+          label={t.investments.openCard}
           variant="secondary"
-          onPress={() => router.push('/edit/employment/me')}
-          testID="edit-employment"
+          onPress={() => router.push('/investments')}
+          testID="open-investments"
         />
       </Card>
-
-      <InvestmentsCard />
-
-      <ActivityCard />
-
-      <TrendBars
-        testID="savings-trend"
-        title={t.savings.trendTitle}
-        caption={t.savings.trendCaption}
-        values={history}
-        firstLabel="6 cycles ago"
-        lastLabel="Last cycle"
-        summary={t.savings.trendSummary(
-          formatAed(history[0] ?? 0),
-          formatAed(history[history.length - 1] ?? 0),
-        )}
-      />
     </Screen>
-  );
-}
-
-function signed(change: number): string {
-  return change >= 0 ? `+${formatAed(change)}` : formatAed(change);
-}
-
-/** The headline balance with buttons to add money or take it out. */
-function CurrentSavings() {
-  const router = useRouter();
-  const { plan } = usePrototype();
-  const balance = plan.savings.balance;
-  return (
-    <Card tone={balance < 0 ? 'danger' : 'info'} testID="current-savings-card">
-      <Body muted>{t.savings.currentTitle}</Body>
-      <Heading>{formatAed(balance)}</Heading>
-      <Body muted>{t.savings.currentNote}</Body>
-      {balance < 0 ? <Body testID="below-zero-note">{t.savings.belowZero}</Body> : null}
-      <Button
-        label={t.savings.addMoney}
-        onPress={() => router.push('/edit/savings-in/new')}
-        testID="savings-add"
-      />
-      <Button
-        label={t.savings.takeOut}
-        variant="secondary"
-        onPress={() => router.push('/edit/savings-out/new')}
-        testID="savings-take"
-      />
-    </Card>
-  );
-}
-
-/** Applies a pay cycle's result (income minus spending) to savings, only when the user confirms. */
-function CycleCard() {
-  const { cycle, closePayCycle } = usePrototype();
-  return (
-    <Card tone={cycle.result < 0 ? 'warn' : 'default'} testID="cycle-card">
-      <Heading>{t.savings.cycleTitle}</Heading>
-      <Body>{t.savings.cycleBody(formatAed(cycle.income), formatAed(cycle.spending))}</Body>
-      <Body testID="cycle-result">
-        {cycle.result >= 0
-          ? t.savings.cycleGain(formatAed(cycle.result))
-          : t.savings.cycleLoss(formatAed(-cycle.result))}
-      </Body>
-      {cycle.canClose ? (
-        <Button label={t.savings.cycleApply} onPress={closePayCycle} testID="close-cycle" />
-      ) : (
-        <Body muted testID="cycle-done">
-          {t.savings.cycleDone}
-        </Body>
-      )}
-      <Body muted>{t.savings.cycleNote}</Body>
-    </Card>
-  );
-}
-
-const ACTIVITY_LIMIT = 6;
-
-function ActivityCard() {
-  const { plan } = usePrototype();
-  const entries = plan.savings.entries.slice(0, ACTIVITY_LIMIT);
-  return (
-    <Card testID="activity-card">
-      <Heading>{t.savings.activityTitle}</Heading>
-      {entries.length === 0 ? (
-        <Body muted>{t.savings.noActivity}</Body>
-      ) : (
-        entries.map((e) => (
-          <Row
-            key={e.id}
-            label={t.savings.entryLine(formatDate(e.date), t.savings.entryKinds[e.kind], e.note)}
-            value={signed(e.change)}
-          />
-        ))
-      )}
-    </Card>
-  );
-}
-
-/** A short summary of investments with a link to the full Investments screen. */
-function InvestmentsCard() {
-  const router = useRouter();
-  const { plan } = usePrototype();
-  const s = investmentSummary(plan);
-  const gain = s.totalGain >= 0 ? `+${formatAed(s.totalGain)}` : formatAed(s.totalGain);
-  return (
-    <Card testID="investments-card">
-      <Heading>{t.investments.title}</Heading>
-      <Row label={t.investments.tileValue} value={formatAed(s.totalValue)} strong />
-      <Row label={s.totalGain >= 0 ? t.investments.gain : t.investments.loss} value={gain} />
-      <Row label={t.investments.tileIncome} value={formatAed(s.monthlyIncome)} />
-      <Body muted>{t.investments.summaryNote(s.count)}</Body>
-      <Button
-        label={t.investments.openCard}
-        variant="secondary"
-        onPress={() => router.push('/investments')}
-        testID="open-investments"
-      />
-    </Card>
   );
 }
