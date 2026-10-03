@@ -12,7 +12,7 @@ import {
   monthsInRange,
   type MonthKey,
 } from './months';
-import { periodSavings } from './savingsEngine';
+import { balanceAsOf, periodSavings } from './savingsEngine';
 import { allIncomeItems, incomeAnchor, sumAmounts, transactionsBetween } from './spending';
 
 /**
@@ -124,4 +124,41 @@ export function rangeElapsed(range: DateRange, today: ISODate): number {
 function daysBetweenInclusive(a: ISODate, b: ISODate): number {
   const ms = Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`);
   return Math.round(ms / 86_400_000) + 1;
+}
+
+const SHORT_MONTHS = [
+  'Jan',
+  'Feb',
+  'Mar',
+  'Apr',
+  'May',
+  'Jun',
+  'Jul',
+  'Aug',
+  'Sep',
+  'Oct',
+  'Nov',
+  'Dec',
+];
+
+/** `2026-10` -> `Oct` (with the year added when the range spans more than one year: `Oct 26`). */
+export function shortMonth(month: MonthKey, withYear = false): string {
+  const name = SHORT_MONTHS[Number(month.slice(5, 7)) - 1] ?? month;
+  return withYear ? `${name} ${month.slice(2, 4)}` : name;
+}
+
+export interface MonthBalance {
+  month: MonthKey;
+  label: string;
+  /** Savings balance at the end of that month (or today for the current month); null before the first record. */
+  value: Fils | null;
+}
+
+/** The savings balance at the end of each month of the range. */
+export function balanceByMonth(plan: Plan, range: DateRange, today: ISODate): MonthBalance[] {
+  return monthBuckets(range).map((b) => ({
+    month: b.month,
+    label: b.label,
+    value: balanceAsOf(plan.savings, b.to < today ? b.to : today),
+  }));
 }

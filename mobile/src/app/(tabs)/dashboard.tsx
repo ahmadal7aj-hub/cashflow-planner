@@ -8,6 +8,7 @@ import { DateRangeControl, useDateRange } from '../../components/DateRangeContro
 import {
   BudgetDashboard,
   IncomeDashboard,
+  OverviewCharts,
   SavingsDashboard,
   SpendingDashboard,
 } from '../../components/dashboards';
@@ -149,7 +150,9 @@ export default function Dashboard() {
     <Screen testID="dashboard-screen">
       {sectionChips}
       <DateRangeControl state={dates} />
+      <OverviewCharts summary={s} />
 
+      <Heading>{t.dashboards.details}</Heading>
       <Card testID="income-summary">
         <Heading>{t.dashboardPage.incomeTitle}</Heading>
         <Row label={t.dashboardPage.received} value={formatAed(s.income.received)} strong />

@@ -197,6 +197,7 @@ describe('logout', () => {
     await backend.createAccount('sara@example.com', 'sara_a');
     await backend.signInAs('sara@example.com');
     await openAccountsApp(db, '/account', { backend });
+    await settle(db); // the profile is read from the database first
     await waitFor(() => expect(screen.getByTestId('account-card')).toBeTruthy());
     expect(screen.getByTestId('profile-username')).toHaveTextContent('sara_a');
     expect(screen.getByTestId('profile-email')).toHaveTextContent('sara@example.com');
