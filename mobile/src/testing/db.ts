@@ -2,7 +2,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { Client } from 'pg';
+import { Client, types as pgTypes } from 'pg';
 
 import { RPC_SHAPES, type RpcClient, type RpcName } from '../backend/contract';
 
@@ -82,24 +82,20 @@ export async function startTestDb(): Promise<TestDb> {
     child.on('exit', (code) => reject(new Error(`test database exited early (${code}): ${out}`)));
   });
   const [host, port] = address.split(':');
-  const client = new Client({ host, port: Number(port), user: 'postgres', database: 'postgres' });
+  const client = new Client({
+    host,
+    port: Number(port),
+    user: 'postgres',
+    database: 'postgres',
+    // Keep calendar dates as plain YYYY-MM-DD text, exactly as the real API returns them.
+    types: {
+      getTypeParser: ((oid: number, format?: 'text' | 'binary') =>
+        oid === 1082
+          ? (v: string) => v
+          : pgTypes.getTypeParser(oid, format as 'text')) as typeof pgTypes.getTypeParser,
+    },
+  });
   await client.connect();
-
-  // PGlite's socket mishandles errors raised inside the extended query protocol (used when values are sent
-  // separately), so values are inlined as escaped literals and the simple protocol is used throughout.
-  const literal = (v: unknown): string =>
-    v === null || v === undefined ? 'null' : client.escapeLiteral(String(v));
-  const bind = (sql: string, params: unknown[] = []): string =>
-    sql.replace(/\$(\d+)/g, (_m, n: string) => literal(params[Number(n) - 1]));
-
-  const admin = async <T>(sql: string, params?: unknown[]): Promise<T[]> => {
-    const r = await client.query(bind(sql, params));
-    return (Array.isArray(r) ? r[r.length - 1]! : r).rows as T[];
-  };
-
-  await client.query(AUTH_SHIM);
-  for (const sql of lastMigrations()) await client.query(sql);
-  await client.query('select 1');
 
   // PGlite serves one connection, so statements run strictly one after another.
   let queue: Promise<unknown> = Promise.resolve();
@@ -108,6 +104,26 @@ export async function startTestDb(): Promise<TestDb> {
     queue = next.catch(() => undefined);
     return next;
   };
+
+  // PGlite's socket mishandles errors raised inside the extended query protocol (used when values are sent
+  // separately), so values are inlined as escaped literals and the simple protocol is used throughout.
+  const literal = (v: unknown): string =>
+    v === null || v === undefined ? 'null' : client.escapeLiteral(String(v));
+  const bind = (sql: string, params: unknown[] = []): string =>
+    sql.replace(/\$(\d+)/g, (_m, n: string) => literal(params[Number(n) - 1]));
+
+  const admin = <T>(sql: string, params?: unknown[]): Promise<T[]> =>
+    serial(async () => {
+      // Always run as the database owner, whatever the previous request was doing.
+      await client.query('rollback').catch(() => undefined);
+      await client.query('reset role');
+      const r = await client.query(bind(sql, params));
+      return (Array.isArray(r) ? r[r.length - 1]! : r).rows as T[];
+    });
+
+  await client.query(AUTH_SHIM);
+  for (const sql of lastMigrations()) await client.query(sql);
+  await client.query('select 1');
 
   const as = (userId: string | null): UserSession => {
     const query = <T>(sql: string, params?: unknown[]): Promise<T[]> =>

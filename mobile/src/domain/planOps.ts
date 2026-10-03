@@ -149,13 +149,24 @@ export function addSavings(
   date: ISODate,
   note: string,
   today: ISODate,
+  groupId?: string,
 ): SavingsResult {
   if (!(amount > 0)) return { ok: false, reason: 'amount' };
   if (!plan.savings.opening) return { ok: false, reason: 'no-opening' };
   if (date < plan.savings.opening.date) return { ok: false, reason: 'before-opening' };
   return {
     ok: true,
-    plan: withMovement(plan, { date, kind: 'deposit', change: amount, note: note.trim() }, today),
+    plan: withMovement(
+      plan,
+      {
+        date,
+        kind: 'deposit',
+        change: amount,
+        note: note.trim(),
+        ...(groupId ? { share: { groupId } } : {}),
+      },
+      today,
+    ),
   };
 }
 
@@ -165,6 +176,7 @@ export function withdrawSavings(
   date: ISODate,
   note: string,
   today: ISODate,
+  groupId?: string,
 ): SavingsResult {
   if (!(amount > 0)) return { ok: false, reason: 'amount' };
   if (!plan.savings.opening) return { ok: false, reason: 'no-opening' };
@@ -175,7 +187,13 @@ export function withdrawSavings(
     ok: true,
     plan: withMovement(
       plan,
-      { date, kind: 'withdrawal', change: -amount, note: note.trim() },
+      {
+        date,
+        kind: 'withdrawal',
+        change: -amount,
+        note: note.trim(),
+        ...(groupId ? { share: { groupId } } : {}),
+      },
       today,
     ),
   };
@@ -192,4 +210,87 @@ export function removeSavingsMovement(plan: Plan, id: string, today: ISODate): P
     },
     today,
   );
+}
+
+/** Share a manual saving with a group, or make it private again (null). Month results cannot be shared. */
+export function setMovementShare(
+  plan: Plan,
+  id: string,
+  groupId: string | null,
+  today: ISODate,
+): Plan {
+  const m = plan.savings.movements.find((x) => x.id === id);
+  if (!m || (m.kind !== 'deposit' && m.kind !== 'withdrawal')) return plan;
+  const next: SavingsMovement = { ...m };
+  if (groupId) next.share = { groupId };
+  else delete next.share;
+  return finish(
+    {
+      ...plan,
+      savings: {
+        ...plan.savings,
+        movements: plan.savings.movements.map((x) => (x.id === id ? next : x)),
+      },
+    },
+    today,
+  );
+}
+
+/** Make every saving shared with these groups private again on the phone (the user left, or was removed). */
+export function clearSharesForGroups(
+  plan: Plan,
+  groupIds: readonly string[],
+  today: ISODate,
+): Plan {
+  const gone = new Set(groupIds);
+  if (!plan.savings.movements.some((m) => m.share && gone.has(m.share.groupId))) return plan;
+  return finish(
+    {
+      ...plan,
+      savings: {
+        ...plan.savings,
+        movements: plan.savings.movements.map((m) => {
+          if (!m.share || !gone.has(m.share.groupId)) return m;
+          const { share: _removed, ...rest } = m;
+          void _removed;
+          return rest;
+        }),
+      },
+    },
+    today,
+  );
+}
+
+export type EditSavingsResult = { ok: true; plan: Plan } | { ok: false; reason: string };
+
+/**
+ * Change the amount, date, note or group of a manual saving. Month results and corrections cannot be edited.
+ * A withdrawal cannot be edited to take out more than was there on that day.
+ */
+export function updateSavingsMovement(
+  plan: Plan,
+  id: string,
+  fields: { amount: Fils; date: ISODate; note: string; groupId: string | null },
+  today: ISODate,
+): EditSavingsResult {
+  const m = plan.savings.movements.find((x) => x.id === id);
+  if (!m || (m.kind !== 'deposit' && m.kind !== 'withdrawal'))
+    return { ok: false, reason: 'not-editable' };
+  if (!(fields.amount > 0)) return { ok: false, reason: 'amount' };
+  const opening = plan.savings.opening;
+  if (!opening) return { ok: false, reason: 'no-opening' };
+  if (fields.date < opening.date) return { ok: false, reason: 'before-opening' };
+  if (fields.date > today) return { ok: false, reason: 'future' };
+  const change = m.kind === 'deposit' ? fields.amount : -fields.amount;
+  const next: SavingsMovement = { ...m, change, date: fields.date, note: fields.note.trim() };
+  if (fields.groupId) next.share = { groupId: fields.groupId };
+  else delete next.share;
+  const movements = plan.savings.movements.map((x) => (x.id === id ? next : x));
+  const candidate: Plan = { ...plan, savings: { ...plan.savings, movements } };
+  if (m.kind === 'withdrawal') {
+    const balance = balanceAsOf(candidate.savings, today);
+    if (balance !== null && balance < 0 && (balanceAsOf(plan.savings, today) ?? 0) >= 0)
+      return { ok: false, reason: 'insufficient' };
+  }
+  return { ok: true, plan: finish(candidate, today) };
 }

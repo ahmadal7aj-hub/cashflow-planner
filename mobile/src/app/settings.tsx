@@ -41,10 +41,10 @@ export default function Settings() {
         <Body>{t.settings.language}</Body>
       </Card>
       <Button
-        label={t.shared.linkAccount}
+        label={t.account.open}
         variant="secondary"
-        onPress={() => router.push('/link')}
-        testID="open-link"
+        onPress={() => router.push('/account')}
+        testID="open-account"
       />
       <Button
         label={t.settings.editNumbers}

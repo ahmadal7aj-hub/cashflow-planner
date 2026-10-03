@@ -13,7 +13,9 @@ import EditItem from '../app/edit/[kind]/[id]';
 import Explain from '../app/explain/[metric]';
 import Index from '../app/index';
 import Investments from '../app/investments';
-import LinkAccount from '../app/link';
+import Account from '../app/account';
+import GroupDetail from '../app/groups/[id]';
+import Groups from '../app/groups/index';
 import Onboarding from '../app/onboarding';
 import Scenario from '../app/scenario';
 import Settings from '../app/settings';
@@ -37,7 +39,9 @@ export const routes = {
   setup: Setup,
   investments: Investments,
   onboarding: Onboarding,
-  link: LinkAccount,
+  account: Account,
+  'groups/index': Groups,
+  'groups/[id]': GroupDetail,
   settings: Settings,
   scenario: Scenario,
   'warning/[id]': Warning,

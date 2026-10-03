@@ -3,7 +3,7 @@ import { Tabs } from 'expo-router';
 import type { ColorValue } from 'react-native';
 
 import { t } from '../../i18n/strings';
-import { usePrototype } from '../../state/PrototypeContext';
+import { useSharing } from '../../state/SharingContext';
 import { useTheme } from '../../theme/ThemeProvider';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
@@ -17,7 +17,7 @@ function icon(filled: IconName, outline: IconName) {
 
 export default function TabsLayout() {
   const { colors } = useTheme();
-  const { sharing } = usePrototype();
+  const sharing = useSharing();
   return (
     <Tabs
       screenOptions={{
@@ -80,7 +80,7 @@ export default function TabsLayout() {
         name="shared"
         options={{
           title: t.tabs.shared,
-          href: sharing.linked ? undefined : null,
+          href: sharing.hasSharedEntries ? undefined : null,
           tabBarIcon: icon('people', 'people-outline'),
           tabBarButtonTestID: 'tab-shared',
         }}

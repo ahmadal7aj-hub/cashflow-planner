@@ -115,6 +115,8 @@ export interface SavingsMovement {
   note: string;
   /** The month a month-close or a correction belongs to. */
   month?: MonthKey;
+  /** Set when the owner shares this saving with a group. Sharing shows the same record elsewhere; it never changes balances. */
+  share?: { groupId: string };
 }
 
 /** The frozen result of a finished month. Written once per month; later edits add corrections instead. */

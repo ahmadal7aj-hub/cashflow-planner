@@ -4,17 +4,10 @@ import { useEffect, useMemo, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { track } from '../../analytics/events';
-import { ChipGroup, Field } from '../../components/forms';
+import { DateRangeControl, useDateRange } from '../../components/DateRangeControl';
+import { ChipGroup } from '../../components/forms';
 import { Body, Button, Card, Heading, HeroCard, Row, Screen } from '../../components/ui';
-import {
-  RANGE_PRESETS,
-  coversWholeMonths,
-  presetRange,
-  summarize,
-  validateRange,
-  type DateRange,
-  type RangePreset,
-} from '../../domain/dashboardRange';
+import { coversWholeMonths, summarize } from '../../domain/dashboardRange';
 import { formatDate, relativeDays } from '../../domain/dates';
 import { formatAed } from '../../domain/money';
 import { t } from '../../i18n/strings';
@@ -53,18 +46,9 @@ export default function Dashboard() {
   const { plan, today, baseline: f, reminders } = usePrototype();
   const active = reminders.filter((r) => r.active);
 
-  const [preset, setPreset] = useState<RangePreset>('current-month');
-  const [customFrom, setCustomFrom] = useState(presetRange('current-month', today).from);
-  const [customTo, setCustomTo] = useState(presetRange('current-month', today).to);
+  const dates = useDateRange(today);
+  const { range, preset } = dates;
   const [savingsView, setSavingsView] = useState<'period' | 'total'>('period');
-
-  const customError = preset === 'custom' ? validateRange(customFrom, customTo) : null;
-  const range: DateRange = useMemo(() => {
-    if (preset === 'custom') {
-      return customError ? presetRange('current-month', today) : { from: customFrom, to: customTo };
-    }
-    return presetRange(preset, today);
-  }, [preset, customFrom, customTo, customError, today]);
   const s = useMemo(() => summarize(plan, range, today), [plan, range, today]);
 
   useEffect(() => {
@@ -79,44 +63,7 @@ export default function Dashboard() {
 
   return (
     <Screen testID="dashboard-screen">
-      <ChipGroup
-        label={t.dashboardPage.rangeLabel}
-        testID="range"
-        value={preset}
-        onChange={setPreset}
-        options={RANGE_PRESETS.map((p) => ({ value: p, label: t.dashboardPage.presets[p] }))}
-      />
-      {preset === 'custom' ? (
-        <Card testID="custom-range">
-          <Field
-            label={t.dashboardPage.from}
-            hint={t.dashboardPage.dateHint}
-            testID="range-from"
-            value={customFrom}
-            onChangeText={setCustomFrom}
-            error={customError === 'invalid-start' ? t.dashboardPage.errorStart : undefined}
-          />
-          <Field
-            label={t.dashboardPage.to}
-            testID="range-to"
-            value={customTo}
-            onChangeText={setCustomTo}
-            error={customError === 'invalid-end' ? t.dashboardPage.errorEnd : undefined}
-          />
-          {customError === 'order' ? (
-            <Text
-              accessibilityLiveRegion="polite"
-              testID="range-error"
-              style={{ color: colors.dangerText }}
-            >
-              {t.dashboardPage.errorOrder}
-            </Text>
-          ) : null}
-        </Card>
-      ) : null}
-      <Body muted testID="range-shown">
-        {t.dashboardPage.showing(formatDate(range.from), formatDate(range.to))}
-      </Body>
+      <DateRangeControl state={dates} />
 
       <Card testID="income-summary">
         <Heading>{t.dashboardPage.incomeTitle}</Heading>

@@ -1,7 +1,7 @@
 import { startTestDb, type TestDb, type UserSession } from './db';
 
 /** Shared setup for the database tests: one fresh database per file, emptied before each test. */
-export function useTestDb(): { db: () => TestDb } {
+export function withTestDb(): { db: () => TestDb } {
   let current: TestDb;
   beforeAll(async () => {
     current = await startTestDb();

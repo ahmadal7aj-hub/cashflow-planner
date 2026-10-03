@@ -25,7 +25,15 @@ import {
 import { todayISO, type ISODate } from '../domain/dates';
 import type { Fils } from '../domain/money';
 import { monthEnd, monthOf, monthStart } from '../domain/months';
-import { CURRENT_SCHEMA, loadPlan, savePlan, type KeyValueStore } from '../domain/persistence';
+import {
+  adoptLegacyPlan,
+  CURRENT_SCHEMA,
+  getDeviceId,
+  loadPlan,
+  planKeyFor,
+  savePlan,
+  type KeyValueStore,
+} from '../domain/persistence';
 import {
   addSavings,
   addTransaction,
@@ -34,8 +42,10 @@ import {
   removeIncomeItem,
   removeSavingsMovement,
   removeTransaction,
+  setMovementShare,
   setOpeningSavings,
   setSavingsTarget,
+  updateSavingsMovement,
   updateTransaction,
   upsertExpenseItem,
   upsertIncomeItem,
@@ -49,22 +59,16 @@ import { transactionsBetween } from '../domain/spending';
 import { useTheme } from '../theme/ThemeProvider';
 import { getTestSeed } from './testSeed';
 
-/** Sharing preview state: one device, a made-up partner, nothing stored or sent. */
-export interface SharingState {
-  linked: boolean;
-  /** The username the user typed when linking (shown back to them). */
-  partnerUsername: string;
-  /** Keys of the items the user chose to share (see domain/sharedDashboard). */
-  sharedKeys: readonly string[];
-}
-
 export type SavingsOutcome = 'ok' | 'amount' | 'no-opening' | 'before-opening' | 'insufficient';
+export type EditOutcome = SavingsOutcome | 'not-editable' | 'future';
 
 interface PrototypeState {
   /** Today's date (device clock, the user's own time zone). */
   today: ISODate;
   /** The saved plan with real dates resolved to relative days for `today`. Edit through the actions below. */
   plan: Plan;
+  /** This phone's id, used to key the savings it shares. Null until it has been read. */
+  deviceId: string | null;
   /** Bill reminders, soonest due first (in-app only). */
   reminders: Reminder[];
   setNumbers: (n: { balance: Fils; safetyBuffer: Fils }) => void;
@@ -83,16 +87,21 @@ interface PrototypeState {
   payBill: (billId: string, due: ISODate, paidOn: ISODate) => void;
   upsertGoal: (goal: SavingsGoal) => void;
   removeGoal: (id: string) => void;
-  sharing: SharingState;
-  linkPartner: (username: string) => void;
-  unlinkPartner: () => void;
-  setShared: (key: string, shared: boolean) => void;
   setEmployment: (e: Employment) => void;
   upsertInvestment: (inv: Investment) => void;
   removeInvestment: (id: string) => void;
-  /** Adds to savings. When `share` is true the new deposit is also shared on the Shared dashboard. */
-  addToSavings: (amount: Fils, note: string, date: ISODate, share?: boolean) => SavingsOutcome;
-  takeFromSavings: (amount: Fils, note: string, date: ISODate) => SavingsOutcome;
+  /** Adds to savings; `groupId` shares the new saving with that group (private when omitted). */
+  addToSavings: (amount: Fils, note: string, date: ISODate, groupId?: string) => SavingsOutcome;
+  takeFromSavings: (amount: Fils, note: string, date: ISODate, groupId?: string) => SavingsOutcome;
+  /** Change amount, date, note and group of a manual saving. */
+  updateSavingsEntry: (
+    id: string,
+    fields: { amount: Fils; date: ISODate; note: string; groupId: string | null },
+  ) => EditOutcome;
+  /** Share a saving with a group, or make it private again (null). */
+  setEntryShare: (id: string, groupId: string | null) => void;
+  /** Make these savings private on the phone (their group is gone). */
+  makeEntriesPrivate: (ids: readonly string[]) => void;
   removeSavingsEntry: (id: string) => void;
   /** True only the first time it is called, so onboarding_completed is recorded once per session. */
   claimOnboardingCompletion: () => boolean;
@@ -152,6 +161,7 @@ export function PrototypeProvider({
   today: todayOverride,
   initialPlan,
   storage,
+  userId,
 }: {
   children: ReactNode;
   today?: ISODate;
@@ -159,32 +169,46 @@ export function PrototypeProvider({
   initialPlan?: Plan;
   /** Where the plan is saved. Defaults to the device storage. */
   storage?: KeyValueStore;
+  /** The signed-in account. Each account has its own plan; null means no account (the phone's own data). */
+  userId?: string | null;
 }) {
   // The device clock is read once per session; tests pass a fixed date.
   const [today] = useState<ISODate>(todayOverride ?? todayISO);
   const seeded = initialPlan ?? getTestSeed();
   const store = storage ?? deviceStore;
+  const planKey = planKeyFor(userId);
   const [rawPlan, setRawPlan] = useState<Plan>(() =>
     seeded ? maintainSavings(seeded, today) : emptyPlan(),
   );
   const [ready, setReady] = useState<boolean>(seeded !== undefined);
+  const [deviceId, setDeviceId] = useState<string | null>(null);
   // Data written by a newer app version is never overwritten.
   const canSave = useRef(true);
   const loaded = useRef(seeded !== undefined);
   const [scenarioOn, setScenarioOn] = useState(false);
-  const [sharing, setSharing] = useState<SharingState>({
-    linked: false,
-    partnerUsername: '',
-    sharedKeys: [],
-  });
   const onboardingTracked = useRef(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    getDeviceId(store)
+      .then((id) => {
+        if (!cancelled) setDeviceId(id);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [store]);
 
   useEffect(() => {
     if (seeded !== undefined) return;
     let cancelled = false;
     (async () => {
       try {
-        const r = await loadPlan(store, new Date().toISOString().replace(/[:.]/g, '-'));
+        const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+        // The first account on a phone takes over what was already saved there (copied, with a backup).
+        if (userId) await adoptLegacyPlan(store, userId, stamp);
+        const r = await loadPlan(store, stamp, undefined, planKey);
         if (cancelled) return;
         if (r.status === 'ok') setRawPlan(maintainSavings(r.plan, today));
         else if (r.status === 'newer-version') canSave.current = false;
@@ -199,12 +223,12 @@ export function PrototypeProvider({
     return () => {
       cancelled = true;
     };
-  }, [seeded, store, today]);
+  }, [seeded, store, today, userId, planKey]);
 
   useEffect(() => {
     if (!ready || !loaded.current || !canSave.current) return;
-    savePlan(store, rawPlan).catch(() => undefined);
-  }, [rawPlan, ready, store]);
+    savePlan(store, rawPlan, planKey).catch(() => undefined);
+  }, [rawPlan, ready, store, planKey]);
 
   const value = useMemo<PrototypeState>(() => {
     const edit = (fn: (p: Plan) => Plan) => setRawPlan((p) => fn(p));
@@ -218,20 +242,17 @@ export function PrototypeProvider({
         })
       : baseline;
 
-    const savingsAction = (
-      run: (p: Plan) => ReturnType<typeof addSavings>,
-      onOk?: (next: Plan) => void,
-    ): SavingsOutcome => {
+    const savingsAction = (run: (p: Plan) => ReturnType<typeof addSavings>): SavingsOutcome => {
       const r = run(rawPlan);
       if (!r.ok) return r.reason as SavingsOutcome;
       setRawPlan(r.plan);
-      onOk?.(r.plan);
       return 'ok';
     };
 
     return {
       today,
       plan,
+      deviceId,
       reminders: remindersFor(plan, today),
       setNumbers: (n) =>
         edit((p) => ({ ...p, availableCash: n.balance, safetyBuffer: n.safetyBuffer })),
@@ -259,33 +280,20 @@ export function PrototypeProvider({
       upsertInvestment: (inv) => edit((p) => ({ ...p, investments: upsert(p.investments, inv) })),
       removeInvestment: (id) =>
         edit((p) => ({ ...p, investments: p.investments.filter((v) => v.id !== id) })),
-      addToSavings: (amount, note, date, share = false) =>
-        savingsAction(
-          (p) => addSavings(p, amount, date, note, today),
-          (next) => {
-            const entry = next.savings.movements.find(
-              (m) => m.kind === 'deposit' && !rawPlan.savings.movements.some((o) => o.id === m.id),
-            );
-            if (share && entry && sharing.linked)
-              setSharing((x) => ({ ...x, sharedKeys: [...x.sharedKeys, `sav:${entry.id}`] }));
-          },
-        ),
-      takeFromSavings: (amount, note, date) =>
-        savingsAction((p) => withdrawSavings(p, amount, date, note, today)),
+      addToSavings: (amount, note, date, groupId) =>
+        savingsAction((p) => addSavings(p, amount, date, note, today, groupId)),
+      takeFromSavings: (amount, note, date, groupId) =>
+        savingsAction((p) => withdrawSavings(p, amount, date, note, today, groupId)),
+      updateSavingsEntry: (id, fields) => {
+        const r = updateSavingsMovement(rawPlan, id, fields, today);
+        if (!r.ok) return r.reason as EditOutcome;
+        setRawPlan(r.plan);
+        return 'ok';
+      },
+      setEntryShare: (id, groupId) => edit((p) => setMovementShare(p, id, groupId, today)),
+      makeEntriesPrivate: (ids) =>
+        edit((p) => ids.reduce((acc, id) => setMovementShare(acc, id, null, today), p)),
       removeSavingsEntry: (id) => edit((p) => removeSavingsMovement(p, id, today)),
-      sharing,
-      linkPartner: (username) =>
-        setSharing({ linked: true, partnerUsername: username.trim(), sharedKeys: [] }),
-      unlinkPartner: () => setSharing({ linked: false, partnerUsername: '', sharedKeys: [] }),
-      setShared: (key, shared) =>
-        setSharing((x) => ({
-          ...x,
-          sharedKeys: shared
-            ? x.sharedKeys.includes(key)
-              ? x.sharedKeys
-              : [...x.sharedKeys, key]
-            : x.sharedKeys.filter((k) => k !== key),
-        })),
       claimOnboardingCompletion: () => {
         if (onboardingTracked.current) return false;
         onboardingTracked.current = true;
@@ -308,7 +316,7 @@ export function PrototypeProvider({
       baseline,
       scenario,
     };
-  }, [rawPlan, today, scenarioOn, sharing]);
+  }, [rawPlan, today, scenarioOn, deviceId]);
 
   // The screens stay mounted while the saved data loads; an opaque cover hides them and blocks touches, so
   // the navigator is never created late and nothing can be edited before the saved plan is in place.

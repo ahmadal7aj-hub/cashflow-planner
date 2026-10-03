@@ -1,7 +1,7 @@
 /** @jest-environment node */
-import { groupOf, refused, share, useTestDb, who } from '../testing/dbHarness';
+import { groupOf, refused, share, withTestDb, who } from '../testing/dbHarness';
 
-const { db } = useTestDb();
+const { db } = withTestDb();
 
 async function trio() {
   const alice = await db().signUp('alice@example.com', 'alice');

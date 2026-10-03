@@ -1,10 +1,14 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import type { ReactNode } from 'react';
 import { Text, View } from 'react-native';
 
 import { appEnvironment, environmentLabel, isProduction } from '../config/environment';
 import { t } from '../i18n/strings';
+import { AuthFlow } from '../auth/AuthFlow';
+import { AccountProvider, useAccount, useUserId } from '../state/AccountContext';
 import { PrototypeProvider } from '../state/PrototypeContext';
+import { SharingProvider } from '../state/SharingContext';
 import { makeStyles, ThemeProvider, useTheme } from '../theme/ThemeProvider';
 import { fontSize, spacing } from '../theme/tokens';
 
@@ -45,7 +49,9 @@ function ThemedStack() {
         <Stack.Screen name="warning/[id]" options={{ title: t.warning.title }} />
         <Stack.Screen name="explain/[metric]" options={{ title: t.explain.title }} />
         <Stack.Screen name="investments" options={{ title: t.investments.title }} />
-        <Stack.Screen name="link" options={{ title: t.shared.linkTitle }} />
+        <Stack.Screen name="account" options={{ title: t.account.title }} />
+        <Stack.Screen name="groups/index" options={{ title: t.groupsPage.title }} />
+        <Stack.Screen name="groups/[id]" options={{ title: t.groupsPage.title }} />
         <Stack.Screen name="scenario" options={{ title: t.scenario.title }} />
         <Stack.Screen name="settings" options={{ title: t.settings.title }} />
       </Stack>
@@ -54,12 +60,34 @@ function ThemedStack() {
   );
 }
 
+/** While nobody is signed in on a build with accounts, the app is replaced by the sign-in screens. */
+function AccountGate({ children }: { children: ReactNode }) {
+  const account = useAccount();
+  if (account.status === 'loading') return <View style={{ flex: 1 }} testID="account-loading" />;
+  if (account.status === 'signedOut') return <AuthFlow />;
+  return <>{children}</>;
+}
+
+/** Each account has its own saved plan, so switching accounts on a phone never shows another person's records. */
+function Scoped({ children }: { children: ReactNode }) {
+  const userId = useUserId();
+  return (
+    <PrototypeProvider key={userId ?? 'local'} userId={userId}>
+      <SharingProvider>{children}</SharingProvider>
+    </PrototypeProvider>
+  );
+}
+
 export default function RootLayout() {
   return (
     <ThemeProvider>
-      <PrototypeProvider>
-        <ThemedStack />
-      </PrototypeProvider>
+      <AccountProvider>
+        <AccountGate>
+          <Scoped>
+            <ThemedStack />
+          </Scoped>
+        </AccountGate>
+      </AccountProvider>
     </ThemeProvider>
   );
 }

@@ -10,7 +10,7 @@ describe('dashboard date ranges', () => {
   it('defaults to the current calendar month and shows the dates', async () => {
     await openApp('/dashboard', { seed: dashboardWorld() });
     expect(shown()).toBe('Showing 1 Oct 2026 to 31 Oct 2026');
-    expect(screen.getByLabelText('Current month')).toBeTruthy();
+    expect(screen.getByLabelText('This month')).toBeTruthy();
   });
 
   it('every preset shows its exact dates', async () => {

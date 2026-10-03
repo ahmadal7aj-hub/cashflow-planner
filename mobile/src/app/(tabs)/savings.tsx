@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { Pressable } from 'react-native';
 
 import { GoalBar } from '../../components/dashboardParts';
 import { EmptyState } from '../../components/EmptyState';
@@ -13,6 +14,7 @@ import { balanceAsOf, projectMonth, targetInMonth } from '../../domain/savingsEn
 import { goalProgress, type GoalProgress } from '../../domain/savingsInsights';
 import { t } from '../../i18n/strings';
 import { usePrototype } from '../../state/PrototypeContext';
+import { useSharing } from '../../state/SharingContext';
 
 function signed(fils: number): string {
   return fils > 0 ? `+${formatAed(fils)}` : formatAed(fils);
@@ -45,6 +47,7 @@ function movementLabel(m: SavingsMovement): string {
 export default function Savings() {
   const router = useRouter();
   const { plan, today, removeSavingsEntry, removeGoal } = usePrototype();
+  const sharing = useSharing();
   const ledger = plan.savings;
   const balance = balanceAsOf(ledger, today);
   const month = monthOf(today);
@@ -125,10 +128,18 @@ export default function Savings() {
       <Heading>{t.savingsPage.activityTitle}</Heading>
       {movements.length === 0 ? <Body muted>{t.savingsPage.noActivity}</Body> : null}
       {movements.map((m) => {
+        const groupName = m.share
+          ? sharing.groups.find((g) => g.groupId === m.share?.groupId)?.name
+          : undefined;
         const card = (
           <Card testID={`movement-${m.id}`}>
             <Row label={movementLabel(m)} value={signed(m.change)} strong />
             <Body muted>{formatDate(m.date)}</Body>
+            {m.share ? (
+              <Body muted testID={`movement-shared-${m.id}`}>
+                {t.shareChoice.sharedWith(groupName ?? t.groupsPage.title)}
+              </Body>
+            ) : null}
           </Card>
         );
         return m.kind === 'deposit' || m.kind === 'withdrawal' ? (
@@ -138,7 +149,15 @@ export default function Savings() {
             name={movementLabel(m)}
             onDelete={() => removeSavingsEntry(m.id)}
           >
-            {card}
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`${movementLabel(m)}, ${signed(m.change)}, ${formatDate(m.date)}`}
+              onPress={() => router.push(`/edit/savings-edit/${m.id}`)}
+              onLongPress={() => router.push(`/edit/savings-edit/${m.id}`)}
+              testID={`movement-edit-${m.id}`}
+            >
+              {card}
+            </Pressable>
           </SwipeableCard>
         ) : (
           <Card key={m.id} testID={`movement-${m.id}`}>

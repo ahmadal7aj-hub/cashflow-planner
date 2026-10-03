@@ -19,6 +19,19 @@ export interface KeyValueStore {
   setItem(key: string, value: string): Promise<void>;
 }
 
+/** Each signed-in account keeps its own plan under its own key; the plain key is the phone's original data. */
+export const USER_PLAN_PREFIX = 'cashflow.plan.';
+export const ADOPTED_KEY = 'cashflow.adopted';
+export const DEVICE_KEY = 'cashflow.device';
+
+export function planKeyFor(userId: string | null | undefined): string {
+  return userId ? `${USER_PLAN_PREFIX}${userId}` : STORAGE_KEY;
+}
+
+function suffixFor(key: string): string {
+  return key === STORAGE_KEY ? '' : `.${key}`;
+}
+
 interface Envelope {
   schemaVersion: number;
   plan: unknown;
@@ -58,8 +71,9 @@ export async function loadPlan(
   store: KeyValueStore,
   stamp: string,
   migrations: Record<number, Migration> = MIGRATIONS,
+  key: string = STORAGE_KEY,
 ): Promise<LoadResult> {
-  const text = await store.getItem(STORAGE_KEY);
+  const text = await store.getItem(key);
   if (text === null) return { status: 'empty' };
 
   let env: Envelope;
@@ -73,7 +87,7 @@ export async function loadPlan(
       throw new Error('bad envelope');
     env = parsed as Envelope;
   } catch {
-    const backupKey = `${BACKUP_PREFIX}unreadable.${stamp}`;
+    const backupKey = `${BACKUP_PREFIX}unreadable.${stamp}${suffixFor(key)}`;
     await store.setItem(backupKey, text);
     return { status: 'unreadable', backupKey };
   }
@@ -85,7 +99,7 @@ export async function loadPlan(
   let version = env.schemaVersion;
   const from = version;
   if (version < CURRENT_SCHEMA) {
-    await store.setItem(`${BACKUP_PREFIX}v${from}.${stamp}`, text);
+    await store.setItem(`${BACKUP_PREFIX}v${from}.${stamp}${suffixFor(key)}`, text);
     while (version < CURRENT_SCHEMA) {
       const step = migrations[version];
       if (!step) break;
@@ -100,7 +114,42 @@ export async function loadPlan(
   };
 }
 
-export async function savePlan(store: KeyValueStore, plan: Plan): Promise<void> {
+export async function savePlan(
+  store: KeyValueStore,
+  plan: Plan,
+  key: string = STORAGE_KEY,
+): Promise<void> {
   const env: Envelope = { schemaVersion: CURRENT_SCHEMA, plan };
-  await store.setItem(STORAGE_KEY, JSON.stringify(env));
+  await store.setItem(key, JSON.stringify(env));
+}
+
+/**
+ * The first account to sign in on a phone takes over the data that was already on it (so nothing entered before
+ * accounts existed is lost). It is COPIED: the original stays where it was, and a backup is written. Later
+ * accounts on the same phone start empty, so nobody sees another person's records.
+ * Returns true when data was adopted.
+ */
+export async function adoptLegacyPlan(
+  store: KeyValueStore,
+  userId: string,
+  stamp: string,
+): Promise<boolean> {
+  const userKey = planKeyFor(userId);
+  if ((await store.getItem(userKey)) !== null) return false;
+  if ((await store.getItem(ADOPTED_KEY)) !== null) return false;
+  const legacy = await store.getItem(STORAGE_KEY);
+  if (legacy === null) return false;
+  await store.setItem(`${BACKUP_PREFIX}adopted.${stamp}`, legacy);
+  await store.setItem(userKey, legacy);
+  await store.setItem(ADOPTED_KEY, userId);
+  return true;
+}
+
+/** A random id for this phone, kept for good. Savings shared from this phone are keyed by it. */
+export async function getDeviceId(store: KeyValueStore): Promise<string> {
+  const existing = await store.getItem(DEVICE_KEY);
+  if (existing) return existing;
+  const id = `d${Math.random().toString(36).slice(2, 10)}${Date.now().toString(36).slice(-4)}`;
+  await store.setItem(DEVICE_KEY, id);
+  return id;
 }

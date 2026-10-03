@@ -24,6 +24,7 @@ import {
 import { addDays, daysBetween, nextOnOrAfter, type ISODate } from '../../../domain/dates';
 import { INVESTMENT_TYPES, getInvestmentType } from '../../../domain/investmentInsights';
 import { formatAed, parseAmountToFils, type Fils } from '../../../domain/money';
+import type { MyShare } from '../../../backend/sharingApi';
 import { balanceAsOf, targetInMonth } from '../../../domain/savingsEngine';
 import { monthOf } from '../../../domain/months';
 import {
@@ -33,9 +34,9 @@ import {
   getIncomeCategory,
   type IncomeKind,
 } from '../../../domain/uaeCategories';
-import { sharedKey } from '../../../domain/sharedDashboard';
 import { t } from '../../../i18n/strings';
 import { usePrototype } from '../../../state/PrototypeContext';
+import { useSharing } from '../../../state/SharingContext';
 
 type Kind =
   | 'income'
@@ -47,6 +48,8 @@ type Kind =
   | 'savings-out'
   | 'savings-target'
   | 'savings-opening'
+  | 'savings-edit'
+  | 'shared-entry'
   | 'expense'
   | 'investment';
 
@@ -60,6 +63,8 @@ const KINDS: readonly string[] = [
   'savings-out',
   'savings-target',
   'savings-opening',
+  'savings-edit',
+  'shared-entry',
   'expense',
   'investment',
 ];
@@ -92,6 +97,8 @@ export default function EditItem() {
   }
 
   if (kind === 'savings-target') return <SavingsTargetForm />;
+  if (kind === 'savings-edit') return <SavingsEditForm movementId={id} />;
+  if (kind === 'shared-entry') return <SharedEntryForm entryId={id} />;
   if (kind === 'savings-opening') return <SavingsOpeningForm />;
   if (kind === 'expense') {
     const tx = store.plan.transactions.find((x) => x.id === id);
@@ -128,7 +135,7 @@ function NotFound() {
 
 function ExpenseForm({ kind, existing }: { kind: 'fixed' | 'variable'; existing?: ExpenseItem }) {
   const router = useRouter();
-  const { plan, today, upsertExpense, removeExpense, sharing, setShared } = usePrototype();
+  const { plan, today, upsertExpense, removeExpense } = usePrototype();
   const categories = EXPENSE_CATEGORIES.filter((c) => c.kind === kind);
   const first = categories[0]!;
   const [categoryId, setCategoryId] = useState(existing?.categoryId ?? first.id);
@@ -141,9 +148,6 @@ function ExpenseForm({ kind, existing }: { kind: 'fixed' | 'variable'; existing?
   const [reminder, setReminder] = useState<number | undefined>(existing?.reminderDaysBefore);
   const [essential, setEssential] = useState<'yes' | 'no'>(
     (existing?.essential ?? first.essential) ? 'yes' : 'no',
-  );
-  const [share, setShare] = useState(
-    existing ? sharing.sharedKeys.includes(sharedKey('exp', existing.id)) : false,
   );
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
 
@@ -172,7 +176,6 @@ function ExpenseForm({ kind, existing }: { kind: 'fixed' | 'variable'; existing?
     if (Object.keys(next).length > 0 || !a.ok) return;
 
     const id = existing?.id ?? nextId('exp', plan.expenses);
-    if (sharing.linked) setShared(sharedKey('exp', id), share);
     upsertExpense({
       id,
       name: name.trim(),
@@ -249,7 +252,6 @@ function ExpenseForm({ kind, existing }: { kind: 'fixed' | 'variable'; existing?
           { value: 'no', label: t.edit.essentialNo },
         ]}
       />
-      <ShareToggle value={share} onChange={setShare} />
       <Button label={t.edit.save} onPress={save} testID="edit-save" />
       {existing && (
         <DeleteButton
@@ -385,10 +387,7 @@ function IncomeForm({ existing }: { existing?: IncomeItem }) {
 
 function GoalForm({ existing }: { existing?: SavingsGoal }) {
   const router = useRouter();
-  const { plan, today, upsertGoal, removeGoal, sharing, setShared } = usePrototype();
-  const [share, setShare] = useState(
-    existing ? sharing.sharedKeys.includes(sharedKey('goal', existing.id)) : false,
-  );
+  const { plan, today, upsertGoal, removeGoal } = usePrototype();
   const [name, setName] = useState(existing?.name ?? '');
   const [target, setTarget] = useState(existing ? toInput(existing.target) : '');
   const [saved, setSaved] = useState(existing ? toInput(existing.saved) : '0');
@@ -416,7 +415,6 @@ function GoalForm({ existing }: { existing?: SavingsGoal }) {
     if (Object.keys(next).length > 0 || !tg.ok || !sv.ok || !mo.ok) return;
 
     const id = existing?.id ?? nextId('goal', plan.goals);
-    if (sharing.linked) setShared(sharedKey('goal', id), share);
     if (emergency === 'yes') {
       // Only one goal can be the emergency fund: clear the flag on any other goal.
       for (const g of plan.goals) {
@@ -512,7 +510,6 @@ function GoalForm({ existing }: { existing?: SavingsGoal }) {
           { value: 'no', label: 'No' },
         ]}
       />
-      <ShareToggle value={share} onChange={setShare} />
       <Button label={t.edit.save} onPress={save} testID="edit-save" />
       {existing && (
         <DeleteButton
@@ -574,7 +571,7 @@ function EmploymentForm({ existing }: { existing?: Employment | undefined }) {
 function SavingsMoveForm({ direction }: { direction: 'in' | 'out' }) {
   const router = useRouter();
   const { plan, today, addToSavings, takeFromSavings } = usePrototype();
-  const [share, setShare] = useState(false);
+  const [groupId, setGroupId] = useState<string | null>(null);
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
   const [date, setDate] = useState<ISODate | null>(today);
@@ -593,8 +590,8 @@ function SavingsMoveForm({ direction }: { direction: 'in' | 'out' }) {
     }
     const result =
       direction === 'in'
-        ? addToSavings(a.fils, note, date, share)
-        : takeFromSavings(a.fils, note, date);
+        ? addToSavings(a.fils, note, date, groupId ?? undefined)
+        : takeFromSavings(a.fils, note, date, groupId ?? undefined);
     if (result === 'insufficient') {
       setErrors({ amount: t.savingsPage.errorInsufficient(formatAed(balance ?? 0)) });
       return;
@@ -640,8 +637,196 @@ function SavingsMoveForm({ direction }: { direction: 'in' | 'out' }) {
         error={errors.date}
       />
       <Field label={t.savingsPage.formNote} testID="note" value={note} onChangeText={setNote} />
-      {direction === 'in' ? <ShareToggle value={share} onChange={setShare} /> : null}
+      <ShareToggle value={groupId} onChange={setGroupId} />
       <Button label={t.edit.save} onPress={save} testID="edit-save" />
+    </Screen>
+  );
+}
+
+/** Edit a manual saving: amount, date, note and which group (if any) it is shared with. */
+function SavingsEditForm({ movementId }: { movementId: string | undefined }) {
+  const router = useRouter();
+  const { plan, today, updateSavingsEntry, removeSavingsEntry } = usePrototype();
+  const sharing = useSharing();
+  const movement = plan.savings.movements.find((m) => m.id === movementId);
+  const editable = movement && (movement.kind === 'deposit' || movement.kind === 'withdrawal');
+  const [amount, setAmount] = useState(movement ? toInput(Math.abs(movement.change)) : '');
+  const [date, setDate] = useState<ISODate | null>(movement?.date ?? today);
+  const [note, setNote] = useState(movement?.note ?? '');
+  const [groupId, setGroupId] = useState<string | null>(movement?.share?.groupId ?? null);
+  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+
+  if (!movement || !editable) return <NotFound />;
+  const group = sharing.groups.find((g) => g.groupId === movement.share?.groupId);
+
+  const save = () => {
+    const a = parseAmountToFils(amount);
+    const next: Record<string, string | undefined> = {};
+    if (!a.ok || a.fils <= 0) next.amount = t.savingsPage.errorAmount;
+    if (date === null) next.date = t.spendForm.errorDate;
+    setErrors(next);
+    if (Object.keys(next).length > 0 || !a.ok || date === null) return;
+    const result = updateSavingsEntry(movement.id, {
+      amount: a.fils,
+      date,
+      note,
+      groupId,
+    });
+    if (result === 'insufficient') {
+      setErrors({ amount: t.savingsPage.errorInsufficient(formatAed(0)) });
+      return;
+    }
+    if (result === 'before-opening') {
+      setErrors({ date: t.savingsPage.errorBeforeOpening });
+      return;
+    }
+    if (result === 'future') {
+      setErrors({ date: t.sharedEntry.errorDate });
+      return;
+    }
+    if (result !== 'ok') {
+      setErrors({ amount: t.savingsPage.errorAmount });
+      return;
+    }
+    router.back();
+  };
+
+  return (
+    <Screen testID="edit-screen">
+      <Heading>
+        {movement.kind === 'deposit' ? t.savingsPage.deposit : t.savingsPage.withdrawal}
+      </Heading>
+      {group ? (
+        <Body muted testID="shared-with">
+          {t.shareChoice.sharedWith(group.name)}
+        </Body>
+      ) : null}
+      <Field
+        label={t.savingsPage.formAmount}
+        testID="amount"
+        value={amount}
+        onChangeText={setAmount}
+        error={errors.amount}
+        keyboardType="decimal-pad"
+      />
+      <DateField
+        label={t.savingsPage.formDate}
+        testID="move-date"
+        value={date}
+        today={today}
+        maxDate={today}
+        onChange={setDate}
+        error={errors.date}
+      />
+      <Field label={t.savingsPage.formNote} testID="note" value={note} onChangeText={setNote} />
+      <ShareToggle value={groupId} onChange={setGroupId} />
+      <Button label={t.edit.save} onPress={save} testID="edit-save" />
+      <DeleteButton
+        onConfirm={() => {
+          removeSavingsEntry(movement.id);
+          router.back();
+        }}
+      />
+    </Screen>
+  );
+}
+
+/**
+ * Edit a shared saving straight from the Shared Savings dashboard. Used for savings shared from another phone;
+ * savings made on this phone are edited with the saving itself. Only the owner can change it (the database checks).
+ */
+function SharedEntryForm({ entryId }: { entryId: string | undefined }) {
+  const router = useRouter();
+  const { today } = usePrototype();
+  const sharing = useSharing();
+  const [entry, setEntry] = useState<MyShare | null | undefined>(undefined);
+  const [amount, setAmount] = useState('');
+  const [date, setDate] = useState<ISODate | null>(null);
+  const [note, setNote] = useState('');
+  const [errors, setErrors] = useState<Record<string, string | undefined>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!sharing.api) return;
+    sharing.api
+      .myShares()
+      .then((all) => {
+        if (cancelled) return;
+        const mine = all.find((x) => x.id === entryId) ?? null;
+        setEntry(mine);
+        if (mine) {
+          setAmount(toInput(mine.amount));
+          setDate(mine.entryDate);
+          setNote(mine.note);
+        }
+      })
+      .catch(() => !cancelled && setEntry(null));
+    return () => {
+      cancelled = true;
+    };
+  }, [sharing.api, entryId]);
+
+  if (entry === undefined)
+    return (
+      <Screen testID="edit-screen">
+        <Body>{t.auth.checking}</Body>
+      </Screen>
+    );
+  if (entry === null) {
+    return (
+      <Screen testID="edit-screen">
+        <Body testID="shared-entry-missing">{t.sharedEntry.notFound}</Body>
+      </Screen>
+    );
+  }
+  const current = entry;
+
+  const save = async () => {
+    const a = parseAmountToFils(amount);
+    const next: Record<string, string | undefined> = {};
+    if (!a.ok || a.fils <= 0) next.amount = t.sharedEntry.errorAmount;
+    if (date === null || date > today) next.date = t.sharedEntry.errorDate;
+    setErrors(next);
+    if (Object.keys(next).length > 0 || !a.ok || date === null || !sharing.api) return;
+    try {
+      await sharing.api.share({
+        groupId: current.groupId,
+        localId: current.localId,
+        kind: current.kind,
+        amount: a.fils,
+        date,
+        note: note.trim(),
+      });
+      await sharing.refresh();
+      router.back();
+    } catch (e) {
+      setErrors({ form: e instanceof Error ? e.message : t.auth.errors.unknown });
+    }
+  };
+
+  return (
+    <Screen testID="edit-screen">
+      <Heading>{t.sharedEntry.title}</Heading>
+      <Field
+        label={t.sharedEntry.amount}
+        testID="amount"
+        value={amount}
+        onChangeText={setAmount}
+        error={errors.amount}
+        keyboardType="decimal-pad"
+      />
+      <DateField
+        label={t.sharedEntry.date}
+        testID="shared-date"
+        value={date}
+        today={today}
+        maxDate={today}
+        onChange={setDate}
+        error={errors.date}
+      />
+      <Field label={t.sharedEntry.note} testID="note" value={note} onChangeText={setNote} />
+      {errors.form ? <Body testID="shared-entry-error">{errors.form}</Body> : null}
+      <Button label={t.sharedEntry.save} onPress={save} testID="edit-save" />
     </Screen>
   );
 }

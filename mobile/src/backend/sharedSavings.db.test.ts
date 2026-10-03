@@ -1,8 +1,8 @@
 /** @jest-environment node */
 import type { UserSession } from '../testing/db';
-import { aed, groupOf, refused, share, useTestDb } from '../testing/dbHarness';
+import { aed, groupOf, refused, share, withTestDb } from '../testing/dbHarness';
 
-const { db } = useTestDb();
+const { db } = withTestDb();
 
 /**
  * The database refuses savings dated in the future, using its own clock. So these tests build their dates from the
