@@ -23,6 +23,8 @@ app needs are public by design.
    paste it in, and press **Run**. It should finish with "Success".
 3. This creates the profiles, groups, members, shared entries and history tables, turns on **Row Level Security** on
    every one, and creates the functions the app calls. It does not touch anything else.
+4. Do the same with the second file, `supabase/migrations/20261004000000_profile_name_phone.sql` (optional name and phone
+   on the profile). Always run the migrations in file-name order.
 
 ## 3. Authentication settings
 

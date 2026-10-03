@@ -55,11 +55,11 @@ function createAuthService(client: SupabaseClient, rpc: RpcClient): AuthService 
     async usernameAvailable(username) {
       return (await rpc.rpc<boolean>('username_available', { p_username: username })) === true;
     },
-    async signUp(email, password, username) {
+    async signUp(email, password, username, profile) {
       const { data, error } = await auth.signUp({
         email,
         password,
-        options: { data: { username } },
+        options: { data: { username, full_name: profile?.fullName, phone: profile?.phone } },
       });
       if (error) {
         const mapped = mapAuthError(error);

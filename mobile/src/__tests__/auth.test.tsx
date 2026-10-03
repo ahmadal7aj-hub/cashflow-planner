@@ -1,12 +1,13 @@
 import { fireEvent, renderRouter, screen, waitFor } from 'expo-router/testing-library';
-import { cleanup } from '@testing-library/react-native';
+import { act, cleanup } from '@testing-library/react-native';
+import { router } from 'expo-router';
 
 import { emptyPlan } from '../domain/budgetModel';
 import { setTestBackend } from '../state/testBackend';
 import { setTestSeed } from '../state/testSeed';
 import { routes } from '../testing/app';
 import type { TestDb } from '../testing/db';
-import { openAccountsApp, startTestDb } from '../testing/accountsApp';
+import { openAccountsApp, settle, startTestDb } from '../testing/accountsApp';
 import { RESET_CODE, SIGNUP_CODE, TestBackend } from '../testing/fakeBackend';
 
 let db: TestDb;
@@ -259,5 +260,60 @@ describe('my profile', () => {
     expect(screen.getByTestId('profile-username')).toHaveTextContent('sara_a');
     expect(screen.getByTestId('profile-email')).toHaveTextContent('sara@example.com');
     expect(screen.getByTestId('profile-share-username')).toBeTruthy();
+  });
+});
+
+describe('name and phone', () => {
+  it('are optional at sign-up, shown on the profile, and can be edited or cleared', async () => {
+    await openAccountsApp(db);
+    await waitFor(() => expect(screen.getByTestId('auth-login')).toBeTruthy());
+    await fireEvent.press(screen.getByTestId('auth-to-register'));
+    await type('auth-username', 'sara_a');
+    await type('auth-email', 'sara@example.com');
+    await type('auth-fullname', 'Sara Ahmed');
+    await type('auth-phone', '+971 50 123 4567');
+    await type('auth-password', 'a-long-password');
+    await fireEvent.press(screen.getByTestId('auth-submit'));
+    await waitFor(() => expect(screen.getByTestId('auth-verify')).toBeTruthy());
+    await type('auth-code', SIGNUP_CODE);
+    await fireEvent.press(screen.getByTestId('auth-submit'));
+    await waitFor(() => expect(screen.getByTestId('home-screen')).toBeTruthy());
+    await settle(db); // the app first returns to the welcome page after signing in
+    await act(async () => router.push('/account'));
+    await waitFor(() => expect(screen.getByTestId('profile-name')).toBeTruthy());
+    expect(screen.getByTestId('profile-name')).toHaveTextContent('Sara Ahmed');
+    expect(screen.getByTestId('profile-phone')).toHaveTextContent('+971 50 123 4567');
+
+    // A bad phone number is refused and nothing changes.
+    await fireEvent.press(screen.getByTestId('profile-edit'));
+    await type('profile-edit-phone', 'call me');
+    await fireEvent.press(screen.getByTestId('profile-save'));
+    expect(screen.getByTestId('error-profile-edit-phone')).toBeTruthy();
+
+    await type('profile-edit-phone', '');
+    await type('profile-edit-name', 'Sara A.');
+    await fireEvent.press(screen.getByTestId('profile-save'));
+    await settle(db);
+    await waitFor(() => expect(screen.getByTestId('profile-saved')).toBeTruthy());
+    expect(screen.getByTestId('profile-name')).toHaveTextContent('Sara A.');
+    expect(screen.getByTestId('profile-phone')).toHaveTextContent('Not set');
+    const rows = await db.admin<{ full_name: string; phone: string | null }>(
+      'select full_name, phone from public.profiles',
+    );
+    expect(rows).toEqual([{ full_name: 'Sara A.', phone: null }]);
+  });
+
+  it('can be left out entirely', async () => {
+    await openAccountsApp(db);
+    await waitFor(() => expect(screen.getByTestId('auth-login')).toBeTruthy());
+    await register('lee@example.com', 'lee_l');
+    await waitFor(() => expect(screen.getByTestId('auth-verify')).toBeTruthy());
+    await type('auth-code', SIGNUP_CODE);
+    await fireEvent.press(screen.getByTestId('auth-submit'));
+    await waitFor(() => expect(screen.getByTestId('home-screen')).toBeTruthy());
+    await settle(db);
+    await act(async () => router.push('/account'));
+    await waitFor(() => expect(screen.getByTestId('profile-name')).toBeTruthy());
+    expect(screen.getByTestId('profile-name')).toHaveTextContent('Not set');
   });
 });

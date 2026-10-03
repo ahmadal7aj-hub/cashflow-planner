@@ -121,3 +121,56 @@ describe('structure guards', () => {
     expect(rows).toEqual([]);
   });
 });
+
+describe('optional name and phone', () => {
+  it('are saved from the sign-up details and returned only to their owner', async () => {
+    const alice = await db.signUp('alice@example.com', 'alice', {
+      fullName: 'Alice A',
+      phone: '+971 50 123 4567',
+    });
+    const bob = await db.signUp('bob@example.com', 'bob');
+    const mine = await alice.rpc<{ full_name: string; phone: string }[]>('my_profile');
+    expect(mine[0]).toMatchObject({ full_name: 'Alice A', phone: '+971 50 123 4567' });
+    const his = await bob.rpc<{ full_name: string | null }[]>('my_profile');
+    expect(his[0]!.full_name).toBeNull();
+    // Another person's row is not readable, so their phone is not reachable.
+    expect(await bob.query('select phone from public.profiles')).toEqual([{ phone: null }]);
+  });
+
+  it('a badly formatted optional detail never blocks registration, it is just left empty', async () => {
+    const carl = await db.signUp('carl@example.com', 'carl', { phone: 'call me', fullName: 'C' });
+    const me = (await carl.rpc<{ full_name: string; phone: string | null }[]>('my_profile'))[0]!;
+    expect(me.phone).toBeNull();
+    expect(me.full_name).toBe('C');
+  });
+
+  it('can be changed or cleared with update_my_contact, which refuses bad values and only touches your own row', async () => {
+    const alice = await db.signUp('alice@example.com', 'alice', { fullName: 'Alice' });
+    const bob = await db.signUp('bob@example.com', 'bob', { fullName: 'Bob' });
+    await alice.rpc('update_my_contact', { p_full_name: 'Alice B', p_phone: '0501234567' });
+    const mine = await alice.rpc<{ full_name: string; phone: string }[]>('my_profile');
+    expect(mine[0]).toMatchObject({ full_name: 'Alice B', phone: '0501234567' });
+    const his = await bob.rpc<{ full_name: string }[]>('my_profile');
+    expect(his[0]!.full_name).toBe('Bob');
+    expect(
+      await denied(alice.rpc('update_my_contact', { p_full_name: '', p_phone: 'abc' })),
+    ).toMatch(/phone/);
+    expect(
+      await denied(alice.rpc('update_my_contact', { p_full_name: 'x'.repeat(81), p_phone: '' })),
+    ).toMatch(/80/);
+    await alice.rpc('update_my_contact', { p_full_name: '', p_phone: '' });
+    const cleared = await alice.rpc<{ full_name: string | null }[]>('my_profile');
+    expect(cleared[0]!.full_name).toBeNull();
+    // Not callable without signing in.
+    expect(
+      await denied(db.as(null).rpc('update_my_contact', { p_full_name: 'x', p_phone: '' })),
+    ).toBeTruthy();
+  });
+
+  it('the username still cannot change', async () => {
+    const alice = await db.signUp('alice@example.com', 'alice');
+    expect(
+      await denied(alice.query("update public.profiles set username = 'other' where true")),
+    ).toBeTruthy();
+  });
+});

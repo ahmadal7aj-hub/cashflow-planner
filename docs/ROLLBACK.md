@@ -83,6 +83,8 @@ Nothing here is destructive by default. Do **not** use `git reset --hard`, force
 5. **Only if you also want the backend gone:** after exporting, run `supabase/rollback/20261003000000_down.sql` in the
    Supabase SQL Editor. It deletes every group, membership and shared entry **for everybody** and keeps the sign-in
    accounts. This is tested (`rollback.db.test.ts`) but cannot be undone, so it is never part of the default rollback.
+   To undo only the optional name and phone (and keep everything else), run `supabase/rollback/20261004000000_down.sql`
+   instead; it deletes just those two values. Checkpoint before that change: `checkpoint/pre-profile-fields-2026-10-03`.
 
 ## What happens to people's records
 

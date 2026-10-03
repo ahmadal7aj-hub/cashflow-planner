@@ -1,5 +1,11 @@
 import type { RpcClient, RpcName } from '../backend/contract';
-import { AuthError, type AuthService, type AuthUser, type Backend } from '../backend/types';
+import {
+  AuthError,
+  type AuthService,
+  type AuthUser,
+  type Backend,
+  type SignUpProfile,
+} from '../backend/types';
 import type { TestDb } from './db';
 
 export const SIGNUP_CODE = '123456';
@@ -7,6 +13,7 @@ export const RESET_CODE = '654321';
 
 interface Account {
   password: string;
+  profile?: SignUpProfile;
   username: string;
   verified: boolean;
   userId: string | null;
@@ -47,10 +54,10 @@ export class TestBackend implements Backend {
   readonly auth: AuthService = {
     usernameAvailable: async (username) =>
       (await this.db.as(null).rpc('username_available', { p_username: username })) === true,
-    signUp: async (email, password, username) => {
+    signUp: async (email, password, username, profile) => {
       const existing = this.accounts.get(email);
       if (existing?.verified) throw new AuthError('email_taken');
-      this.accounts.set(email, { password, username, verified: false, userId: null });
+      this.accounts.set(email, { password, username, profile, verified: false, userId: null });
       this.sentCodes.push({ email, kind: 'signup' });
       return 'verification-sent';
     },
@@ -59,7 +66,7 @@ export class TestBackend implements Backend {
       if (!account || code !== SIGNUP_CODE) throw new AuthError('invalid_code');
       if (!account.userId) {
         try {
-          const session = await this.db.signUp(email, account.username);
+          const session = await this.db.signUp(email, account.username, account.profile);
           account.userId = session.id;
         } catch {
           throw new AuthError('username_taken');

@@ -58,3 +58,23 @@ export function codeProblem(input: string): 'empty' | 'invalid' | null {
   if (c === '') return 'empty';
   return /^\d{6,10}$/.test(c) ? null : 'invalid';
 }
+
+export const PHONE_PATTERN = /^\+?[0-9 ()-]{6,20}$/;
+export const MAX_NAME_LENGTH = 80;
+
+/** A display name is optional: empty is fine, otherwise at most 80 characters. */
+export function normalizeName(input: string): string {
+  return input.trim().replace(/\s+/g, ' ');
+}
+export function nameProblem(input: string): 'length' | null {
+  return normalizeName(input).length > MAX_NAME_LENGTH ? 'length' : null;
+}
+
+/** A phone number is optional: empty is fine, otherwise digits with an optional leading + (6 to 20 characters). */
+export function normalizePhone(input: string): string {
+  return input.trim();
+}
+export function phoneProblem(input: string): 'invalid' | null {
+  const p = normalizePhone(input);
+  return p === '' || PHONE_PATTERN.test(p) ? null : 'invalid';
+}

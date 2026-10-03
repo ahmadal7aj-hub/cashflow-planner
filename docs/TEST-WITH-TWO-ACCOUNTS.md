@@ -50,7 +50,10 @@ You can use **two phones**, or **one phone** and switch accounts (Settings, **Ac
 **Account A**
 
 1. **Create an account**: a unique username (for example `sara_a`), an email (any address, for example `a@test.com`) and a
-   password of at least 10 characters. Type the code **123456**.
+   password of at least 10 characters. Name and phone are optional. Type the code **123456**.
+   Tap the person icon at the top right any time to see your profile (username, email, name, phone). Give your
+   **username or email** to the other person: they use it to invite you. The phone number is only for you; it is not used
+   to find people because it is not verified.
 2. Tap **Get started** and answer the savings questions (0 is fine).
 3. Settings, **Account and groups**, **Groups and shared savings**, **Start a group** (for example "Home"). On the group
    screen type the other person's **username** under **Invite someone** and send.
