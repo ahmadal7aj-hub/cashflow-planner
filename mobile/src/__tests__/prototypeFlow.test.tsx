@@ -58,13 +58,10 @@ describe('prototype journey (P1-01)', () => {
     expect(screen.getByText('DEVELOPMENT build')).toBeTruthy();
   });
 
-  it('walks welcome -> onboarding -> commitments -> dashboard with correct numbers', async () => {
+  it('walks welcome -> commitments -> dashboard with correct numbers', async () => {
     const { getPathname } = await openApp();
 
     await fireEvent.press(screen.getByTestId('start-button'));
-    await waitFor(() => expect(getPathname()).toBe('/onboarding'));
-
-    await fireEvent.press(screen.getByTestId('onboarding-continue'));
     await waitFor(() => expect(getPathname()).toBe('/commitments'));
 
     await fireEvent.press(screen.getByTestId('commitments-continue'));
@@ -143,6 +140,9 @@ describe('prototype journey (P1-01)', () => {
     const { getPathname } = await openApp();
 
     await fireEvent.press(screen.getByTestId('start-button'));
+    await waitFor(() => expect(getPathname()).toBe('/commitments'));
+    // The starting-numbers page is optional now: editing the numbers completes it.
+    await fireEvent.press(screen.getByTestId('edit-balance'));
     await waitFor(() => expect(getPathname()).toBe('/onboarding'));
     await fireEvent.press(screen.getByTestId('onboarding-continue'));
     await waitFor(() => expect(getPathname()).toBe('/commitments'));

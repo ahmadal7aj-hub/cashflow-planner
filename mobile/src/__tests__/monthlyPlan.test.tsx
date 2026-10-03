@@ -106,6 +106,26 @@ describe('income can be zero or removed, and spending follows the balance', () =
     expect(screen.getByTestId('error-amount')).toBeTruthy();
   });
 
+  it('removes an item straight from the list, including the salary and the car loan', async () => {
+    await open('/commitments');
+    expect(screen.getByTestId('income-salary')).toBeTruthy();
+    await fireEvent.press(screen.getByTestId('remove-salary'));
+    expect(screen.queryByTestId('income-salary')).toBeNull();
+
+    expect(screen.getByTestId('expense-car')).toBeTruthy(); // the sample car loan
+    await fireEvent.press(screen.getByTestId('remove-car'));
+    expect(screen.queryByTestId('expense-car')).toBeNull();
+  });
+
+  it('accepts zero for an everyday budget', async () => {
+    const { getPathname } = await open('/commitments');
+    await fireEvent.press(screen.getByTestId('add-variable'));
+    await waitFor(() => expect(getPathname()).toBe('/edit/variable/new'));
+    await fireEvent.changeText(screen.getByTestId('input-amount'), '0');
+    await fireEvent.press(screen.getByTestId('edit-save'));
+    await waitFor(() => expect(getPathname()).toBe('/commitments'));
+  });
+
   it('deletes an income item', async () => {
     const { getPathname } = await open('/commitments');
     await fireEvent.press(screen.getByTestId('income-side'));
@@ -119,7 +139,9 @@ describe('income can be zero or removed, and spending follows the balance', () =
     const { getPathname } = await open('/commitments');
     await fireEvent.press(screen.getByTestId('clear-sample'));
     expect(screen.queryByTestId('income-salary')).toBeNull();
-    expect(screen.queryByTestId('expense-rent')).toBeNull();
+    // Only the core essentials stay, at zero; the car loan is gone.
+    expect(screen.getByTestId('expense-starter-rent')).toBeTruthy();
+    expect(screen.queryByTestId('expense-car')).toBeNull();
     await fireEvent.press(screen.getByTestId('commitments-continue'));
     await waitFor(() => expect(getPathname()).toBe('/dashboard'));
   });

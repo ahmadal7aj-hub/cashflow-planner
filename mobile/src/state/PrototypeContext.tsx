@@ -23,6 +23,7 @@ import {
 import { computeForecast, type ForecastResult } from '../domain/prototypeForecast';
 import { remindersFor, type Reminder } from '../domain/reminders';
 import { SAMPLE_PLAN, SCENARIO_PRESET } from '../domain/sampleData';
+import { starterExpenses } from '../domain/starterPlan';
 
 interface PrototypeState {
   /** Today's date (device clock), used to turn real dates into days. */
@@ -139,7 +140,7 @@ export function PrototypeProvider({
         setPlan((p) => ({
           ...p,
           income: [],
-          expenses: [],
+          expenses: starterExpenses(),
           goals: [],
           investments: [],
           savings: { balance: 0, entries: [] },

@@ -14,15 +14,9 @@ appId: host.exp.exponent
     id: 'home-screen'
 - assertVisible: 'UAE Cash-Flow Planner'
 
-# Welcome -> onboarding
+# Welcome -> income and expenses (the starting-numbers page is optional)
 - tapOn:
     id: 'start-button'
-- assertVisible:
-    id: 'onboarding-screen'
-
-# Onboarding -> commitments (sample numbers are pre-filled and valid)
-- tapOn:
-    id: 'onboarding-continue'
 - assertVisible:
     id: 'commitments-screen'
 

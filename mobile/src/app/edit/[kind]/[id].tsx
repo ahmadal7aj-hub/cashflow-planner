@@ -168,7 +168,7 @@ function ExpenseForm({ kind, existing }: { kind: 'fixed' | 'variable'; existing?
     const s = parseAmountToFils(spent);
     const next: Record<string, string | undefined> = {};
     if (name.trim() === '') next.name = t.edit.errorName;
-    if (!a.ok || a.fils <= 0) next.amount = t.edit.errorAmount;
+    if (!a.ok) next.amount = t.edit.errorAmount;
     if (kind === 'variable' && !s.ok) next.spent = t.edit.errorAmount;
     if (kind === 'fixed') {
       if (dueDate === null) next.date = t.dates.errorDueDate;
@@ -435,7 +435,7 @@ function GoalForm({ existing }: { existing?: SavingsGoal }) {
     const mo = parseAmountToFils(monthly);
     const next: Record<string, string | undefined> = {};
     if (name.trim() === '') next.name = t.edit.errorName;
-    if (!tg.ok || tg.fils <= 0) next.target = t.edit.errorAmount;
+    if (!tg.ok) next.target = t.edit.errorAmount;
     if (!sv.ok) next.saved = t.edit.errorAmount;
     if (!mo.ok) next.monthly = t.edit.errorAmount;
     setErrors(next);
@@ -565,7 +565,7 @@ function EmploymentForm({ existing }: { existing?: Employment | undefined }) {
     const b = parseAmountToFils(basic);
     const next: Record<string, string | undefined> = {};
     if (y === undefined || y > 60) next.years = 'Enter years of service, for example 4 or 4.5.';
-    if (!b.ok || b.fils <= 0) next.basic = t.edit.errorAmount;
+    if (!b.ok) next.basic = t.edit.errorAmount;
     setErrors(next);
     if (Object.keys(next).length > 0 || y === undefined || !b.ok) return;
     setEmployment({ yearsOfService: y, basicMonthly: b.fils });
@@ -680,7 +680,7 @@ function InvestmentForm({ existing }: { existing?: Investment | undefined }) {
     const inc = parseAmountToFils(income);
     const next: Record<string, string | undefined> = {};
     if (name.trim() === '') next.name = t.edit.errorName;
-    if (!inv.ok || inv.fils <= 0) next.invested = t.investments.errorNumber;
+    if (!inv.ok) next.invested = t.investments.errorNumber;
     if (!val.ok) next.value = t.investments.errorNumber;
     if (!con.ok) next.contribution = t.investments.errorNumber;
     if (!inc.ok) next.income = t.investments.errorNumber;

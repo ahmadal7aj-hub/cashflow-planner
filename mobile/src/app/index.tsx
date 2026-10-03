@@ -83,7 +83,7 @@ export default function Welcome() {
         testID="start-button"
         onPress={() => {
           track('onboarding_started', { platform: Platform.OS });
-          router.push('/onboarding');
+          router.push('/commitments');
         }}
       />
     </Screen>
