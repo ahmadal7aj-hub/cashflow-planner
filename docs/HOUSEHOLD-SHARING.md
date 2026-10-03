@@ -5,7 +5,8 @@ Source: owner's request. Open items are marked **Decision needed**.
 
 ## What the owner wants
 
-1. Any user can **connect with another user** of the app (for example a couple).
+1. Each person has an account (unique username, email sign-in, password) and can **link to another user**, who must
+   accept; both sides are then linked to each other (for example a couple).
 2. Connecting does **not** share anything by itself. Both people are told that sharing is possible.
 3. Each person **chooses what to share, separately and optionally**, from three categories:
    - **Savings**
@@ -24,8 +25,13 @@ Source: owner's request. Open items are marked **Decision needed**.
   who shared it, and the screen says who is included, so a total is never mistaken for the full household.
 - **Either person can stop sharing a category, or disconnect, at any time.** It takes effect immediately and the other
   person no longer sees that data. Plain wording, no guilt.
-- **Sharing starts with totals per month**, not individual transactions or bill names. Item-level sharing is a later,
-  separate choice.
+- **Item-level sharing (owner's example, 2026-10-03):** next to each saving amount or expense there is a **Share**
+  button. Tapping it shares that one item with the linked user and it appears on a separate **Shared dashboard**
+  page. Example: after payday, put AED 5,000 aside as savings and mark it shared, so the shared dashboard shows a
+  shared AED 5,000; mark the rent as an upcoming essential spend of AED 5,000, so it shows there too. Category
+  switches (savings, spending, upcoming essentials) remain as a quick way to share everything in a category.
+  Un-sharing an item removes it from the other person's view immediately.
+- **Separate pages:** the individual dashboard is never mixed with the Shared dashboard.
 - **Safe to spend is never shared**: it depends on private details (cash, buffer, goals).
 - **Invitation flow:** one person invites (a code or link); the other accepts. Nothing is visible before acceptance.
   The invitation expires.
