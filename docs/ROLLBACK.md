@@ -50,3 +50,49 @@ results.** So after a rollback:
   overwritten by an older one.
 - Deleting an item never deletes history: deleted budgets, bills and income move to a retired list, and past spending
   is never removed by deleting a budget. See `docs/ARCHITECTURE.md` and ADR 0005.
+
+
+---
+
+# Rollback: removing accounts and shared savings
+
+Accounts and shared savings (ADR 0006) are also reversible.
+
+## The checkpoint
+
+| What | Value |
+|---|---|
+| **Tag** | `checkpoint/pre-accounts-2026-10-03` (annotated, pushed to GitHub) |
+| **Commit** | `a2eb797` (the five-page app of PR #46, on-device saving, 500 passing tests) |
+| **Backup branch** | `backup/pre-accounts-2026-10-03` (same commit, pushed) |
+| **State captured** | The working tree was clean, so nothing uncommitted existed. |
+
+## "Reverse the accounts and shared savings": the procedure
+
+Nothing here is destructive by default. Do **not** use `git reset --hard`, force-push, or delete data first.
+
+1. **Keep what exists.** Settings, **Export my data**, on every phone, for the personal records. For the shared savings,
+   open **Shared Savings** and note the totals; the shared entries are also visible in the Supabase **Table editor**
+   (`shared_entries`), where they can be exported as CSV.
+2. **Switch the app back to local-only without deleting anything:** remove `EXPO_PUBLIC_SUPABASE_URL` and
+   `EXPO_PUBLIC_SUPABASE_ANON_KEY` from `mobile/.env.local` and restart Expo. The sign-in screens and the Shared Savings tab
+   disappear; the app runs on its own. The data in Supabase is untouched.
+3. **Undo the code with new commits:** `git switch -c reverse/accounts main`, then `git revert -m 1 <merge commit>` (or revert
+   the commit range). Compare with the checkpoint at any time: `git diff checkpoint/pre-accounts-2026-10-03 HEAD`. To look at the
+   old version: `git switch -c restore/before-accounts checkpoint/pre-accounts-2026-10-03`.
+4. **Check it:** `cd mobile && npm run check`, then `npm start`.
+5. **Only if you also want the backend gone:** after exporting, run `supabase/rollback/20261003000000_down.sql` in the
+   Supabase SQL Editor. It deletes every group, membership and shared entry **for everybody** and keeps the sign-in
+   accounts. This is tested (`rollback.db.test.ts`) but cannot be undone, so it is never part of the default rollback.
+
+## What happens to people's records
+
+- **Personal records are never stored in the backend**, so reversing the backend cannot lose them. On each phone they stay in
+  the app storage under that account (`cashflow.plan.<account id>`), plus the original phone data (`cashflow.plan`) and the
+  backup written when the first account took over (`cashflow.backup.adopted.*`).
+- **Compatibility issue:** after reverting the code to the earlier version, that version reads only the original phone data
+  (`cashflow.plan`). Records entered **while signed in** live under the account's key and are not shown by the older code. They
+  are not lost: **Export my data** (before reverting) saves them as a file, and re-applying the feature shows them again.
+  If you want them visible after a revert, say so before it is done and I will migrate them across first, instead of reverting.
+- **Shared savings** exist only in the backend. After switching to local-only they are not visible in the app, and they remain
+  in Supabase until you run the down script or export and delete them.

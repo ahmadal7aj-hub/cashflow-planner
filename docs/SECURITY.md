@@ -13,6 +13,26 @@ Financial data is treated as highly sensitive even where not legally classified 
 - RLS enabled on every exposed table, deny-by-default; cross-user denial tests for every user-owned table.
 - Service-role key server-side only.
 
+### What is implemented (accounts and shared savings, ADR 0006)
+
+- **Sign-in:** Supabase Auth with email and password (minimum 10 characters), email verification by one-time code, password
+  reset by code, sign-out. Login never reveals whether an email exists; the password-reset screen never says either.
+- **Row Level Security on every table**, deny-by-default. Signed-in users have **read-only** grants; anonymous users have none.
+  Every write goes through a function that checks `auth.uid()` and the caller's role in the group.
+- **Cross-user denial tests** (`mobile/src/backend/*.db.test.ts`) run the real SQL as different users against a real
+  PostgreSQL: pending invitees and unrelated accounts read nothing, only the owner can change an entry, only an admin can
+  invite or remove, and no one can write to a table directly. A guard test fails if a new table is added without Row Level Security.
+- **No financial data in logs or analytics.** The group history stores events, never amounts.
+- **The service-role key never exists in the app**; the two public settings are read from environment variables.
+
+### Known gaps (before real users)
+
+- Session tokens and the saved plan are in **unencrypted app storage** on the phone.
+- `username_available` is callable without an account (so registration can say "taken"); it reveals whether a username exists.
+- No account-deletion function yet; no rate limiting beyond Supabase defaults; no second factor.
+- The built-in Supabase email sender is for testing only; use your own SMTP provider.
+- Not yet tested against a live Supabase project; no penetration test; UAE PDPL review pending.
+
 ## Secrets
 Never commit secrets. `.env*` is git-ignored; `.env.example` lists names only. Keys scoped per environment; rotate exposed secrets immediately.
 

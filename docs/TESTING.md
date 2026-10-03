@@ -1,6 +1,6 @@
 # Testing
 
-**Current state:** 500 tests in 36 suites, all passing. Jest's per-test timeout is 20 seconds to avoid false failures on a cold start. Run them with one command (below).
+**Current state:** 612 tests in 47 suites, all passing. Jest's per-test timeout is 20 seconds to avoid false failures on a cold start. Run them with one command (below).
 
 ## Layers
 
@@ -12,7 +12,8 @@
 | **Journey / integration** | Whole flows through the real navigator: empty states and Add item forms for a new user, the groceries and petrol examples, both deletion methods with Cancel, saving and loading, savings reductions, every date preset and custom range, Period versus Total savings, export | `mobile/src/__tests__/*.test.tsx` |
 | **Provider** | Saving, loading, restart, month rollover and storage safety without any screens | `mobile/src/__tests__/persistence.test.tsx`, helper `src/testing/provider.tsx` |
 | **Tooling** | The dependency audit gate and the weekly exception watch | `mobile/scripts/*.test.js` |
-| **Database / RLS** | Not yet (no database). Added in Phase 2 with cross-user denial tests for every user-owned table | later |
+| **Database / RLS** | The real SQL (migrations in `supabase/`) runs in PostgreSQL (PGlite, over a local socket) with `auth.uid()` simulated. Cross-user denial tests for every table and function, the shared-savings examples, history rules, and the rollback script | `mobile/src/backend/*.db.test.ts` |
+| **Accounts end to end** | The whole app, with sign-in, groups and sharing, against that database. Two accounts on one phone, offline and live updates, every date preset | `mobile/src/__tests__/auth.test.tsx`, `sharedSavings*.test.tsx` |
 | **E2E on a device** | Maestro smoke flow written, **never run** | `mobile/.maestro/smoke.yaml` |
 
 Every hand-calculated number in the tests is explained in a comment (for example safe to spend
@@ -34,6 +35,16 @@ Run in `mobile/` (on Windows PowerShell use `npm.cmd` if scripts are blocked):
 CI (`.github/workflows/ci.yml`) additionally runs `expo-doctor`, a JS bundle export and dependency review.
 CodeQL runs in `codeql.yml`. Note: `expo-doctor` makes network calls and has failed once from a transient
 blip; re-running it passed.
+
+## The database tests
+
+`src/testing/db.ts` starts a throwaway PostgreSQL (`scripts/test-db-server.mjs`, PGlite served on a local port), applies
+the migrations in `supabase/migrations/`, and acts as any user (`db.as(userId)` sets the role and the JWT subject, so Row
+Level Security applies exactly as on Supabase). `src/testing/fakeBackend.ts` stands in for Supabase **Auth only** (the
+signup code is always 123456, the reset code 654321) on top of that real database. These tests need no Docker and no
+Supabase account. **What they cannot show:** real Supabase emails, rate limits and Realtime delivery.
+
+Database tests use dates relative to the real current month (the database rejects dates in the future by its own clock).
 
 ## Writing tests here
 

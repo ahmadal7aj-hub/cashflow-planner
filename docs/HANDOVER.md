@@ -1,6 +1,6 @@
 # Project handover
 
-**Snapshot date:** 2026-10-03 · **Stage:** Validation / pre-build (BRD) · **App:** working prototype, data saved on the phone only
+**Snapshot date:** 2026-10-03 · **Stage:** Validation / pre-build (BRD) · **App:** working prototype with optional accounts and shared savings
 
 This is the one document to read to pick the project up cold. It says what exists, what is done, what is
 not, and exactly what to do next. Anything that needs a person's decision is marked **OWNER**.
@@ -18,10 +18,11 @@ not, and exactly what to do next. Anything that needs a person's decision is mar
   Budgeting, Actual spending). A new user starts empty; what is entered is **saved on the phone only** (nothing is
   sent; ADR 0005). Sample data is only for demos (Settings, Load sample data). There is no backend, no accounts and no
   real forecast engine yet. **To undo the restructure see `docs/ROLLBACK.md`** (checkpoint tag
-  `checkpoint/pre-restructure-2026-10-03`).
+  `checkpoint/pre-restructure-2026-10-03`). **Accounts and shared savings** (ADR 0006) are built behind a Supabase project the
+  owner still has to create (`docs/BACKEND-SETUP.md`); checkpoint `checkpoint/pre-accounts-2026-10-03`.
 - **The gate:** the BRD says **do not build Phase 2 (accounts, database, real engine) until 20 to 30 interviews show
   recurring demand.** Those interviews have **not started**. That is the single most important next step.
-- **Engineering health:** all work went through pull requests with CI. `main` is protected. 500 automated tests pass.
+- **Engineering health:** all work went through pull requests with CI. `main` is protected. 612 automated tests pass.
 - **One time-limited risk:** a security exception (node-forge) **expires 2026-11-01** (section 7).
 
 ---
@@ -54,7 +55,7 @@ Five pages plus supporting screens. All numbers are hand-verified in tests.
 | **Actual spending** | Dated purchases per category against the monthly budget: budget, spent and remaining, negative shown as overspending, unbudgeted spending labelled. Month navigation |
 | **Saving and history** | Everything is saved on the device with a backup before any migration. Edits apply from the current month; deleting never removes past spending; each finished month is closed once; export a copy from Settings |
 | **Investments** (opened from Savings) | Type, amount put in, worth now, profit or loss, income, allocation, planned monthly contribution. Tracking only, not advice |
-| **Shared dashboard (preview)** | Link with another account (a made-up partner on this phone), choose items to share, see a separate Shared page. Nothing is stored or sent; real linking needs accounts (`docs/HOUSEHOLD-SHARING.md`) |
+| **Accounts and Shared Savings** | Register (unique username and email), verify by code, sign in, reset password, sign out. Groups of two or more by invitation (accept or decline). Share a saving with one group; a **Shared Savings** dashboard in every member's account with the combined total, each member's contribution, entry history, period or total savings and the same date filters. Privacy enforced by the database. Needs a Supabase project: `docs/BACKEND-SETUP.md`, how it works: `docs/SHARED-SAVINGS.md` |
 | **Due dates and reminders** | Calendar date picker; bill reminders on the day, 1 day, 3 days, 1 week, 2 weeks before, or an exact date. In-app only; no phone notifications yet |
 | **Look and feel** | Navy and gold theme in light and dark mode, a navy hero card for Safe to spend, icons, a welcome screen |
 

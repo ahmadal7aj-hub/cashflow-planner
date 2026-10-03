@@ -720,6 +720,9 @@ function SavingsEditForm({ movementId }: { movementId: string | undefined }) {
       />
       <Field label={t.savingsPage.formNote} testID="note" value={note} onChangeText={setNote} />
       <ShareToggle value={groupId} onChange={setGroupId} />
+      {movement.share && groupId !== movement.share.groupId ? (
+        <Body testID="share-change-note">{t.shareChoice.changeNote}</Body>
+      ) : null}
       <Button label={t.edit.save} onPress={save} testID="edit-save" />
       <DeleteButton
         onConfirm={() => {

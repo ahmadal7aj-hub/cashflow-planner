@@ -713,6 +713,8 @@ export const t = {
     manage: 'Manage groups',
     sharedWith: (group: string) => `Shared with ${group}`,
     alreadyShared: 'Changing the group makes it private in the old one first.',
+    changeNote:
+      'Saving this makes it private in the group it is shared with now. It disappears from the group totals for every member, for all dates. It stays in your own savings.',
     notAvailable: 'Accounts are not set up on this build, so savings cannot be shared.',
   },
 

@@ -108,6 +108,28 @@ instead of inventing a number).
 - **Money set aside:** the larger of the monthly savings target and the goal contributions, plus investment contributions.
 - **Version:** every result carries `calculationVersion` (`prototype-0.1`).
 
+### Accounts and shared savings (ADR 0006)
+
+```
+phone (Expo app)                                   Supabase
+  personal plan  (never leaves the phone)           Auth: email, password, one-time codes
+  one saved plan per account                        PostgreSQL + Row Level Security on every table
+  savings you choose to share  --- share_entry --->   shared_entries (one row per shared saving)
+  Shared Savings dashboard    <--- group_savings_summary, list_group_entries, Realtime events
+```
+
+- `src/backend/` is the only code that talks to the server: `supabaseBackend.ts` (Auth + the database functions),
+  `sharingApi.ts` (typed calls), `contract.ts` (the list of database functions), `config.ts` (the two public settings).
+- `src/state/AccountContext` holds the session; the sign-in screens (`src/auth/`) replace the app while nobody is signed
+  in. `SharingContext` loads groups and invitations, listens for changes, and **keeps the shared copies in step with the
+  phone** (`domain/shareSync.ts`: one record per saving keyed by phone id + saving id, so a retry never adds an amount twice
+  and another phone's entries are never removed).
+- `PrototypeProvider` is keyed by account, so each account has its own saved plan on a phone and nobody sees another
+  person's records. Without the Supabase settings the app runs unchanged, with accounts off.
+- **The database is the authority.** Clients can only SELECT; every write is a `security definer` function that checks
+  `auth.uid()`. A pending invitee sees only the group name and who invited them. Totals come from
+  `group_savings_summary`, so every member sees the same numbers. See `supabase/migrations/` and `SHARED-SAVINGS.md`.
+
 ## 2. Target (later phases, not built)
 
 - **Mobile:** same Expo app. **Backend:** Supabase (PostgreSQL with Row Level Security, Auth, Edge Functions).

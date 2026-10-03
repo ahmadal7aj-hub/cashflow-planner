@@ -36,7 +36,12 @@ describe('syncing: edit, make private, delete and offline never double count', (
     // Make it private again from the same form: it leaves the server, but stays in the personal total.
     await fireEvent.press(screen.getByTestId('movement-edit-mv-1'));
     await waitFor(() => expect(getPathname()).toBe('/edit/savings-edit/mv-1'));
+    expect(screen.queryByTestId('share-change-note')).toBeNull();
     await fireEvent.press(screen.getByTestId('share-private'));
+    // The effect is explained before saving.
+    expect(screen.getByTestId('share-change-note').props.children).toMatch(
+      /disappears from the group totals/,
+    );
     await fireEvent.press(screen.getByTestId('edit-save'));
     await waitFor(() => expect(getPathname()).toBe('/savings'));
     await settle(w.db);

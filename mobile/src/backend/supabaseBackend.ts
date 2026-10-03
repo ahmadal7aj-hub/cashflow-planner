@@ -16,7 +16,7 @@ import {
   type Backend,
 } from './types';
 
-function mapAuthError(
+export function mapAuthError(
   e: SupabaseAuthError | { message: string; code?: string; status?: number },
 ): AuthError {
   const code = ('code' in e ? e.code : undefined) ?? '';

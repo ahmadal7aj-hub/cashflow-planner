@@ -45,7 +45,8 @@ What the prototype does today, what competing apps offer, and where this app cou
 | Multi-currency, remittances | **Deferred** | FinArt, Pocket Clear and Wally all advertise it (vendor pages and listings) |
 | Investment tracking (type, amount, worth, profit, income) | **Built** (tracking only, values typed by the user, not advice) | Copilot advertises investments with live performance; Monarch has investments (Plus) |
 | Net worth (assets and liabilities), live prices | **Idea** | YNAB, Monarch, Copilot |
-| Shared household budgets | **Idea** | YNAB (up to six), Monarch (free) |
+| Shared household budgets | **Idea** (not built; only chosen **savings** can be shared) | YNAB (up to six), Monarch (free) |
+| Accounts and shared savings between people (groups, invitations, a Shared Savings dashboard) | **Built** (needs a Supabase project; ADR 0006) | Not mentioned on the pages checked |
 | Rollover budgets | **Idea** | Copilot |
 | AI categorisation | **Deferred** | Copilot. BRD: AI must never be the source of financial arithmetic |
 | Local-only private data (no account) | **Not the current plan** | **YooToo markets this; FinArt offers an on-device Private Mode and backups to your own cloud.** The BRD architecture is cloud-based (Supabase) |
