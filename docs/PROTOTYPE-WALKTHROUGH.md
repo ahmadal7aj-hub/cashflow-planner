@@ -1,83 +1,86 @@
 # Prototype walkthrough script
 
-Use with `docs/INTERVIEW-ONE-PAGER.md`. The prototype uses made-up numbers and saves nothing.
+Use with `docs/INTERVIEW-ONE-PAGER.md`. The app saves what is entered **on that phone only** (nothing is sent). For a
+session, use **Settings, then Load sample data** so no participant enters real figures.
 
 ## Setup (before the session)
 
 1. On your computer: `cd mobile && npm start`.
-2. On the participant's phone (or yours): open **Expo Go**, scan the QR code. Both devices must be on
-   the same Wi-Fi.
-3. Confirm you see "UAE Cash-Flow Planner" and an orange "DEVELOPMENT build" strip. That strip is
-   expected; tell the participant it is a test version.
+2. On the participant's phone (or yours): open **Expo Go**, scan the QR code. Both devices must be on the same Wi-Fi.
+3. Confirm you see "UAE Cash-Flow Planner" and an orange "DEVELOPMENT build" strip. That strip is expected; tell the
+   participant it is a test version.
+4. Tap **Get started**, then **Save and continue** on the savings questions (zero is fine). Then on the Dashboard open
+   **Settings** and tap **Load sample data**.
+
+## The five pages
+
+- **Dashboard.** The default range is the current calendar month (the dates are shown). Presets: Current month, Last
+  week (previous Monday to Sunday), Last month, Last quarter, Last year, and a **Custom range** typed as `YYYY-MM-DD`.
+  It shows income, spending against budget, and savings, with a toggle between **This month's savings** (net added in
+  the range) and **Total savings** (the cumulative balance at the end of the range). Changing the range never changes
+  the data.
+- **Income.** Add item, then choose a category (salary, allowance, bonus, side work, rental, investment, other), amount,
+  how often, the next payment date and whether it is predictable. Zero is allowed.
+- **Savings planning.** Existing savings (with the date it started), the monthly target (a plan, not money saved), a
+  projection for the unfinished month (labelled projected), add and take out money, finished months, goals, and an
+  Investments screen.
+- **Budgeting.** **Bills and fixed expenses** (a due date, a reminder, **Mark as paid**) and **Everyday budgets** (a
+  monthly amount per category, for example groceries AED 3,000). Every category stays available in the form.
+- **Actual spending.** Add each purchase (category, amount, date). Every category shows the monthly budget, what was
+  spent and the remaining balance; an overspend shows as a negative amount ("Over by"), and spending in a category with
+  no budget is labelled **Unbudgeted**.
 
 ## What the sample data looks like (so you can spot misunderstandings)
 
-Spendable balance AED 12,000 - safety buffer AED 300 - payday in 12 days - savings set aside AED 1,200
-(emergency fund 500, gold 300, summer travel 400). Bills due before payday total AED 7,080: rent AED 3,500
-(in 4 days), DEWA 450 (6), internet and mobile 380 (8), car loan 1,300 (9), health insurance 250 (10),
-money sent home 1,000 (11), gym 200 (11). Essential everyday budgets (groceries, fuel, Salik, parking) still
-expected: AED 1,650. Dining, delivery, shopping and entertainment come out of the safe-to-spend figure.
-Expected: **Safe to spend AED 1,770.00**, **AED 147.50 per day**, **expected balance AED 2,070.00**,
-one "due soon" heads-up for rent. The what-if laptop (AED 3,000) shows a **AED 1,230.00** shortfall.
+Spendable balance AED 12,000, safety buffer AED 300, payday in 12 days. Bills due before payday total AED 7,080: rent
+AED 3,500 (in 4 days), DEWA 450 (6), internet and mobile 380 (8), car loan 1,300 (9), health insurance 250 (10), money
+sent home 1,000 (11), gym 200 (11). Essential everyday budgets still expected: AED 1,650. Expected on the Dashboard:
+**Safe to spend AED 1,770.00**, **AED 147.50 per day**, **expected balance AED 2,070.00**. The what-if laptop (AED
+3,000) shows a **AED 1,230.00** shortfall. Existing savings AED 23,600.00, monthly target AED 1,200.00. Investments:
+worth **AED 47,100.00** against **AED 43,000.00** put in, a profit of **AED 4,100.00 (+9.5%)**.
 
-Participants can also edit this data: tap any item on the "Your income and expenses" screen, or add their own
-(for example Salik, parking, chiller, school fees). Safe to spend updates immediately.
+## How savings react to spending (worth showing)
 
-The **Spending** tab shows each everyday budget with a written status (on track, ahead of pace, over budget), the
-monthly cost by type, and the room left for dining and shopping. In the sample data, Entertainment is over
-budget (AED 275 of 250) and Food delivery is ahead of pace.
+At the end of a month: **result = income received - actual spending**. Savings grow by the result, **never by more than
+the monthly target**, and **if the result is negative the shortfall comes out of existing savings**. Example with
+opening AED 5,000 and a AED 1,000 target when income equals the plan plus the target: overspending of AED 300 saves AED
+700 (closing AED 5,700); overspending of AED 1,200 saves nothing and takes AED 200 from savings (closing AED 4,800).
+Underspending in one category offsets overspending in another because only the overall totals count.
+
+## Deleting
+
+Open an item and use **Delete** (it asks again, with Keep it), or **swipe a card left** to reveal a red **Delete**
+button (it asks for confirmation with Cancel). Deleting a budget never deletes past spending.
 
 ## Say to the participant
 
-"This is an early test version with made-up numbers. There are no right or wrong answers; if something is
-confusing, that is useful for me. Please say what you are thinking out loud."
+"This is an early test version with made-up numbers. There are no right or wrong answers; if something is confusing,
+that is useful for me. Please say what you are thinking out loud."
 
 ## Tasks (read one at a time; do not help)
 
 | Task | Say | Watch for | Success |
 |---|---|---|---|
-| T1 | "Set up your starting numbers and get to your forecast." | Hesitation on the two fields; confusion about "safety buffer" | Reaches the dashboard unaided |
-| T2 | "In your own words, what does 'Safe to spend' mean?" | Do they mention commitments, savings, buffer, payday? | Explains it as money left until payday |
-| T3 | "Why is the rent heads-up showing?" | Do they tap the card and read the reason? | Can describe the reason |
-| T4 | "How was the safe-to-spend number worked out?" | Do they tap the big number? | Opens the explanation and follows the inputs |
-| T5 | "Could you afford a AED 3,000 laptop right now?" | Do they find the what-if? Do they read the shortfall? | States the outcome; knows their real plan is unchanged |
-| T6 | "Where would you change an assumption?" | Settings vs editing numbers | Finds one path |
+| T1 | "Add your salary and a budget for groceries." | Finds Add item; picks a category; understands the date | Both appear as cards |
+| T2 | "You bought groceries for 300 today. Record it and tell me how much is left." | Finds Actual spending; reads Remaining | States the remaining balance |
+| T3 | "Is any category over budget?" | Reads the red status and "Over by" | Names the category |
+| T4 | "How much have you saved so far, and how much did you add this month?" | Total savings versus This month's savings | Tells the two apart |
+| T5 | "Show me last month." | The range chips | Dashboard shows last month's dates |
+| T6 | "Remove a bill you do not have." | Swipe or open the item | Confirms, then it is gone |
+| T7 | "Could you afford a AED 3,000 laptop right now?" | The what-if on the Dashboard | States the outcome; knows the plan is unchanged |
 
 ## Follow-up questions (after tasks)
 
 - "What was the most useful thing on that screen? What did you ignore?"
 - "Was anything worrying, confusing or wrong-looking?"
-- "Plan until the day before payday: does that match how you think about your month?" (H4)
-- "Would you keep this updated each week? What would stop you?" (H3)
+- "Would you record your spending every day? What would stop you?" (H3, manual entry is the biggest adoption risk)
+- "Would you share savings or spending with a partner? Which parts?" (see `docs/HOUSEHOLD-SHARING.md`)
+- "Would a weekly or monthly email summary be useful?" (needs accounts; Phase 2)
 - "What would you expect to pay for this, if anything? What would feel too much?" (H5)
 
 ## After the session
 
 1. Write the private notes (see the note template in `docs/INTERVIEW-KIT.md`).
-2. If a number looked wrong to the participant, note which screen and what they expected. Do not change the
-   sample data mid-study unless it is clearly broken; record any change and the date.
+2. If a number looked wrong to the participant, note which screen and what they expected. Do not change the sample data
+   mid-study unless it is clearly broken; record any change and the date.
 3. Never save screenshots that show a participant's real data.
-
-## The other tabs and newer features (sample numbers to expect)
-
-- **Savings tab.** *Current savings* starts at **AED 23,600.00** with **Add money** and **Take out**. The *End of
-  this pay cycle* card says a typical month brings in **AED 17,830.00** and sends out **AED 14,658.33**, leaving
-  about **AED 3,171.67**; **Apply this to my savings** adds it once (balance becomes AED 26,771.67), and spending more
-  than you earn would reduce it. Also: the emergency fund in months of essential spending (about 1.4 months), the
-  big bills ahead with the monthly amount to set aside (school fees due in 40 days: AED 4,500 a month), an
-  illustrative gratuity estimate (AED 25,200), and recent activity. Summer travel is behind: it needs AED 1,120 a
-  month and sets aside 400.
-- **Investments** (open it from the Savings tab). Three sample investments worth **AED 47,100.00** against
-  **AED 43,000.00** put in: a **profit of AED 4,100.00 (+9.5%)**, and **AED 80.00 a month** of income from the
-  property fund. Tap one to change it, or add your own (type, amount put in, worth now, income, monthly
-  contribution). It says clearly that this is for tracking, not advice.
-- **Income tab.** Splits income by source (salary 84%, plus side work, the yearly bonus and investment income),
-  separates predictable from irregular income, lists money arriving in the next 60 days, and says how steady income
-  is (predictable income covers 102% of spending but not spending plus savings).
-- **Insights tab.** Short notes such as `Entertainment is over budget` and `School fees are coming up`. Tap one to
-  open the screen behind it.
-- **Due dates and reminders.** Add a bill (Bills and fixed expenses, then **Add a bill**), choose a **due date**
-  on the calendar, and under **Remind me** pick on the day, 1 day, 3 days, 1 week or 2 weeks before, or **Pick a
-  date**. A reminder that has started shows on the Overview and in Insights. Choose **Other bill (name it yourself)**
-  for anything not listed. Reminders are in-app only for now.
-- **Dark mode.** Settings, then **Appearance**: match your phone, light or dark.

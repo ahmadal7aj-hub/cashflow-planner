@@ -2,6 +2,9 @@
 # Runs against Expo Go for now (no store identifiers are decided yet). Switch `appId` to the
 # development-build id once the product name / bundle id are final.
 #
+# WARNING: this flow REPLACES the saved data on the device with the sample data (Settings > Load sample data).
+# Run it only on a test phone or emulator, on a fresh install (the first-run questions appear once).
+#
 # Run (see docs/TESTING.md):
 #   1. cd mobile && npm start            # open the project in Expo Go on the emulator/device
 #   2. maestro test .maestro/smoke.yaml
@@ -14,21 +17,31 @@ appId: host.exp.exponent
     id: 'home-screen'
 - assertVisible: 'UAE Cash-Flow Planner'
 
-# Welcome -> onboarding
+# Welcome -> the savings questions (zero is allowed for both answers)
 - tapOn:
     id: 'start-button'
 - assertVisible:
-    id: 'onboarding-screen'
-
-# Onboarding -> commitments (sample numbers are pre-filled and valid)
+    id: 'setup-screen'
 - tapOn:
-    id: 'onboarding-continue'
+    id: 'setup-save'
+
+# A new user starts with an empty Income page and an Add item button
 - assertVisible:
-    id: 'commitments-screen'
+    id: 'income-screen'
+- assertVisible: 'No income added yet'
+- assertVisible: 'Add item'
 
-# Commitments -> dashboard with the hand-verified sample result
+# Load the demo data from Settings (on the Dashboard)
 - tapOn:
-    id: 'commitments-continue'
+    id: 'tab-dashboard'
+- tapOn:
+    id: 'open-settings'
+- tapOn:
+    id: 'load-sample'
+- assertVisible: 'Sample data loaded.'
+- back
+
+# Dashboard with the hand-verified sample result
 - assertVisible:
     id: 'dashboard-screen'
 - assertVisible: 'AED 1,770.00'

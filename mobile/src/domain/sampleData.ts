@@ -1,6 +1,6 @@
 import { aedToFils } from './money';
 import type { ExpenseItem, IncomeItem, Investment, Plan, SavingsGoal } from './budgetModel';
-import { deriveForecastInput } from './budgetModel';
+import { deriveForecastInput, EMPTY_LEDGER } from './budgetModel';
 import { getExpenseCategory } from './uaeCategories';
 
 /** Fictional sample data only. Never put real user data in fixtures. */
@@ -165,16 +165,44 @@ export const SAMPLE_INVESTMENTS: readonly Investment[] = [
 ];
 
 export const SAMPLE_PLAN: Plan = {
+  setupDone: true,
   investments: SAMPLE_INVESTMENTS,
-  // Matches the sum of the goals' saved amounts (18,000 + 3,200 + 2,400): goals earmark this pot.
-  savings: { balance: aedToFils(23600), entries: [] },
+  savings: EMPTY_LEDGER,
   availableCash: aedToFils(12000),
   safetyBuffer: aedToFils(300),
   income: SAMPLE_INCOME,
   expenses: SAMPLE_EXPENSES,
+  retiredIncome: [],
+  retiredExpenses: [],
+  transactions: [],
   goals: SAMPLE_GOALS,
   employment: { yearsOfService: 4, basicMonthly: aedToFils(9000) },
 };
+
+/**
+ * Demo plan for Settings > Load sample data: the sample items, an opening savings balance dated `today`, and
+ * this month's spending so far as dated transactions (so budgets show spent and remaining amounts).
+ */
+export function demoPlan(today: string): Plan {
+  const transactions = SAMPLE_EXPENSES.filter((e) => e.kind === 'variable' && e.spentSoFar > 0).map(
+    (e, i) => ({
+      id: `tx-${i + 1}`,
+      date: today,
+      categoryId: e.categoryId,
+      amount: e.spentSoFar,
+      note: e.name,
+    }),
+  );
+  return {
+    ...SAMPLE_PLAN,
+    transactions,
+    savings: {
+      ...EMPTY_LEDGER,
+      opening: { amount: aedToFils(23600), date: today },
+      targets: [{ from: today.slice(0, 7), amount: aedToFils(1200) }],
+    },
+  };
+}
 
 /** Fictional last six pay cycles (oldest first). Used for trend charts only. */
 export const SAMPLE_HISTORY = {

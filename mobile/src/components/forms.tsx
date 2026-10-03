@@ -41,6 +41,7 @@ export function Field({
   error,
   hint,
   keyboardType = 'default',
+  secure = false,
   testID,
 }: {
   label: string;
@@ -49,6 +50,8 @@ export function Field({
   error?: string | undefined;
   hint?: string;
   keyboardType?: KeyboardTypeOptions;
+  /** Hide what is typed (passwords). */
+  secure?: boolean;
   testID: string;
 }) {
   const styles = useStyles();
@@ -62,6 +65,9 @@ export function Field({
         value={value}
         onChangeText={onChangeText}
         keyboardType={keyboardType}
+        secureTextEntry={secure}
+        autoCapitalize={secure || keyboardType === 'email-address' ? 'none' : undefined}
+        autoCorrect={secure ? false : undefined}
         accessibilityLabel={label}
         accessibilityHint={error}
         placeholderTextColor={colors.textMuted}

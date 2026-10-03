@@ -1,79 +1,134 @@
 # Architecture
 
 Describes what exists today (the Phase 1 prototype) and the target for later phases. Record every material
-decision as an ADR in `adr/`.
+decision as an ADR in `adr/`. To go back to the layout before the five-page restructure, see `ROLLBACK.md`.
 
 ## 1. Today: the prototype
 
-A single Expo React Native app. **No backend, no network calls, no persistence.** All data is fictional sample data
-held in memory and reset when the app closes.
+A single Expo React Native app. **No backend and no network calls.** What the user enters is **saved on the phone**
+(versioned JSON in the app storage, with backups; see ADR 0005). A new user starts with nothing: no sample amounts.
+Sample data exists only for demos (Settings, Load sample data).
 
 ```
 mobile/src/
   app/            screens and navigation (Expo Router, file based)
-    (tabs)/       Overview, Spending, Savings, Income, Insights (bottom tab bar)
-    commitments   "Your income and expenses" list
-    edit/[kind]/[id]   add / edit / delete form (income, bills, budgets, goals, investments, savings, employment)
-    investments   the Investments screen (opened from the Savings tab)
-    onboarding, explain/[metric], warning/[id], scenario, settings (incl. Appearance), index (welcome)
-  components/     ui kit (ui.tsx), forms, dates (calendar picker), ReminderPicker, charts, dashboard parts
-  domain/         PURE functions only: money, dates, plan model, forecast, reminders, savings balance, investment /
-                  spending / savings / income / insight analytics, UAE categories, sample data
-  state/          PrototypeContext: the in-memory plan, today's date, and the CRUD actions
+    (tabs)/       Dashboard, Income, Savings planning, Budgeting, Actual spending (+ Shared when linked)
+    setup         first-run savings questions (existing savings, its date, monthly target; zero allowed)
+    edit/[kind]/[id]   add / edit / delete form: income, fixed (bills), variable (everyday budgets), expense (an actual
+                  spending record), goal, investment, employment, savings-in / out / target / opening
+    investments, scenario (what-if), settings, link (Shared preview), onboarding (spendable balance and buffer),
+    explain/[metric], warning/[id], index (welcome)
+  components/     ui kit, forms, dates (calendar picker), SwipeableCard, EmptyState, DeleteButton, charts, ...
+  domain/         PURE functions only
+    money, dates, months, versioned, occurrences      value types and calendar maths
+    budgetModel     the plan types, deriveForecastInput, resolvePlan
+    spending        budget versus actual per category, for any date range
+    savingsEngine   balance, period savings, month results, projection, once-per-month close, corrections
+    planOps         every edit as a pure function (history is kept)
+    dashboardRange  date presets, custom ranges, the dashboard summary
+    persistence     saving, loading, backup, versioning
+    prototypeForecast, reminders, investmentInsights, sharedDashboard, savingsInsights, spendingInsights
+    uaeCategories, sampleData
+  state/          PrototypeContext: loads and saves the plan, exposes actions; testSeed (tests only)
   i18n/strings.ts all user-facing text
-  theme/          palettes.ts (light + dark), ThemeProvider (follows the phone or a manual choice), tokens.ts (layout)
+  theme/          palettes (light and dark), ThemeProvider, tokens
   analytics/      allow-listed, privacy-safe event recorder (memory only)
-  config/         environment resolution (development / staging / production)
-mobile/scripts/   audit-gate.js and exception-watch.js (CI tooling, with tests)
+  testing/        test helpers (not shipped): app routes and builders, provider harness
 ```
 
 ### Layering rules (enforced by review and tests)
 
-1. **`domain/` is pure.** No React, no I/O, no clocks, no random. Same input gives the same output. It is where every
-   formula lives. The one exception is `todayISO()` in `dates.ts`, called once at the edge of the app; everything else
-   takes today's date as an argument.
-2. **Screens never do money maths.** They call a `domain/` function and render the result. No duplicated formulas.
-3. **Money is integer fils.** Floats are never used for money. Formatting is display-only (`formatAed`).
-4. **All text comes from `i18n/strings.ts`**; colours come from the theme (`useTheme` / `makeStyles`, never a
-   hard-coded hex in a screen) and spacing from `theme/tokens.ts`. Every text and background pair is contrast-tested
-   in both light and dark mode.
-5. **Status is never colour alone.** A symbol and written label always accompany colour.
-6. **Analytics are allow-listed.** Unknown event properties are dropped, so a financial value cannot be recorded.
+1. **`domain/` is pure.** No React, no I/O, no clocks, no random. The only impure function is `todayISO()` in
+   `dates.ts`, called once at the edge; everything else takes today's date as an argument. Dates are plain ISO strings
+   in the user's own calendar, so there is no time-zone drift.
+2. **Screens never do money maths.** They call a `domain/` function and render the result.
+3. **Money is integer fils.** Formatting is display-only.
+4. **All text comes from `i18n/strings.ts`**; colours from the theme; every pair is contrast-tested in both modes.
+5. **Status is never colour alone.** A written label always accompanies colour.
+6. **Analytics are allow-listed.** A financial value cannot be recorded.
 
-### Data flow
+### The data model
 
-```
-sample data (domain/sampleData)
-        |
-        v
-PrototypeContext (raw plan: balance, buffer, income[], expenses[], goals[], investments[], savings, employment)
-        |  resolvePlan(plan, today)            -> real dates become relative days
-        |  deriveForecastInput(plan)           -> ForecastInput
-        |  computeForecast(input)              -> ForecastResult (baseline)
-        |  + what-if purchase                  -> ForecastResult (scenario, never mutates the plan)
-        v
-screens read: baseline / scenario / plan, and call pure analytics:
-  spendingInsights, savingsInsights, savingsBalance, investmentInsights, incomeInsights, insights, reminders,
-  forecastCharts
-```
+One `Plan` document:
 
-### Planning model (prototype, ADR 0003)
+- `income`, `expenses` (kind `fixed` = bills with due dates, kind `variable` = monthly everyday budgets), `goals`,
+  `investments`, optional spendable balance and safety buffer (used only by the safe-to-spend card).
+- `transactions`: **dated actual spending**, always more than zero. A planned bill or budget is **not** a transaction.
+  Marking a bill as paid creates one transaction linked to that bill occurrence, so it is counted once.
+- `savings`: a **ledger**: the opening balance with its date, effective-dated monthly targets, dated movements
+  (deposit, withdrawal, month-close, correction) and the frozen result of each closed month.
+- `retiredIncome`, `retiredExpenses`: deleted items, kept so earlier months still report correctly.
 
-- **Horizon:** today until the day before the next payday, taken from the salary item. Capped at 62 days. When payday
-  is today, the horizon is the next pay cycle and today's salary is counted as arriving now.
+### History is never rewritten
+
+- Amounts are **effective-dated**: editing a budget, bill or income applies from the current month; earlier months keep
+  the old amount.
+- **Deleting** an item moves it to the retired list and ends it from the current month. Past spending is never deleted.
+- A finished month is **closed once** (key `YYYY-MM`) and frozen. Closing is idempotent, so reopening the app any number
+  of times never adds it again. A back-dated change to a closed month adds a dated **correction** in the present.
+
+### Budget versus actual
+
+- Every category shows **monthly budget, actual spending this month and remaining = budget - actual**; a negative
+  remainder is shown as overspending. Spending in a category with no budget is allowed and labelled **Unbudgeted**.
+- **Whole months** use the exact budget. **Part of a month** (last week, a ten-day custom range): everyday budgets are
+  shared out by days (budget x days in range / days in that month); a **bill counts when it falls due** inside the
+  range. Non-monthly bills (school fees, insurance) count in the month they fall due.
+
+### Savings (four things kept apart)
+
+| Idea | Meaning |
+|---|---|
+| **Existing balance** | The opening balance plus every movement dated on or after the opening date. Not income, not saved in any period. |
+| **Monthly target** | A plan, never counted as money already saved. |
+| **Projected savings** | An estimate for an unfinished month, always labelled projected: all scheduled income, and spending of whichever is larger, the plan or what is already spent. |
+| **Actual movements** | Deposits, withdrawals, month results and corrections. Transfers are never income or spending. |
+
+At month end, with `result = income received - actual spending`: **added = max(0, min(result, target))** and
+**taken from existing savings = max(0, -result)**. So overspending first reduces that month's planned saving, and only
+the part beyond it reduces existing savings. Only the **overall** totals matter, so underspending in one category offsets
+overspending in another. If income equals the spending plan plus the target: opening 5,000 and target 1,000 with 300
+overspent closes at 5,700; with 1,200 overspent, nothing is added, 200 comes from existing savings and it closes at 4,800.
+Surplus above the target is not saved automatically.
+
+### The dashboard
+
+Defaults to the current calendar month. Presets (device time zone, both ends included): **current month**, **last week**
+(previous full Monday to Sunday), **last month**, **last quarter** (previous calendar quarter), **last year**, and a
+**custom range** typed as `YYYY-MM-DD` (any valid start and end). Filtering changes only the view. A toggle switches
+**period savings** (net movements dated inside the range, including reductions, excluding the opening balance) and
+**total savings** (the cumulative balance at the end of the range; if the range ends before the balance began it says so
+instead of inventing a number).
+
+### Planning model for the safe-to-spend card (ADR 0003)
+
+- **Horizon:** today until the day before the next payday, from the salary item. Capped at 62 days.
 - **Safe to spend** = cash + expected income - bills due before payday - savings set aside - safety buffer - expected
-  everyday essentials. Clamped at zero; a shortfall is reported separately.
-- **Essentials vs discretionary:** the remaining budget of essential everyday categories (groceries, fuel, Salik,
-  parking...) is deducted. Dining, shopping and similar are funded *from* safe to spend, not deducted.
-- **Dates:** bills, income and goal deadlines can have real dates. They are resolved to relative days for `today` in
-  one pure function, so all the maths is unchanged. Recurring dates roll forward by calendar month, keeping the day
-  of month.
-- **Money set aside:** savings goal contributions plus planned investment contributions are reserved each cycle.
-  Investment income counts in monthly income but not in the payday forecast.
-- **Savings balance:** a separate pot that goals earmark parts of. It changes by deposits, withdrawals (never more
-  than saved) and an end-of-cycle result (typical income minus typical spending), applied once per cycle on request.
-- **Reminders:** stored as days before a bill's due date, so they repeat with the bill; in-app only.
+  everyday essentials. The card appears only when a spendable balance has been entered.
+- **Money set aside:** the larger of the monthly savings target and the goal contributions, plus investment contributions.
 - **Version:** every result carries `calculationVersion` (`prototype-0.1`).
+
+### Accounts and shared savings (ADR 0006)
+
+```
+phone (Expo app)                                   Supabase
+  personal plan  (never leaves the phone)           Auth: email, password, one-time codes
+  one saved plan per account                        PostgreSQL + Row Level Security on every table
+  savings you choose to share  --- share_entry --->   shared_entries (one row per shared saving)
+  Shared Savings dashboard    <--- group_savings_summary, list_group_entries, Realtime events
+```
+
+- `src/backend/` is the only code that talks to the server: `supabaseBackend.ts` (Auth + the database functions),
+  `sharingApi.ts` (typed calls), `contract.ts` (the list of database functions), `config.ts` (the two public settings).
+- `src/state/AccountContext` holds the session; the sign-in screens (`src/auth/`) replace the app while nobody is signed
+  in. `SharingContext` loads groups and invitations, listens for changes, and **keeps the shared copies in step with the
+  phone** (`domain/shareSync.ts`: one record per saving keyed by phone id + saving id, so a retry never adds an amount twice
+  and another phone's entries are never removed).
+- `PrototypeProvider` is keyed by account, so each account has its own saved plan on a phone and nobody sees another
+  person's records. Without the Supabase settings the app runs unchanged, with accounts off.
+- **The database is the authority.** Clients can only SELECT; every write is a `security definer` function that checks
+  `auth.uid()`. A pending invitee sees only the group name and who invited them. Totals come from
+  `group_savings_summary`, so every member sees the same numbers. See `supabase/migrations/` and `SHARED-SAVINGS.md`.
 
 ## 2. Target (later phases, not built)
 

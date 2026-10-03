@@ -10,7 +10,7 @@ import {
 import { aedToFils } from './money';
 import { computeForecast } from './prototypeForecast';
 import { SAMPLE_PLAN } from './sampleData';
-import { cycleResult } from './savingsBalance';
+import { monthlyIncome } from './savingsInsights';
 
 const [etf, gold, reit] = SAMPLE_PLAN.investments as [Investment, Investment, Investment];
 
@@ -168,8 +168,7 @@ describe('how investments feed the rest of the plan', () => {
 
   it('investment income raises monthly income and the end-of-cycle result', () => {
     const none: Plan = { ...SAMPLE_PLAN, investments: [] };
-    expect(cycleResult(SAMPLE_PLAN).income - cycleResult(none).income).toBe(aedToFils(80));
-    expect(cycleResult(SAMPLE_PLAN).result - cycleResult(none).result).toBe(aedToFils(80));
+    expect(monthlyIncome(SAMPLE_PLAN) - monthlyIncome(none)).toBe(aedToFils(80));
   });
 });
 

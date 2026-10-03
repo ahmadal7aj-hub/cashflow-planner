@@ -6,7 +6,7 @@ What the prototype does today, what competing apps offer, and where this app cou
 > - **Competitor information was researched on 2026-10-02** from each vendor's own public pages and from
 >   web search results. It is **vendor marketing, not independently tested.** A feature that a page does not
 >   mention is **not proof it is absent.** Prices are as listed that day and change.
-> - **Everything in the prototype runs on sample data in memory.** It stores and sends nothing.
+> - **The prototype stores what you enter on the phone only** (no backend, nothing sent). A new user starts empty; sample data is for demos.
 > - **Status words:** *Built* = in the prototype. *Planned* = fits the BRD/PRD, not built. *Deferred* = the BRD says
 >   not until validated or approved. *Idea* = not in the BRD/PRD; needs a decision.
 > - The BRD gate still applies: **Phase 2 (accounts, database, real forecast engine) waits for interview evidence.**
@@ -45,7 +45,8 @@ What the prototype does today, what competing apps offer, and where this app cou
 | Multi-currency, remittances | **Deferred** | FinArt, Pocket Clear and Wally all advertise it (vendor pages and listings) |
 | Investment tracking (type, amount, worth, profit, income) | **Built** (tracking only, values typed by the user, not advice) | Copilot advertises investments with live performance; Monarch has investments (Plus) |
 | Net worth (assets and liabilities), live prices | **Idea** | YNAB, Monarch, Copilot |
-| Shared household budgets | **Idea** | YNAB (up to six), Monarch (free) |
+| Shared household budgets | **Idea** (not built; only chosen **savings** can be shared) | YNAB (up to six), Monarch (free) |
+| Accounts and shared savings between people (groups, invitations, a Shared Savings dashboard) | **Built** (needs a Supabase project; ADR 0006) | Not mentioned on the pages checked |
 | Rollover budgets | **Idea** | Copilot |
 | AI categorisation | **Deferred** | Copilot. BRD: AI must never be the source of financial arithmetic |
 | Local-only private data (no account) | **Not the current plan** | **YooToo markets this; FinArt offers an on-device Private Mode and backups to your own cloud.** The BRD architecture is cloud-based (Supabase) |

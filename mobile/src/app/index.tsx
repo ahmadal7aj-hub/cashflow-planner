@@ -5,6 +5,7 @@ import { Platform, Text, View } from 'react-native';
 import { track } from '../analytics/events';
 import { Body, Button, Card, HeroCard, Screen, type IconName } from '../components/ui';
 import { t } from '../i18n/strings';
+import { usePrototype } from '../state/PrototypeContext';
 import { makeStyles, useTheme } from '../theme/ThemeProvider';
 import { fontSize, radius, spacing } from '../theme/tokens';
 
@@ -46,6 +47,7 @@ const BENEFITS: readonly { icon: IconName; text: string }[] = [
 
 export default function Welcome() {
   const router = useRouter();
+  const { plan } = usePrototype();
   const styles = useStyles();
   const { colors } = useTheme();
   return (
@@ -83,7 +85,7 @@ export default function Welcome() {
         testID="start-button"
         onPress={() => {
           track('onboarding_started', { platform: Platform.OS });
-          router.push('/onboarding');
+          router.push(plan.setupDone ? '/dashboard' : '/setup');
         }}
       />
     </Screen>
