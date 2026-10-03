@@ -54,6 +54,8 @@ interface PrototypeState {
   /** True only the first time it is called, so onboarding_completed is recorded once per session. */
   claimOnboardingCompletion: () => boolean;
   resetToSample: () => void;
+  /** Empties income, expenses, goals, investments and savings so the user can enter their own numbers. */
+  clearSampleData: () => void;
   scenarioOn: boolean;
   setScenarioOn: (on: boolean) => void;
   /** Real plan. A what-if never mutates this. */
@@ -133,6 +135,16 @@ export function PrototypeProvider({
         return true;
       },
       resetToSample: () => setPlan(SAMPLE_PLAN),
+      clearSampleData: () =>
+        setPlan((p) => ({
+          ...p,
+          income: [],
+          expenses: [],
+          goals: [],
+          investments: [],
+          savings: { balance: 0, entries: [] },
+          monthlySavings: 0,
+        })),
       scenarioOn,
       setScenarioOn,
       baseline,

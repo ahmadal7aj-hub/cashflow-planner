@@ -1,8 +1,9 @@
 import { useRouter } from 'expo-router';
 
 import { BudgetBar, HorizontalBars, StatTile, TrendBars } from '../../components/dashboardParts';
-import { Body, Button, Card, Heading, Screen } from '../../components/ui';
+import { Body, Button, Card, Heading, Row, Screen } from '../../components/ui';
 import { formatAed } from '../../domain/money';
+import { monthlySplit } from '../../domain/monthlyPlan';
 import { SAMPLE_HISTORY } from '../../domain/sampleData';
 import {
   budgetLines,
@@ -18,6 +19,7 @@ export default function Spending() {
   const { plan, baseline } = usePrototype();
   const days = baseline.horizonDays;
   const s = spendingSummary(plan, baseline, days);
+  const split = monthlySplit(plan);
   const lines = budgetLines(plan, days);
   const groups = monthlyByGroup(plan);
   const elapsed = cycleElapsedFraction(days);
@@ -26,6 +28,24 @@ export default function Spending() {
   return (
     <Screen testID="spending-screen">
       <Body muted>{t.spending.cycleNote(Math.round(elapsed * 100), days)}</Body>
+
+      <Card tone={split.room < 0 ? 'warn' : 'info'} testID="spending-budget-card">
+        <Heading>{t.monthlyPlan.spendingTitle}</Heading>
+        <Body muted>{t.monthlyPlan.spendingIntro}</Body>
+        <Row label={t.monthlyPlan.spendingLeft} value={formatAed(split.leftToSpend)} />
+        <Row label={t.monthlyPlan.spendingBudgeted} value={formatAed(split.plannedSpending)} />
+        <Row
+          label={split.room < 0 ? t.monthlyPlan.spendingOver : t.monthlyPlan.spendingUnbudgeted}
+          value={formatAed(Math.abs(split.room))}
+          strong
+        />
+        <Button
+          label={t.monthlyPlan.open}
+          variant="secondary"
+          onPress={() => router.push('/monthly-plan')}
+          testID="spending-open-plan"
+        />
+      </Card>
 
       <StatTile
         testID="tile-everyday"

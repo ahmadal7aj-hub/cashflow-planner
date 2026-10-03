@@ -3,6 +3,7 @@ import { renderRouter } from 'expo-router/testing-library';
 
 import RootLayout from '../app/_layout';
 import Commitments from '../app/commitments';
+import EditItem from '../app/edit/[kind]/[id]';
 import MonthlyPlan from '../app/monthly-plan';
 import TabsLayout from '../app/(tabs)/_layout';
 import Dashboard from '../app/(tabs)/dashboard';
@@ -14,6 +15,7 @@ import Spending from '../app/(tabs)/spending';
 const routes = {
   _layout: RootLayout,
   commitments: Commitments,
+  'edit/[kind]/[id]': EditItem,
   'monthly-plan': MonthlyPlan,
   '(tabs)/_layout': TabsLayout,
   '(tabs)/dashboard': Dashboard,
@@ -76,5 +78,62 @@ describe('monthly plan: income, then saving, then what is left', () => {
     await waitFor(() => expect(getPathname()).toBe('/dashboard'));
     // 1,770.00 - 500.00 set aside.
     expect(screen.getAllByText('AED 1,270.00').length).toBeGreaterThan(0);
+  });
+});
+
+describe('income can be zero or removed, and spending follows the balance', () => {
+  beforeEach(() => {
+    jest.useFakeTimers({ now: new Date('2026-10-03T08:00:00') });
+  });
+  afterEach(() => jest.useRealTimers());
+
+  it('accepts zero for an income item and says it is not received this month', async () => {
+    const { getPathname } = await open('/commitments');
+    await fireEvent.press(screen.getByTestId('income-side'));
+    await waitFor(() => expect(getPathname()).toBe('/edit/income/side'));
+    await fireEvent.changeText(screen.getByTestId('input-amount'), '0');
+    await fireEvent.press(screen.getByTestId('edit-save'));
+    await waitFor(() => expect(getPathname()).toBe('/commitments'));
+    expect(screen.getByText('Not receiving this month')).toBeTruthy();
+  });
+
+  it('still rejects junk for an income amount', async () => {
+    const { getPathname } = await open('/commitments');
+    await fireEvent.press(screen.getByTestId('income-side'));
+    await waitFor(() => expect(getPathname()).toBe('/edit/income/side'));
+    await fireEvent.changeText(screen.getByTestId('input-amount'), 'abc');
+    await fireEvent.press(screen.getByTestId('edit-save'));
+    expect(screen.getByTestId('error-amount')).toBeTruthy();
+  });
+
+  it('deletes an income item', async () => {
+    const { getPathname } = await open('/commitments');
+    await fireEvent.press(screen.getByTestId('income-side'));
+    await waitFor(() => expect(getPathname()).toBe('/edit/income/side'));
+    await fireEvent.press(screen.getByTestId('edit-delete'));
+    await waitFor(() => expect(getPathname()).toBe('/commitments'));
+    expect(screen.queryByTestId('income-side')).toBeNull();
+  });
+
+  it('clears the sample data so the user can start fresh', async () => {
+    const { getPathname } = await open('/commitments');
+    await fireEvent.press(screen.getByTestId('clear-sample'));
+    expect(screen.queryByTestId('income-salary')).toBeNull();
+    expect(screen.queryByTestId('expense-rent')).toBeNull();
+    await fireEvent.press(screen.getByTestId('commitments-continue'));
+    await waitFor(() => expect(getPathname()).toBe('/dashboard'));
+  });
+
+  it('shows the spending budget against what is left after saving', async () => {
+    await open('/spending');
+    expect(screen.getByTestId('spending-budget-card')).toBeTruthy();
+    expect(screen.getByText('AED 16,630.00')).toBeTruthy();
+  });
+
+  it('tells you how much stays unbudgeted while you type a new budget', async () => {
+    const { getPathname } = await open('/edit/variable/new');
+    await fireEvent.changeText(screen.getByTestId('input-amount'), '1000');
+    expect(screen.getByTestId('unbudgeted-note')).toBeTruthy();
+    expect(getPathname()).toBe('/edit/variable/new');
   });
 });

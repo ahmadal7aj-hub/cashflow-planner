@@ -21,6 +21,7 @@ import {
 import { addDays, daysBetween, nextOnOrAfter, type ISODate } from '../../../domain/dates';
 import { INVESTMENT_TYPES, getInvestmentType } from '../../../domain/investmentInsights';
 import { formatAed, parseAmountToFils, type Fils } from '../../../domain/money';
+import { monthlySplit } from '../../../domain/monthlyPlan';
 import {
   EXPENSE_CATEGORIES,
   INCOME_CATEGORIES,
@@ -125,6 +126,32 @@ function ExpenseForm({ kind, existing }: { kind: 'fixed' | 'variable'; existing?
   );
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
 
+  // What would still be unbudgeted (income - savings - all spending) if this item were saved as typed.
+  const typedAmount = parseAmountToFils(amount);
+  const unbudgetedAfter = typedAmount.ok
+    ? monthlySplit({
+        ...plan,
+        expenses: existing
+          ? plan.expenses.map((e) =>
+              e.id === existing.id ? { ...e, amount: typedAmount.fils } : e,
+            )
+          : [
+              ...plan.expenses,
+              {
+                id: 'preview',
+                name,
+                categoryId,
+                amount: typedAmount.fils,
+                frequency: kind === 'variable' ? 'monthly' : frequency,
+                nextDueInDays: 0,
+                kind,
+                essential: essential === 'yes',
+                spentSoFar: 0,
+              },
+            ],
+      }).room
+    : null;
+
   const pickCategory = (cid: string) => {
     setCategoryId(cid);
     if (!existing) {
@@ -197,6 +224,13 @@ function ExpenseForm({ kind, existing }: { kind: 'fixed' | 'variable'; existing?
         error={errors.amount}
         keyboardType="decimal-pad"
       />
+      {unbudgetedAfter !== null ? (
+        <Body muted testID="unbudgeted-note">
+          {unbudgetedAfter >= 0
+            ? t.monthlyPlan.unbudgetedAfter(formatAed(unbudgetedAfter))
+            : t.monthlyPlan.overAfter(formatAed(-unbudgetedAfter))}
+        </Body>
+      ) : null}
       {kind === 'fixed' && (
         <>
           <ChipGroup
@@ -285,7 +319,8 @@ function IncomeForm({ existing }: { existing?: IncomeItem }) {
     const a = parseAmountToFils(amount);
     const next: Record<string, string | undefined> = {};
     if (name.trim() === '') next.name = t.edit.errorName;
-    if (!a.ok || a.fils <= 0) next.amount = t.edit.errorAmount;
+    // Zero is allowed for income: it means "nothing expected this month" (or delete the item).
+    if (!a.ok) next.amount = t.edit.errorAmount;
     // Days until the next payment on or after today (recurring dates roll forward).
     const days = nextDate
       ? daysBetween(today, nextOnOrAfter(nextDate, frequency, today))
@@ -328,6 +363,7 @@ function IncomeForm({ existing }: { existing?: IncomeItem }) {
       />
       <Field
         label={t.edit.amount}
+        hint={t.edit.incomeZeroHint}
         testID="amount"
         value={amount}
         onChangeText={setAmount}

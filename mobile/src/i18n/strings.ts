@@ -52,6 +52,7 @@ export const t = {
     name: 'Name',
     category: 'Category',
     amount: 'Amount (AED)',
+    incomeZeroHint: 'Not receiving this one this month? Enter 0, or use Delete below to remove it.',
     budgetAmount: 'Budget for this cycle (AED)',
     frequency: 'How often',
     nextDue: 'Next due in (days)',
@@ -472,6 +473,18 @@ export const t = {
     overNote:
       'The spending you entered is more than what is left after saving. Lower the savings or the spending.',
     setAsideMore: 'You are setting aside more than your income. Lower the amount to save.',
+    unbudgetedAfter: (amount: string) =>
+      `After this, ${amount} of your monthly balance is still unbudgeted.`,
+    overAfter: (amount: string) =>
+      `After this, your spending is ${amount} more than your monthly balance.`,
+    spendingTitle: 'Your spending budget',
+    spendingIntro: 'What is left after saving is the most your budgets can add up to.',
+    spendingLeft: 'Left to spend each month',
+    spendingBudgeted: 'Already budgeted',
+    spendingUnbudgeted: 'Still unbudgeted',
+    spendingOver: 'Over your balance by',
+    zeroIncome: 'Not receiving this month',
+    clearSample: 'Clear sample data and start fresh',
     open: 'Plan my monthly savings',
     saved: 'Saved. Your safe to spend now sets this amount aside.',
     save: 'Save my plan',

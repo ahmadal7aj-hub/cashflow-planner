@@ -16,7 +16,7 @@ function whenText(today: ISODate, days: number): string {
 
 export default function Commitments() {
   const router = useRouter();
-  const { plan, today, resetToSample } = usePrototype();
+  const { plan, today, resetToSample, clearSampleData } = usePrototype();
   const fixed = plan.expenses.filter((e) => e.kind === 'fixed');
   const variable = plan.expenses.filter((e) => e.kind === 'variable');
 
@@ -91,6 +91,12 @@ export default function Commitments() {
         onPress={resetToSample}
         testID="reset-sample"
       />
+      <Button
+        label={t.monthlyPlan.clearSample}
+        variant="secondary"
+        onPress={clearSampleData}
+        testID="clear-sample"
+      />
     </Screen>
   );
 }
@@ -115,7 +121,9 @@ function IncomeCard({
       <Card>
         <Row label={item.name} value={formatAed(item.amount)} strong />
         <Body muted>
-          {`${label} · ${FREQUENCY_LABELS[item.frequency]} · ${whenText(today, item.nextInDays)}`}
+          {item.amount === 0
+            ? t.monthlyPlan.zeroIncome
+            : `${label} · ${FREQUENCY_LABELS[item.frequency]} · ${whenText(today, item.nextInDays)}`}
         </Body>
       </Card>
     </Pressable>
