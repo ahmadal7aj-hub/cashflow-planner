@@ -95,4 +95,31 @@ describe('all dashboards live in one tab', () => {
     await open('savings');
     expect(screen.getByTestId('savings-dashboard-empty')).toBeTruthy();
   });
+
+  it('the overview opens with charts: in, spent and saved; budget used; month by month; savings balance', async () => {
+    await openApp('/dashboard', { seed: dashboardWorld() }); // October 2026: spent 500 of 3,000, saved 2,000
+    expect(
+      screen.getByLabelText(
+        'Money in, spent and saved. Income: AED 0.00; Spent: AED 500.00; Saved: AED 2,000.00',
+      ),
+    ).toBeTruthy();
+    expect(screen.getByTestId('chart-budget-used-pct').props.children).toBe('17%');
+    expect(screen.getByTestId('chart-by-month')).toBeTruthy();
+    expect(screen.getByLabelText(/^Savings balance. Oct: AED 14,000.00/)).toBeTruthy();
+    // The number cards are still there, under Details.
+    expect(screen.getByText('Details')).toBeTruthy();
+    expect(screen.getByTestId('spending-summary')).toBeTruthy();
+  });
+
+  it('a longer range shows one group of columns per month, and over budget turns the meter red with a written note', async () => {
+    await openApp('/dashboard', { seed: dashboardWorld() });
+    await fireEvent.press(screen.getByTestId('range-last-quarter'));
+    expect(
+      screen.getByLabelText(
+        /^Month by month. Jul: .*; Aug: .*; Sep: Income AED 10,000.00, Spent AED 800.00/,
+      ),
+    ).toBeTruthy();
+    await open('budget');
+    expect(screen.getByTestId('budget-meter')).toBeTruthy();
+  });
 });

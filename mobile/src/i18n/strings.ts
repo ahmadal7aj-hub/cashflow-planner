@@ -194,6 +194,14 @@ export const t = {
   dashboards: {
     sectionLabel: 'Dashboard',
     overview: 'Overview',
+    details: 'Details',
+    series: { income: 'Income', spent: 'Spent', saved: 'Saved' },
+    overviewCharts: {
+      inOutTitle: 'Money in, spent and saved',
+      inOutCaption: 'For the dates chosen above.',
+      byMonthTitle: 'Month by month',
+      byMonthCaption: 'Income received, spending and net savings in each month.',
+    },
     income: {
       chip: 'Income',
       title: 'Income dashboard',
@@ -209,6 +217,8 @@ export const t = {
       byCategory: 'Budget by category',
       byCategoryCaption: 'What you planned for these dates.',
       usage: 'How each budget is being used',
+      usedTitle: 'Budget used',
+      usedLabel: 'Spent',
       usageCaption: 'The marker shows where an even pace would be by today.',
     },
     spending: {
@@ -229,6 +239,9 @@ export const t = {
       trendTitle: 'Net savings added per month',
       trendCaption: 'Deposits minus withdrawals, month by month.',
       open: 'Open savings planning',
+      balanceTitle: 'Savings balance',
+      balanceCaption: 'Your total savings at the end of each month.',
+      noBalance: 'no balance yet',
     },
     shared: { chip: 'Shared' },
   },

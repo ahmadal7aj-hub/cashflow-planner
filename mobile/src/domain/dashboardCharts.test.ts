@@ -1,10 +1,12 @@
 import { emptyPlan, type ExpenseItem, type IncomeItem, type Plan } from './budgetModel';
 import {
+  balanceByMonth,
   incomeBySource,
   incomeByMonth,
   monthBuckets,
   rangeElapsed,
   savingsByMonth,
+  shortMonth,
   spendingByMonth,
 } from './dashboardCharts';
 import { summarize } from './dashboardRange';
@@ -130,5 +132,18 @@ describe('how much of the range has passed', () => {
     expect(rangeElapsed({ from: '2026-10-01', to: '2026-10-31' }, '2026-09-30')).toBe(0);
     expect(rangeElapsed({ from: '2026-10-01', to: '2026-10-31' }, '2026-11-01')).toBe(1);
     expect(rangeElapsed({ from: '2026-10-01', to: '2026-10-10' }, '2026-10-05')).toBe(0.5);
+  });
+});
+
+describe('short month labels and month-end balances', () => {
+  it('names months briefly, with the year when asked', () => {
+    expect(shortMonth('2026-10')).toBe('Oct');
+    expect(shortMonth('2025-01', true)).toBe('Jan 25');
+  });
+
+  it('gives the balance at the end of each month, and nothing before the first record', () => {
+    const p = world();
+    const b = balanceByMonth(p, { from: '2026-07-01', to: '2026-10-31' }, today);
+    expect(b.map((x) => x.value)).toEqual([null, aed(10000), aed(12000), aed(12500)]);
   });
 });

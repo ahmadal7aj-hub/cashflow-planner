@@ -3,21 +3,25 @@ import { useMemo } from 'react';
 import { Text } from 'react-native';
 
 import {
+  balanceByMonth,
   incomeByMonth,
   incomeBySource,
   rangeElapsed,
   savingsByMonth,
+  shortMonth,
   spendingByMonth,
+  type MonthValue,
 } from '../domain/dashboardCharts';
 import { coversWholeMonths, type DashboardSummary } from '../domain/dashboardRange';
-import { formatDate } from '../domain/dates';
+import { formatDate, type ISODate } from '../domain/dates';
 import { formatAed } from '../domain/money';
 import { paceStatus } from '../domain/spendingInsights';
 import { t } from '../i18n/strings';
 import { usePrototype } from '../state/PrototypeContext';
-import { makeStyles } from '../theme/ThemeProvider';
+import { makeStyles, useTheme } from '../theme/ThemeProvider';
 import { fontSize } from '../theme/tokens';
-import { BudgetBar, HorizontalBars, TrendBars } from './dashboardParts';
+import { CompareColumns, GroupedColumns, Meter, MonthColumns } from './chartKit';
+import { BudgetBar, HorizontalBars } from './dashboardParts';
 import { Body, Button, Card, Heading, Row } from './ui';
 
 const useStyles = makeStyles(({ colors }) => ({
@@ -30,49 +34,152 @@ function signed(fils: number): string {
   return fils > 0 ? `+${formatAed(fils)}` : formatAed(fils);
 }
 
-/** The first and last month of a monthly chart, and one sentence that says what the chart shows. */
-function trendText(
-  months: readonly { label: string; value: number }[],
-  what: string,
-): { first: string; last: string; summary: string } {
-  const first = months[0]?.label ?? '';
-  const last = months[months.length - 1]?.label ?? '';
-  const parts = months.map((m) => `${m.label}: ${formatAed(m.value)}`).join('; ');
-  return { first, last, summary: `${what}. ${parts}` };
+/** Short month names for a chart; the year is added when the months span more than one year. */
+function monthLabels(months: readonly { month: string }[]): string[] {
+  const years = new Set(months.map((m) => m.month.slice(0, 4)));
+  return months.map((m) => shortMonth(m.month, years.size > 1));
 }
 
 interface SectionProps {
   summary: DashboardSummary;
 }
 
+/** Series colours: one hue per kind of money, used the same way on every chart. */
+function useSeriesColors() {
+  const { chart } = useTheme();
+  return {
+    income: chart.safe,
+    spending: chart.commitments,
+    savings: chart.savings,
+    over: chart.critical,
+  };
+}
+
+function useMonthly(summary: DashboardSummary) {
+  const { plan, today } = usePrototype();
+  const range = useMemo(() => ({ from: summary.from, to: summary.to }), [summary.from, summary.to]);
+  return useMemo(() => {
+    const income = incomeByMonth(plan, range, today);
+    return {
+      income,
+      spending: spendingByMonth(plan, range),
+      saved: savingsByMonth(plan, range, today),
+      balance: balanceByMonth(plan, range, today),
+      labels: monthLabels(income),
+    };
+  }, [plan, range, today]);
+}
+
+const values = (m: readonly MonthValue[]) => m.map((x) => x.value);
+
+/** The charts at the top of the Overview: in, out and saved; budget used; month by month; savings balance. */
+export function OverviewCharts({ summary: s }: SectionProps) {
+  const c = useSeriesColors();
+  const m = useMonthly(s);
+  return (
+    <>
+      <CompareColumns
+        testID="chart-in-out"
+        title={d.overviewCharts.inOutTitle}
+        caption={d.overviewCharts.inOutCaption}
+        columns={[
+          { key: 'income', label: d.series.income, value: s.income.received, color: c.income },
+          { key: 'spent', label: d.series.spent, value: s.spending.totalActual, color: c.spending },
+          { key: 'saved', label: d.series.saved, value: s.savings.period, color: c.savings },
+        ]}
+      />
+      <BudgetMeter summary={s} />
+      <GroupedColumns
+        testID="chart-by-month"
+        title={d.overviewCharts.byMonthTitle}
+        caption={d.overviewCharts.byMonthCaption}
+        groups={m.labels}
+        series={[
+          { key: 'income', label: d.series.income, color: c.income, values: values(m.income) },
+          { key: 'spent', label: d.series.spent, color: c.spending, values: values(m.spending) },
+          { key: 'saved', label: d.series.saved, color: c.savings, values: values(m.saved) },
+        ]}
+      />
+      <MonthColumns
+        testID="chart-balance"
+        title={d.savings.balanceTitle}
+        caption={d.savings.balanceCaption}
+        labels={m.labels}
+        values={m.balance.map((b) => b.value)}
+        color={c.savings}
+        emptyText={d.savings.noBalance}
+      />
+    </>
+  );
+}
+
+function BudgetMeter({
+  summary: s,
+  testID = 'chart-budget-used',
+}: SectionProps & { testID?: string }) {
+  const c = useSeriesColors();
+  const sp = s.spending;
+  return (
+    <Meter
+      testID={testID}
+      title={d.budget.usedTitle}
+      used={sp.totalActual}
+      total={sp.totalBudget}
+      usedLabel={d.budget.usedLabel}
+      color={c.spending}
+      overColor={c.over}
+      note={
+        sp.totalRemaining < 0
+          ? `${t.dashboardPage.overBy} ${formatAed(-sp.totalRemaining)}`
+          : `${t.dashboardPage.remaining}: ${formatAed(sp.totalRemaining)}`
+      }
+    />
+  );
+}
+
 /** Income received and still expected, by month and by source. */
 export function IncomeDashboard({ summary: s }: SectionProps) {
   const { plan, today } = usePrototype();
-  const range = { from: s.from, to: s.to };
-  const sources = useMemo(() => incomeBySource(plan, range, today), [plan, s.from, s.to, today]); // eslint-disable-line react-hooks/exhaustive-deps
-  const months = useMemo(() => incomeByMonth(plan, range, today), [plan, s.from, s.to, today]); // eslint-disable-line react-hooks/exhaustive-deps
-  const tt = trendText(months, d.income.trendTitle);
+  const c = useSeriesColors();
+  const m = useMonthly(s);
+  const sources = useMemo(
+    () => incomeBySource(plan, { from: s.from, to: s.to }, today),
+    [plan, s.from, s.to, today],
+  );
   return (
     <>
-      <Card testID="income-dashboard">
-        <Heading>{d.income.title}</Heading>
-        <Row label={t.dashboardPage.received} value={formatAed(s.income.received)} strong />
-        <Row label={t.dashboardPage.expected} value={formatAed(s.income.expected)} />
-      </Card>
       {sources.length === 0 ? (
         <Body muted testID="income-dashboard-empty">
           {d.income.none}
         </Body>
       ) : (
         <>
-          <TrendBars
+          <CompareColumns
+            testID="income-received-expected"
+            title={d.income.title}
+            columns={[
+              {
+                key: 'received',
+                label: t.dashboardPage.received,
+                value: s.income.received,
+                color: c.income,
+              },
+              {
+                key: 'expected',
+                label: t.dashboardPage.expected,
+                value: s.income.expected,
+                color: c.income,
+              },
+            ]}
+          />
+          <MonthColumns
             testID="income-trend"
             title={d.income.trendTitle}
             caption={d.income.trendCaption}
-            values={months.map((m) => m.value)}
-            firstLabel={tt.first}
-            lastLabel={tt.last}
-            summary={tt.summary}
+            labels={m.labels}
+            values={values(m.income)}
+            color={c.income}
+            emptyText="-"
           />
           <HorizontalBars
             testID="income-sources"
@@ -86,11 +193,16 @@ export function IncomeDashboard({ summary: s }: SectionProps) {
           />
         </>
       )}
+      <Card testID="income-dashboard">
+        <Heading>{d.details}</Heading>
+        <Row label={t.dashboardPage.received} value={formatAed(s.income.received)} strong />
+        <Row label={t.dashboardPage.expected} value={formatAed(s.income.expected)} />
+      </Card>
     </>
   );
 }
 
-/** Budget by category and how each budget is being used. */
+/** Budget used, budget by category and how each budget is being used. */
 export function BudgetDashboard({ summary: s }: SectionProps) {
   const router = useRouter();
   const { today } = usePrototype();
@@ -99,24 +211,13 @@ export function BudgetDashboard({ summary: s }: SectionProps) {
   const budgeted = sp.rows.filter((r) => r.budget > 0);
   return (
     <>
-      <Card testID="budget-dashboard">
-        <Heading>{d.budget.title}</Heading>
-        <Row label={t.dashboardPage.budget} value={formatAed(sp.totalBudget)} strong />
-        <Row label={t.dashboardPage.spent} value={formatAed(sp.totalActual)} />
-        <Row
-          label={sp.totalRemaining < 0 ? t.dashboardPage.overBy : t.dashboardPage.remaining}
-          value={formatAed(Math.abs(sp.totalRemaining))}
-        />
-        {!coversWholeMonths({ from: s.from, to: s.to }) ? (
-          <Body muted>{t.dashboardPage.prorated}</Body>
-        ) : null}
-      </Card>
       {budgeted.length === 0 ? (
         <Body muted testID="budget-dashboard-empty">
           {t.dashboardPage.budgetsNone}
         </Body>
       ) : (
         <>
+          <BudgetMeter summary={s} testID="budget-meter" />
           <HorizontalBars
             testID="budget-by-category"
             title={d.budget.byCategory}
@@ -139,6 +240,18 @@ export function BudgetDashboard({ summary: s }: SectionProps) {
           </Card>
         </>
       )}
+      <Card testID="budget-dashboard">
+        <Heading>{d.details}</Heading>
+        <Row label={t.dashboardPage.budget} value={formatAed(sp.totalBudget)} strong />
+        <Row label={t.dashboardPage.spent} value={formatAed(sp.totalActual)} />
+        <Row
+          label={sp.totalRemaining < 0 ? t.dashboardPage.overBy : t.dashboardPage.remaining}
+          value={formatAed(Math.abs(sp.totalRemaining))}
+        />
+        {!coversWholeMonths({ from: s.from, to: s.to }) ? (
+          <Body muted>{t.dashboardPage.prorated}</Body>
+        ) : null}
+      </Card>
       <Button
         label={t.dashboardPage.openBudget}
         variant="secondary"
@@ -152,18 +265,38 @@ export function BudgetDashboard({ summary: s }: SectionProps) {
 /** Actual spending by month and by category. */
 export function SpendingDashboard({ summary: s }: SectionProps) {
   const router = useRouter();
-  const { plan } = usePrototype();
+  const c = useSeriesColors();
+  const m = useMonthly(s);
   const sp = s.spending;
-  const months = useMemo(
-    () => spendingByMonth(plan, { from: s.from, to: s.to }),
-    [plan, s.from, s.to],
-  );
   const spentRows = sp.rows.filter((r) => r.actual > 0).sort((a, b) => b.actual - a.actual);
-  const tt = trendText(months, d.spending.trendTitle);
   return (
     <>
+      {spentRows.length === 0 ? (
+        <Body muted testID="spending-dashboard-empty">
+          {d.spending.none}
+        </Body>
+      ) : (
+        <>
+          <MonthColumns
+            testID="spending-trend"
+            title={d.spending.trendTitle}
+            caption={d.spending.trendCaption}
+            labels={m.labels}
+            values={values(m.spending)}
+            color={c.spending}
+            emptyText="-"
+          />
+          <HorizontalBars
+            testID="spending-by-category"
+            title={d.spending.byCategory}
+            caption={d.spending.byCategoryCaption}
+            items={spentRows.map((r) => ({ key: r.categoryId, label: r.label, value: r.actual }))}
+          />
+          {sp.totalBudget > 0 ? <BudgetMeter summary={s} testID="spending-meter" /> : null}
+        </>
+      )}
       <Card tone={sp.totalRemaining < 0 ? 'danger' : 'default'} testID="spending-dashboard">
-        <Heading>{d.spending.title}</Heading>
+        <Heading>{d.details}</Heading>
         <Row label={t.dashboardPage.spent} value={formatAed(sp.totalActual)} strong />
         <Row label={t.dashboardPage.budget} value={formatAed(sp.totalBudget)} />
         <Row
@@ -174,29 +307,6 @@ export function SpendingDashboard({ summary: s }: SectionProps) {
           <Body muted>{t.dashboardPage.unbudgeted(formatAed(sp.unbudgetedActual))}</Body>
         ) : null}
       </Card>
-      {spentRows.length === 0 ? (
-        <Body muted testID="spending-dashboard-empty">
-          {d.spending.none}
-        </Body>
-      ) : (
-        <>
-          <TrendBars
-            testID="spending-trend"
-            title={d.spending.trendTitle}
-            caption={d.spending.trendCaption}
-            values={months.map((m) => m.value)}
-            firstLabel={tt.first}
-            lastLabel={tt.last}
-            summary={tt.summary}
-          />
-          <HorizontalBars
-            testID="spending-by-category"
-            title={d.spending.byCategory}
-            caption={d.spending.byCategoryCaption}
-            items={spentRows.map((r) => ({ key: r.categoryId, label: r.label, value: r.actual }))}
-          />
-        </>
-      )}
       <Button
         label={t.dashboardPage.openSpending}
         variant="secondary"
@@ -207,21 +317,43 @@ export function SpendingDashboard({ summary: s }: SectionProps) {
   );
 }
 
-/** Savings added each month, the period total and the balance. */
+/** The savings balance and what was added each month. */
 export function SavingsDashboard({ summary: s }: SectionProps) {
   const styles = useStyles();
   const router = useRouter();
-  const { plan, today } = usePrototype();
-  const months = useMemo(
-    () => savingsByMonth(plan, { from: s.from, to: s.to }, today),
-    [plan, s.from, s.to, today],
-  );
-  const tt = trendText(months, d.savings.trendTitle);
-  const hasMoney = months.some((m) => m.value !== 0);
+  const c = useSeriesColors();
+  const m = useMonthly(s);
+  const hasRecords = m.balance.some((b) => b.value !== null);
   return (
     <>
+      {hasRecords ? (
+        <>
+          <MonthColumns
+            testID="savings-balance-chart"
+            title={d.savings.balanceTitle}
+            caption={d.savings.balanceCaption}
+            labels={m.labels}
+            values={m.balance.map((b) => b.value)}
+            color={c.savings}
+            emptyText={d.savings.noBalance}
+          />
+          <MonthColumns
+            testID="savings-trend"
+            title={d.savings.trendTitle}
+            caption={d.savings.trendCaption}
+            labels={m.labels}
+            values={values(m.saved)}
+            color={c.savings}
+            emptyText="-"
+          />
+        </>
+      ) : (
+        <Body muted testID="savings-dashboard-empty">
+          {d.savings.none}
+        </Body>
+      )}
       <Card tone="info" testID="savings-dashboard">
-        <Heading>{d.savings.title}</Heading>
+        <Heading>{d.details}</Heading>
         <Body muted>{d.savings.periodLabel}</Body>
         <Text style={styles.big} testID="savings-dashboard-period">
           {signed(s.savings.period)}
@@ -235,25 +367,12 @@ export function SavingsDashboard({ summary: s }: SectionProps) {
             <Text style={styles.big} testID="savings-dashboard-total">
               {formatAed(s.savings.total)}
             </Text>
-            <Body muted>{t.dashboardPage.totalNote(formatDate(s.savings.totalAsOf))}</Body>
+            <Body muted>
+              {t.dashboardPage.totalNote(formatDate(s.savings.totalAsOf as ISODate))}
+            </Body>
           </>
         )}
       </Card>
-      {hasMoney ? (
-        <TrendBars
-          testID="savings-trend"
-          title={d.savings.trendTitle}
-          caption={d.savings.trendCaption}
-          values={months.map((m) => m.value)}
-          firstLabel={tt.first}
-          lastLabel={tt.last}
-          summary={tt.summary}
-        />
-      ) : (
-        <Body muted testID="savings-dashboard-empty">
-          {d.savings.none}
-        </Body>
-      )}
       <Button
         label={d.savings.open}
         variant="secondary"
