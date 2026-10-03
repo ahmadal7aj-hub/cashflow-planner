@@ -1,17 +1,25 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 import { track } from '../../analytics/events';
 import { DateRangeControl, useDateRange } from '../../components/DateRangeControl';
+import {
+  BudgetDashboard,
+  IncomeDashboard,
+  SavingsDashboard,
+  SpendingDashboard,
+} from '../../components/dashboards';
 import { ChipGroup } from '../../components/forms';
+import { SharedDashboard } from '../../components/SharedDashboard';
 import { Body, Button, Card, Heading, HeroCard, Row, Screen } from '../../components/ui';
 import { coversWholeMonths, summarize } from '../../domain/dashboardRange';
 import { formatDate, relativeDays } from '../../domain/dates';
 import { formatAed } from '../../domain/money';
 import { t } from '../../i18n/strings';
 import { usePrototype } from '../../state/PrototypeContext';
+import { useSharing } from '../../state/SharingContext';
 import { makeStyles, useTheme } from '../../theme/ThemeProvider';
 import { fontSize, minTouchTarget, spacing } from '../../theme/tokens';
 
@@ -39,6 +47,16 @@ function signed(fils: number): string {
   return fils > 0 ? `+${formatAed(fils)}` : formatAed(fils);
 }
 
+type Section = 'overview' | 'income' | 'budget' | 'spending' | 'savings' | 'shared';
+const SECTIONS: readonly Section[] = [
+  'overview',
+  'income',
+  'budget',
+  'spending',
+  'savings',
+  'shared',
+];
+
 export default function Dashboard() {
   const router = useRouter();
   const styles = useStyles();
@@ -46,6 +64,19 @@ export default function Dashboard() {
   const { plan, today, baseline: f, reminders } = usePrototype();
   const active = reminders.filter((r) => r.active);
 
+  const sharing = useSharing();
+  const params = useLocalSearchParams<{ section?: string }>();
+  const [chosen, setChosen] = useState<Section>(
+    SECTIONS.includes(params.section as Section) ? (params.section as Section) : 'overview',
+  );
+  // Opening the page with another section (for example from a group) switches to it.
+  const [seenParam, setSeenParam] = useState(params.section);
+  if (seenParam !== params.section) {
+    setSeenParam(params.section);
+    if (SECTIONS.includes(params.section as Section)) setChosen(params.section as Section);
+  }
+  // The Shared dashboard exists only once something is shared; until then there is nothing to show.
+  const section: Section = chosen === 'shared' && !sharing.hasSharedEntries ? 'overview' : chosen;
   const dates = useDateRange(today);
   const { range, preset } = dates;
   const [savingsView, setSavingsView] = useState<'period' | 'total'>('period');
@@ -61,8 +92,62 @@ export default function Dashboard() {
   const periodLabel = monthView ? t.dashboardPage.thisMonthSavings : t.dashboardPage.periodSavings;
   const showSafe = plan.availableCash > 0;
 
+  const sectionChips = (
+    <ChipGroup
+      label={t.dashboards.sectionLabel}
+      testID="dash-section"
+      value={section}
+      onChange={setChosen}
+      options={[
+        { value: 'overview', label: t.dashboards.overview },
+        { value: 'income', label: t.dashboards.income.chip },
+        { value: 'budget', label: t.dashboards.budget.chip },
+        { value: 'spending', label: t.dashboards.spending.chip },
+        { value: 'savings', label: t.dashboards.savings.chip },
+        ...(sharing.hasSharedEntries
+          ? [{ value: 'shared' as const, label: t.dashboards.shared.chip }]
+          : []),
+      ]}
+    />
+  );
+
+  const settingsButton = (
+    <Button
+      label={t.dashboard.settings}
+      icon="settings-outline"
+      variant="secondary"
+      onPress={() => router.push('/settings')}
+      testID="open-settings"
+    />
+  );
+
+  if (section === 'shared') {
+    return (
+      <Screen testID="dashboard-screen">
+        {sectionChips}
+        <SharedDashboard dates={dates} />
+        {settingsButton}
+      </Screen>
+    );
+  }
+
+  if (section !== 'overview') {
+    return (
+      <Screen testID="dashboard-screen">
+        {sectionChips}
+        <DateRangeControl state={dates} />
+        {section === 'income' ? <IncomeDashboard summary={s} /> : null}
+        {section === 'budget' ? <BudgetDashboard summary={s} /> : null}
+        {section === 'spending' ? <SpendingDashboard summary={s} /> : null}
+        {section === 'savings' ? <SavingsDashboard summary={s} /> : null}
+        {settingsButton}
+      </Screen>
+    );
+  }
+
   return (
     <Screen testID="dashboard-screen">
+      {sectionChips}
       <DateRangeControl state={dates} />
 
       <Card testID="income-summary">
@@ -195,13 +280,7 @@ export default function Dashboard() {
         </>
       ) : null}
 
-      <Button
-        label={t.dashboard.settings}
-        icon="settings-outline"
-        variant="secondary"
-        onPress={() => router.push('/settings')}
-        testID="open-settings"
-      />
+      {settingsButton}
     </Screen>
   );
 }

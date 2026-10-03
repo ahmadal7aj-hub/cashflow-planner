@@ -7,7 +7,6 @@ import Budget from '../app/(tabs)/budget';
 import Dashboard from '../app/(tabs)/dashboard';
 import Income from '../app/(tabs)/income';
 import Savings from '../app/(tabs)/savings';
-import Shared from '../app/(tabs)/shared';
 import Spending from '../app/(tabs)/spending';
 import EditItem from '../app/edit/[kind]/[id]';
 import Explain from '../app/explain/[metric]';
@@ -53,7 +52,6 @@ export const routes = {
   '(tabs)/savings': Savings,
   '(tabs)/budget': Budget,
   '(tabs)/spending': Spending,
-  '(tabs)/shared': Shared,
 };
 
 export const TODAY = '2026-10-15';

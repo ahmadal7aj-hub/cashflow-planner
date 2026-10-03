@@ -5,13 +5,13 @@ recorded in `adr/0006-accounts-and-shared-savings.md`; the setup is in `BACKEND-
 
 ## What is private and what is shared
 
-| Information | Who can see it |
-|---|---|
-| Income, budgets, bills, spending, goals, investments | Only you, on your phone. They are never sent. |
-| Your personal savings total and your private savings | Only you. |
-| A saving you chose to **Share** (amount, date, note, whether it was a deposit or a withdrawal) | The accepted members of the one group you chose |
-| That you belong to a group, your username | The accepted members of that group |
-| Your email address | Only you (and the sign-in service). Others can invite you by it, but never see it. |
+| Information                                                                                    | Who can see it                                                                     |
+| ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Income, budgets, bills, spending, goals, investments                                           | Only you, on your phone. They are never sent.                                      |
+| Your personal savings total and your private savings                                           | Only you.                                                                          |
+| A saving you chose to **Share** (amount, date, note, whether it was a deposit or a withdrawal) | The accepted members of the one group you chose                                    |
+| That you belong to a group, your username                                                      | The accepted members of that group                                                 |
+| Your email address                                                                             | Only you (and the sign-in service). Others can invite you by it, but never see it. |
 
 **Sharing displays the same record in another view.** It does not copy the amount into anyone's personal total, move
 money, or add another person's contribution to yours.
@@ -46,7 +46,7 @@ money, or add another person's contribution to yours.
 
 ## The Shared Savings dashboard
 
-A **Shared Savings** tab appears in every accepted member's account once any of their groups has a shared saving. It shows,
+A **Shared** section on the **Dashboards** tab appears in every accepted member's account once any of their groups has a shared saving. It shows,
 for the chosen group and dates: the combined **period** or **total** savings, each member's contribution, the shared
 entries, and the group history. Members of several groups choose the group at the top; each group's records and totals are
 kept apart. Every member sees the same numbers, because the totals are worked out once, in the database.
@@ -60,13 +60,13 @@ kept apart. Every member sees the same numbers, because the totals are worked ou
 
 ## What happens to history (so there are no surprises)
 
-| What happens | Effect on shared totals |
-|---|---|
-| You share an **older** saving | It appears at **its own date**. Totals for earlier periods that include that date change. The entry shows "Shared on" the date it became visible. |
-| You **make a saving private** (or delete it) | It disappears from every member's totals for **all dates**. The history keeps a note that a saving was made private, with no amount. |
-| You **leave** a group, or an admin removes you | All your shared savings in that group become private again and disappear from its totals for all dates. Your own records are not changed. The history keeps "left the group". You lose access at once. |
-| You **edit** a shared saving | The one shared record changes; totals for the dates involved change. |
-| A date before the group's **first** shared saving | The screen says no shared savings were recorded; it does not show zero as if it were a balance. |
+| What happens                                      | Effect on shared totals                                                                                                                                                                                |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| You share an **older** saving                     | It appears at **its own date**. Totals for earlier periods that include that date change. The entry shows "Shared on" the date it became visible.                                                      |
+| You **make a saving private** (or delete it)      | It disappears from every member's totals for **all dates**. The history keeps a note that a saving was made private, with no amount.                                                                   |
+| You **leave** a group, or an admin removes you    | All your shared savings in that group become private again and disappear from its totals for all dates. Your own records are not changed. The history keeps "left the group". You lose access at once. |
+| You **edit** a shared saving                      | The one shared record changes; totals for the dates involved change.                                                                                                                                   |
+| A date before the group's **first** shared saving | The screen says no shared savings were recorded; it does not show zero as if it were a balance.                                                                                                        |
 
 ## Limits of this version
 

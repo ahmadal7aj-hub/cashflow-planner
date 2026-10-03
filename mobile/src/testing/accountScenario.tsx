@@ -147,5 +147,5 @@ export function sharedRows(db: TestDb) {
 
 export async function openRoute(getPathname: () => string, path: string) {
   await act(async () => router.push(path as never));
-  await waitFor(() => expect(getPathname()).toBe(path));
+  await waitFor(() => expect(getPathname()).toBe(path.split('?')[0]));
 }

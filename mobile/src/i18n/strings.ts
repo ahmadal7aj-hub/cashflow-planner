@@ -191,6 +191,48 @@ export const t = {
     openBudget: 'Open budgeting',
   },
 
+  dashboards: {
+    sectionLabel: 'Dashboard',
+    overview: 'Overview',
+    income: {
+      chip: 'Income',
+      title: 'Income dashboard',
+      none: 'No income in these dates. Add your income on the Income page.',
+      trendTitle: 'Income received per month',
+      trendCaption: 'Money that has arrived, month by month, up to today.',
+      sourcesTitle: 'Income by source',
+      sourcesCaption: 'Received plus still expected in these dates.',
+    },
+    budget: {
+      chip: 'Budget',
+      title: 'Budget dashboard',
+      byCategory: 'Budget by category',
+      byCategoryCaption: 'What you planned for these dates.',
+      usage: 'How each budget is being used',
+      usageCaption: 'The marker shows where an even pace would be by today.',
+    },
+    spending: {
+      chip: 'Spending',
+      title: 'Spending dashboard',
+      none: 'No spending recorded in these dates.',
+      trendTitle: 'Spending per month',
+      trendCaption: 'What you actually spent, month by month.',
+      byCategory: 'Spending by category',
+      byCategoryCaption: 'Where the money went in these dates.',
+    },
+    savings: {
+      chip: 'Savings',
+      title: 'Savings dashboard',
+      periodLabel: 'Saved in these dates',
+      totalLabel: 'Total savings',
+      none: 'No savings added or taken out in these dates.',
+      trendTitle: 'Net savings added per month',
+      trendCaption: 'Deposits minus withdrawals, month by month.',
+      open: 'Open savings planning',
+    },
+    shared: { chip: 'Shared' },
+  },
+
   onboarding: {
     title: 'Your starting point',
     intro:
@@ -381,7 +423,7 @@ export const t = {
   },
 
   tabs: {
-    dashboard: 'Dashboard',
+    dashboard: 'Dashboards',
     income: 'Income',
     savings: 'Savings planning',
     budget: 'Budgeting',

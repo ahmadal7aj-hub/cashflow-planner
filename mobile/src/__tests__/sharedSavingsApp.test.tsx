@@ -28,15 +28,18 @@ describe('the shared savings example, across two separate accounts', () => {
     ]); // only the shared one reached the server
 
     // A Shared Savings dashboard appears for Alice with only the shared 5,000.
-    await waitFor(() => expect(screen.getByTestId('tab-shared')).toBeTruthy());
-    await fireEvent.press(screen.getByTestId('tab-shared'));
+    await fireEvent.press(screen.getByTestId('tab-dashboard'));
+    await waitFor(() => expect(screen.getByTestId('dash-section-shared')).toBeTruthy());
+    await fireEvent.press(screen.getByTestId('tab-dashboard'));
+    await fireEvent.press(screen.getByTestId('dash-section-shared'));
     await waitFor(() => expect(screen.getByTestId('shared-combined')).toBeTruthy());
     await fireEvent.press(screen.getByTestId('sview-total'));
     expect(screen.getByTestId('shared-combined').props.children).toBe('AED 5,000.00');
 
     // Bob signs in on his own account. He has not shared anything, but the group now has a shared saving.
     await switchTo(w, getPathname, 'bob');
-    await waitFor(() => expect(screen.getByTestId('tab-shared')).toBeTruthy());
+    await fireEvent.press(screen.getByTestId('tab-dashboard'));
+    await waitFor(() => expect(screen.getByTestId('dash-section-shared')).toBeTruthy());
 
     // Bob's personal savings are his own: none of Alice's money is in them.
     await fireEvent.press(screen.getByTestId('tab-savings'));
@@ -46,7 +49,8 @@ describe('the shared savings example, across two separate accounts', () => {
     await addSaving(w, getPathname, '3000', { groupId: w.group });
     expect(personalTotal().getByText('AED 3,000.00')).toBeTruthy(); // not 8,000, not 10,000
 
-    await fireEvent.press(screen.getByTestId('tab-shared'));
+    await fireEvent.press(screen.getByTestId('tab-dashboard'));
+    await fireEvent.press(screen.getByTestId('dash-section-shared'));
     await waitFor(() => expect(screen.getByTestId('shared-combined')).toBeTruthy());
     await fireEvent.press(screen.getByTestId('sview-total'));
     expect(screen.getByTestId('shared-combined').props.children).toBe('AED 8,000.00');
@@ -60,7 +64,8 @@ describe('the shared savings example, across two separate accounts', () => {
 
     // Back to Alice: the same combined 8,000, and her personal total is still 7,000.
     await switchTo(w, getPathname, 'alice');
-    await fireEvent.press(screen.getByTestId('tab-shared'));
+    await fireEvent.press(screen.getByTestId('tab-dashboard'));
+    await fireEvent.press(screen.getByTestId('dash-section-shared'));
     await waitFor(() => expect(screen.getByTestId('shared-combined')).toBeTruthy());
     await fireEvent.press(screen.getByTestId('sview-total'));
     expect(screen.getByTestId('shared-combined').props.children).toBe('AED 8,000.00');
@@ -80,7 +85,8 @@ describe('the shared savings example, across two separate accounts', () => {
 
     await switchTo(w, getPathname, 'carol'); // registered, but never invited
     await settle(w.db);
-    expect(screen.queryByTestId('tab-shared')).toBeNull();
+    await fireEvent.press(screen.getByTestId('tab-dashboard'));
+    expect(screen.queryByTestId('dash-section-shared')).toBeNull();
     await fireEvent.press(screen.getByTestId('tab-savings'));
     expect(personalTotal().getByText('AED 0.00')).toBeTruthy();
   });

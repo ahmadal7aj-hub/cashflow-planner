@@ -28,13 +28,13 @@ app needs are public by design.
 
 In **Authentication** in the Supabase dashboard:
 
-| Setting | Value | Why |
-|---|---|---|
-| Providers, Email | **On** | Registration and login with email and password |
-| Confirm email | **On** | Email verification is required before sign-in |
-| Minimum password length | **10** | Matches the app's rule |
-| Secure password change / re-authentication | On | Safer password changes |
-| Rate limits | Keep the defaults, or lower them | Limits guessing and email abuse |
+| Setting                                    | Value                            | Why                                            |
+| ------------------------------------------ | -------------------------------- | ---------------------------------------------- |
+| Providers, Email                           | **On**                           | Registration and login with email and password |
+| Confirm email                              | **On**                           | Email verification is required before sign-in  |
+| Minimum password length                    | **10**                           | Matches the app's rule                         |
+| Secure password change / re-authentication | On                               | Safer password changes                         |
+| Rate limits                                | Keep the defaults, or lower them | Limits guessing and email abuse                |
 
 **Email templates.** The app asks people to type the code from the email, so the emails must contain the code. In
 **Authentication, Email templates** edit these two, and make sure each body contains `{{ .Token }}`:
@@ -55,6 +55,7 @@ users, add your own SMTP provider in **Authentication, SMTP settings**.
    EXPO_PUBLIC_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
    EXPO_PUBLIC_SUPABASE_ANON_KEY=YOUR-ANON-KEY
    ```
+
 3. Start the app with a clean cache: `npm.cmd start -- --clear`. Open it in Expo Go. You should now see the **Sign in**
    screen instead of the welcome page.
 
@@ -65,8 +66,8 @@ users, add your own SMTP provider in **Authentication, SMTP settings**.
 2. **Phone B:** Create an account with the other email, confirm the code. Settings, **Account and groups**: accept the
    invitation.
 3. **Phone A:** Savings planning, **Add money**, AED 5,000, choose the group under **Share this saving**, save. Add another
-   AED 2,000 and leave it on **Keep private**. A **Shared Savings** tab appears.
-4. **Phone B:** a **Shared Savings** tab appears. Add AED 3,000 shared.
+   AED 2,000 and leave it on **Keep private**. A **Shared** section appears on the **Dashboards** tab.
+4. **Phone B:** a **Shared** section appears on the **Dashboards** tab. Add AED 3,000 shared.
 5. **Both phones** show AED 8,000 under **Total savings** (AED 5,000 from A and AED 3,000 from B). Phone A's personal
    total is AED 7,000 and Phone B never sees the private AED 2,000.
 6. Change the dates (Last month, Custom date range) and the **Period / Total savings** toggle on both phones.

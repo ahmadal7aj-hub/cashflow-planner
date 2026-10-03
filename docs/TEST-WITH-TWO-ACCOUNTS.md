@@ -48,6 +48,7 @@ server, open `http://YOUR-IP:8787/health` in the phone's browser: it should show
 You can use **two phones**, or **one phone** and switch accounts (Settings, **Account and groups**, **Sign out**).
 
 **Account A**
+
 1. **Create an account**: a unique username (for example `sara_a`), an email (any address, for example `a@test.com`) and a
    password of at least 10 characters. Type the code **123456**.
 2. Tap **Get started** and answer the savings questions (0 is fine).
@@ -55,16 +56,17 @@ You can use **two phones**, or **one phone** and switch accounts (Settings, **Ac
    screen type the other person's **username** under **Invite someone** and send.
 
 **Account B** (the other phone, or after signing out on this one)
+
 1. **Create an account** with a different username and email, code **123456**, **Get started**, savings questions.
 2. Settings, **Account and groups**, **Groups and shared savings**: you see the invitation. Nothing is shared until you
    **Accept**.
 
 ## 5. Share savings (the example)
 
-1. **Account A**: Savings planning, **Add money**, AED 5,000. Under **Share this saving** pick **Home**. Save.
-   Add AED 2,000 again and leave it on **Keep private**. A **Shared Savings** tab appears.
+1. **Account A**: Savings planning, **Add money**, AED 5,000. Under **Share this saving** pick **Shared**, then **Home** (or **Someone new** and type the other account username or email). Save.
+   Add AED 2,000 again and leave it on **Keep private**. A **Shared** section appears on the **Dashboards** tab.
    Your personal total is AED 7,000; Shared Savings shows only AED 5,000.
-2. **Account B**: a **Shared Savings** tab appears (it can take a few seconds, or tap **Refresh**). Add AED 3,000 with
+2. **Account B**: a **Shared** section appears on the **Dashboards** tab (it can take a few seconds, or tap **Refresh**). Add AED 3,000 with
    **Home** selected.
 3. Both accounts now show **AED 8,000** under **Total savings**: AED 5,000 from A, AED 3,000 from B. B never sees A's
    private AED 2,000 or A's personal total.
@@ -72,12 +74,12 @@ You can use **two phones**, or **one phone** and switch accounts (Settings, **Ac
 
 ## If something does not work
 
-| Problem | What to do |
-|---|---|
-| The app still opens on the welcome page | `.env.local` is missing or wrong. Check the name and the line, then restart with `npm.cmd start -- --clear` |
-| "Cannot reach the test server" | Same Wi-Fi? Server window still open? Right IP? Allow Node in Windows Firewall (private networks) |
-| The phone browser cannot open `http://YOUR-IP:8787/health` | A firewall or a different network (guest Wi-Fi) is blocking it |
-| You want a clean start | Stop the server (Ctrl+C), delete the folder `mobile\.dev-data`, start it again |
-| You are done testing | Delete `.env.local` and restart the app: it goes back to local-only |
+| Problem                                                    | What to do                                                                                                  |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| The app still opens on the welcome page                    | `.env.local` is missing or wrong. Check the name and the line, then restart with `npm.cmd start -- --clear` |
+| "Cannot reach the test server"                             | Same Wi-Fi? Server window still open? Right IP? Allow Node in Windows Firewall (private networks)           |
+| The phone browser cannot open `http://YOUR-IP:8787/health` | A firewall or a different network (guest Wi-Fi) is blocking it                                              |
+| You want a clean start                                     | Stop the server (Ctrl+C), delete the folder `mobile\.dev-data`, start it again                              |
+| You are done testing                                       | Delete `.env.local` and restart the app: it goes back to local-only                                         |
 
 The real thing (Supabase, real emails) is set up with `docs/BACKEND-SETUP.md` when you are ready.

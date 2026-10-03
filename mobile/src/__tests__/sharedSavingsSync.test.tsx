@@ -86,7 +86,8 @@ describe('syncing: edit, make private, delete and offline never double count', (
     const { getPathname } = await start(w, 'alice');
     await addSaving(w, getPathname, '5000', { groupId: w.group });
     await addSaving(w, getPathname, '1000', { groupId: w.group, direction: 'out' });
-    await fireEvent.press(screen.getByTestId('tab-shared'));
+    await fireEvent.press(screen.getByTestId('tab-dashboard'));
+    await fireEvent.press(screen.getByTestId('dash-section-shared'));
     await waitFor(() => expect(screen.getByTestId('shared-combined')).toBeTruthy());
     await fireEvent.press(screen.getByTestId('sview-total'));
     expect(screen.getByTestId('shared-combined').props.children).toBe('AED 4,000.00');
@@ -132,7 +133,7 @@ describe('syncing: edit, make private, delete and offline never double count', (
     const w = await world(db());
     const { getPathname } = await start(w, 'alice');
     await addSaving(w, getPathname, '5000', { groupId: w.group });
-    await openRoute(getPathname, '/shared');
+    await openRoute(getPathname, '/dashboard?section=shared');
     await settle(w.db);
     await fireEvent.press(screen.getByTestId('sview-total'));
     expect(screen.getByTestId('shared-combined').props.children).toBe('AED 5,000.00');
@@ -178,7 +179,7 @@ describe('invitations and leaving, through the screens', () => {
     expect(screen.getByText('Family')).toBeTruthy();
     expect(screen.getByText('Invited by alice')).toBeTruthy();
     expect(screen.getByText('You are not in a group yet.')).toBeTruthy();
-    expect(screen.queryByTestId('tab-shared')).toBeNull();
+    expect(screen.queryByTestId('dash-section-shared')).toBeNull();
 
     // Decline: still nothing, and the invitation is gone.
     await fireEvent.press(screen.getByTestId(/^decline-/));

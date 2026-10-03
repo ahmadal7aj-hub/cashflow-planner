@@ -3,7 +3,6 @@ import { Tabs, useRouter } from 'expo-router';
 import { Pressable, type ColorValue } from 'react-native';
 
 import { t } from '../../i18n/strings';
-import { useSharing } from '../../state/SharingContext';
 import { useTheme } from '../../theme/ThemeProvider';
 
 type IconName = React.ComponentProps<typeof Ionicons>['name'];
@@ -17,7 +16,6 @@ function icon(filled: IconName, outline: IconName) {
 
 export default function TabsLayout() {
   const { colors } = useTheme();
-  const sharing = useSharing();
   const router = useRouter();
   return (
     <Tabs
@@ -87,15 +85,6 @@ export default function TabsLayout() {
           title: t.tabs.spending,
           tabBarIcon: icon('card', 'card-outline'),
           tabBarButtonTestID: 'tab-spending',
-        }}
-      />
-      <Tabs.Screen
-        name="shared"
-        options={{
-          title: t.tabs.shared,
-          href: sharing.hasSharedEntries ? undefined : null,
-          tabBarIcon: icon('people', 'people-outline'),
-          tabBarButtonTestID: 'tab-shared',
         }}
       />
     </Tabs>

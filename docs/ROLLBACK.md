@@ -5,13 +5,13 @@ reversible. This page records the checkpoint, how to restore it, and the one una
 
 ## The checkpoint
 
-| What | Value |
-|---|---|
-| **Tag** | `checkpoint/pre-restructure-2026-10-03` (annotated, pushed to GitHub) |
-| **Commit** | `e62af1c` |
-| **Backup branch** | `backup/pre-restructure-2026-10-03` (same commit, pushed) |
+| What               | Value                                                                                                                                                                                                                                                                                                      |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Tag**            | `checkpoint/pre-restructure-2026-10-03` (annotated, pushed to GitHub)                                                                                                                                                                                                                                      |
+| **Commit**         | `e62af1c`                                                                                                                                                                                                                                                                                                  |
+| **Backup branch**  | `backup/pre-restructure-2026-10-03` (same commit, pushed)                                                                                                                                                                                                                                                  |
 | **State captured** | The working tree was clean, so nothing uncommitted existed. It contains the monthly plan, zero amounts, delete confirmation and the Shared dashboard preview (PR #44 and #45 content). It does **not** contain the adjustable what-if (PR #42), the sharing spec (PR #43) or the handover update (PR #41). |
-| **Verified** | The tag was checked out into a separate worktree and its full test suite ran: 31 suites, 506 tests, all passing. The worktree was then removed. |
+| **Verified**       | The tag was checked out into a separate worktree and its full test suite ran: 31 suites, 506 tests, all passing. The worktree was then removed.                                                                                                                                                            |
 
 ## "Reverse these changes": the procedure
 
@@ -51,7 +51,6 @@ results.** So after a rollback:
 - Deleting an item never deletes history: deleted budgets, bills and income move to a retired list, and past spending
   is never removed by deleting a budget. See `docs/ARCHITECTURE.md` and ADR 0005.
 
-
 ---
 
 # Rollback: removing accounts and shared savings
@@ -60,12 +59,12 @@ Accounts and shared savings (ADR 0006) are also reversible.
 
 ## The checkpoint
 
-| What | Value |
-|---|---|
-| **Tag** | `checkpoint/pre-accounts-2026-10-03` (annotated, pushed to GitHub) |
-| **Commit** | `a2eb797` (the five-page app of PR #46, on-device saving, 500 passing tests) |
-| **Backup branch** | `backup/pre-accounts-2026-10-03` (same commit, pushed) |
-| **State captured** | The working tree was clean, so nothing uncommitted existed. |
+| What               | Value                                                                        |
+| ------------------ | ---------------------------------------------------------------------------- |
+| **Tag**            | `checkpoint/pre-accounts-2026-10-03` (annotated, pushed to GitHub)           |
+| **Commit**         | `a2eb797` (the five-page app of PR #46, on-device saving, 500 passing tests) |
+| **Backup branch**  | `backup/pre-accounts-2026-10-03` (same commit, pushed)                       |
+| **State captured** | The working tree was clean, so nothing uncommitted existed.                  |
 
 ## "Reverse the accounts and shared savings": the procedure
 
@@ -75,7 +74,7 @@ Nothing here is destructive by default. Do **not** use `git reset --hard`, force
    open **Shared Savings** and note the totals; the shared entries are also visible in the Supabase **Table editor**
    (`shared_entries`), where they can be exported as CSV.
 2. **Switch the app back to local-only without deleting anything:** remove `EXPO_PUBLIC_SUPABASE_URL` and
-   `EXPO_PUBLIC_SUPABASE_ANON_KEY` from `mobile/.env.local` and restart Expo. The sign-in screens and the Shared Savings tab
+   `EXPO_PUBLIC_SUPABASE_ANON_KEY` from `mobile/.env.local` and restart Expo. The sign-in screens and the Shared section of the Dashboards tab
    disappear; the app runs on its own. The data in Supabase is untouched.
 3. **Undo the code with new commits:** `git switch -c reverse/accounts main`, then `git revert -m 1 <merge commit>` (or revert
    the commit range). Compare with the checkpoint at any time: `git diff checkpoint/pre-accounts-2026-10-03 HEAD`. To look at the

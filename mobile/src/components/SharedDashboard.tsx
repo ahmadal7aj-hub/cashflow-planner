@@ -1,22 +1,23 @@
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { Text } from 'react-native';
+import { Text, View } from 'react-native';
 
-import type { GroupEvent, GroupTotals, SharedEntry } from '../../backend/sharingApi';
-import { DateRangeControl, useDateRange } from '../../components/DateRangeControl';
-import { ChipGroup } from '../../components/forms';
-import { Body, Button, Card, Heading, Row, Screen } from '../../components/ui';
-import { formatDate } from '../../domain/dates';
-import { formatAed } from '../../domain/money';
-import { entriesInRange, eventsInRange, localDay, totalsWindow } from '../../domain/sharedView';
-import { t } from '../../i18n/strings';
-import { useAccount } from '../../state/AccountContext';
-import { usePrototype } from '../../state/PrototypeContext';
-import { useSharing } from '../../state/SharingContext';
-import { makeStyles } from '../../theme/ThemeProvider';
-import { fontSize } from '../../theme/tokens';
+import type { GroupEvent, GroupTotals, SharedEntry } from '../backend/sharingApi';
+import { DateRangeControl, type DateRangeState } from './DateRangeControl';
+import { ChipGroup } from './forms';
+import { Body, Button, Card, Heading, Row } from './ui';
+import { formatDate } from '../domain/dates';
+import { formatAed } from '../domain/money';
+import { entriesInRange, eventsInRange, localDay, totalsWindow } from '../domain/sharedView';
+import { t } from '../i18n/strings';
+import { useAccount } from '../state/AccountContext';
+import { usePrototype } from '../state/PrototypeContext';
+import { useSharing } from '../state/SharingContext';
+import { makeStyles } from '../theme/ThemeProvider';
+import { fontSize, spacing } from '../theme/tokens';
 
 const useStyles = makeStyles(({ colors }) => ({
+  wrap: { gap: spacing.md },
   big: { fontSize: fontSize.title, fontWeight: '800', color: colors.text },
 }));
 
@@ -29,13 +30,13 @@ function eventText(e: GroupEvent): string {
   return (texts[e.kind] ?? (() => e.kind))(e.actor ?? '?', e.subject ?? '?');
 }
 
-export default function SharedSavings() {
+/** The Shared Savings dashboard: a group's combined and per-person savings, its entries and its history. */
+export function SharedDashboard({ dates }: { dates: DateRangeState }) {
   const router = useRouter();
   const styles = useStyles();
   const { today } = usePrototype();
   const account = useAccount();
   const sharing = useSharing();
-  const dates = useDateRange(today);
   const { range } = dates;
   const [chosen, setChosen] = useState<string | null>(null);
   const [view, setView] = useState<'period' | 'total'>('period');
@@ -76,17 +77,17 @@ export default function SharedSavings() {
 
   if (!sharing.available) {
     return (
-      <Screen testID="shared-screen">
+      <View style={styles.wrap} testID="shared-screen">
         <Heading>{t.shared.title}</Heading>
         <Body muted testID="shared-unavailable">
           {account.status === 'unavailable' ? t.account.notAvailable : t.shared.notSignedIn}
         </Body>
-      </Screen>
+      </View>
     );
   }
   if (!group) {
     return (
-      <Screen testID="shared-screen">
+      <View style={styles.wrap} testID="shared-screen">
         <Heading>{t.shared.title}</Heading>
         <Body muted testID="shared-no-groups">
           {t.shared.noGroups}
@@ -96,7 +97,7 @@ export default function SharedSavings() {
           onPress={() => router.push('/groups')}
           testID="shared-manage"
         />
-      </Screen>
+      </View>
     );
   }
 
@@ -121,7 +122,7 @@ export default function SharedSavings() {
   };
 
   return (
-    <Screen testID="shared-screen">
+    <View style={styles.wrap} testID="shared-screen">
       <Body muted>{t.shared.subtitle}</Body>
       {sharing.groups.length > 1 ? (
         <ChipGroup
@@ -270,6 +271,6 @@ export default function SharedSavings() {
         onPress={() => router.push(`/groups/${group.groupId}`)}
         testID="shared-manage"
       />
-    </Screen>
+    </View>
   );
 }
