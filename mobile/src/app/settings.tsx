@@ -6,6 +6,7 @@ import { track } from '../analytics/events';
 import { ChipGroup } from '../components/forms';
 import { Body, Button, Card, Heading, Screen } from '../components/ui';
 import { t } from '../i18n/strings';
+import { useNotifications } from '../notifications/NotificationsContext';
 import { usePrototype } from '../state/PrototypeContext';
 import { useThemeMode, type ThemeMode } from '../theme/ThemeProvider';
 
@@ -16,6 +17,18 @@ export default function Settings() {
 
   const { mode, setMode } = useThemeMode();
   const { loadSampleData, exportJson } = usePrototype();
+  const notifications = useNotifications();
+  const [notifyMessage, setNotifyMessage] = useState<string | null>(null);
+  const toggleNotifications = async () => {
+    const result = await notifications.setEnabled(!notifications.enabled);
+    setNotifyMessage(
+      result === 'on'
+        ? t.settings.notifyOn
+        : result === 'denied'
+          ? t.settings.notifyDenied
+          : t.settings.notifyOff,
+    );
+  };
 
   return (
     <Screen testID="settings-screen">
@@ -33,6 +46,24 @@ export default function Settings() {
             { value: 'dark', label: t.settings.appearanceDark },
           ]}
         />
+      </Card>
+      <Card testID="notifications-card">
+        <Heading>{t.settings.notifyTitle}</Heading>
+        <Body muted>{t.settings.notifyHint}</Body>
+        <Body testID="notify-state">
+          {notifications.enabled ? t.settings.notifyIsOn : t.settings.notifyIsOff}
+        </Body>
+        <Button
+          label={notifications.enabled ? t.settings.notifyTurnOff : t.settings.notifyTurnOn}
+          variant="secondary"
+          onPress={toggleNotifications}
+          testID="notify-toggle"
+        />
+        {notifyMessage ? (
+          <Body testID="notify-message" accessibilityLiveRegion="polite">
+            {notifyMessage}
+          </Body>
+        ) : null}
       </Card>
       <Card>
         <Heading>{t.settings.assumptions}</Heading>

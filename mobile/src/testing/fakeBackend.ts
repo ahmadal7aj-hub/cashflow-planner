@@ -77,6 +77,14 @@ export class TestBackend implements Backend {
       this.emit();
       return { id: account.userId!, email };
     },
+    deleteAccount: async () => {
+      if (this.offline) throw new Error('Network request failed');
+      const userId = this.session?.userId ?? null;
+      await this.db.as(userId).rpc('delete_my_account');
+      for (const [email, a] of this.accounts) if (a.userId === userId) this.accounts.delete(email);
+      this.session = null;
+      this.emit();
+    },
     resendSignUpCode: async (email) => {
       this.sentCodes.push({ email, kind: 'signup' });
     },

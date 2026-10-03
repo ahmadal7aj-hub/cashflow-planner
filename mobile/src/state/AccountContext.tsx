@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   createContext,
   useCallback,
@@ -40,6 +41,8 @@ interface AccountActions {
   resendCode: (email: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  /** Deletes the account on the server and this account's saved records on this phone, then signs out. */
+  deleteAccount: (userId: string) => Promise<void>;
   requestReset: (email: string) => Promise<void>;
   resetPassword: (email: string, code: string, newPassword: string) => Promise<void>;
   usernameAvailable: (username: string) => Promise<boolean>;
@@ -147,6 +150,14 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       },
       async signOut() {
         await need().auth.signOut();
+        await establish(null);
+      },
+      async deleteAccount(userId) {
+        await need().auth.deleteAccount();
+        // Only after the server confirmed: this account's records and backups on this phone.
+        const keys = await AsyncStorage.getAllKeys();
+        const mine = keys.filter((k) => k.includes(userId));
+        if (mine.length > 0) await AsyncStorage.multiRemove(mine);
         await establish(null);
       },
       requestReset: (email) => need().auth.requestPasswordReset(email),

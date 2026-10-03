@@ -48,6 +48,8 @@ export interface AuthService {
   resendSignUpCode(email: string): Promise<void>;
   signIn(email: string, password: string): Promise<AuthUser>;
   signOut(): Promise<void>;
+  /** Deletes the account and everything stored about it on the server, then signs out. */
+  deleteAccount(): Promise<void>;
   /** Always resolves, whether or not the email has an account (nothing is revealed). */
   requestPasswordReset(email: string): Promise<void>;
   resetPassword(email: string, code: string, newPassword: string): Promise<AuthUser>;

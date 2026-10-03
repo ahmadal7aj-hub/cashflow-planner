@@ -666,6 +666,19 @@ export const t = {
       'Connected to the local test server on your computer (testing only). Real accounts need the real backend.',
     open: 'Account and groups',
     profileButton: 'My profile',
+    deleteTitle: 'Delete my account',
+    deleteIntro:
+      'This permanently deletes your account and everything stored about it on the server, and the records saved under this account on this phone.',
+    deleteDetails:
+      'Savings you shared are removed from the group for everyone. Groups with other people stay for them. Records on other phones are not touched. This cannot be undone.',
+    deleteTypeLabel: 'Type DELETE to confirm',
+    deleteWord: 'DELETE',
+    deleteConfirm: 'Delete my account for good',
+    deleteStart: 'Delete my account',
+    deleteCancel: 'Keep my account',
+    deleteMismatch: 'Type the word DELETE exactly to confirm.',
+    deleteFailed:
+      'Could not delete the account. Check your connection and try again. Nothing was deleted.',
     profileTitle: 'My profile',
     usernameLabel: 'Username',
     emailLabel: 'Email',
@@ -845,6 +858,17 @@ export const t = {
 
   settings: {
     title: 'Settings and assumptions',
+    notifyTitle: 'Phone reminders',
+    notifyHint:
+      'A notification at 9:00 on the day each bill reminder starts. It names the bill and the due date, never an amount, so nothing about your money shows on a locked screen.',
+    notifyIsOn: 'Phone reminders are on.',
+    notifyIsOff: 'Phone reminders are off.',
+    notifyTurnOn: 'Turn on phone reminders',
+    notifyTurnOff: 'Turn off phone reminders',
+    notifyOn: 'Phone reminders are on. They are updated whenever your bills change.',
+    notifyOff: 'Phone reminders are off and any waiting ones were cancelled.',
+    notifyDenied:
+      'The phone did not allow notifications. You can allow them for this app in the phone settings, then try again.',
     assumptions: 'Assumptions in this prototype',
     horizonRule: 'Plan until: the day before next payday',
     currency: 'Currency: AED',

@@ -4,6 +4,7 @@ import http from 'node:http';
 import path from 'node:path';
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as SecureStore from 'expo-secure-store';
 
 import { createDevBackend, type FetchLike } from './devBackend';
 import { readDevServerUrl } from './config';
@@ -43,6 +44,12 @@ beforeAll(async () => {
 afterAll(() => {
   child.kill('SIGTERM');
 });
+
+/** A phone with nothing signed in: plain and secure storage both empty. */
+async function clearPhoneStorage() {
+  await AsyncStorage.clear();
+  (SecureStore as unknown as { __store: Map<string, string> }).__store.clear();
+}
 
 /** The test environment replaces fetch, so use plain Node HTTP for the requests. */
 const nodeFetch: FetchLike = (target, init) =>
@@ -84,7 +91,7 @@ describe('the local test server', () => {
   });
 
   it('registers two people, checks usernames and emails, signs them in and out, and resets a password', async () => {
-    await AsyncStorage.clear();
+    await clearPhoneStorage();
     const a = phone();
     const alice = await register(a, 'alice@example.com', 'alice');
     expect((await a.auth.currentUser())?.id).toBe(alice.id);
@@ -136,7 +143,7 @@ describe('the local test server', () => {
   });
 
   it('keeps the optional name and phone from sign-up and lets the owner change them', async () => {
-    await AsyncStorage.clear();
+    await clearPhoneStorage();
     const a = phone();
     expect(
       await a.auth.signUp('eve@example.com', 'a-long-password', 'eve_e', {
@@ -152,8 +159,50 @@ describe('the local test server', () => {
     expect(cleared[0]!.full_name).toBeNull();
   });
 
+  it('deletes an account for good: the sign-in, the shared savings and the username', async () => {
+    await clearPhoneStorage();
+    const a = phone();
+    const b = phone();
+    await register(a, 'fay@example.com', 'fay_f');
+    await register(b, 'gus@example.com', 'gus_g');
+    const api = { a: createSharingApi(a.rpc), b: createSharingApi(b.rpc) };
+    const group = await api.a.createGroup('Home');
+    await api.a.invite(group, 'gus_g');
+    await api.b.respond(group, true);
+    const day = new Date().toISOString().slice(0, 10);
+    await api.a.share({
+      groupId: group,
+      localId: 'dA:1',
+      kind: 'deposit',
+      amount: 1000,
+      date: day,
+      note: '',
+    });
+    await api.b.share({
+      groupId: group,
+      localId: 'dB:1',
+      kind: 'deposit',
+      amount: 500,
+      date: day,
+      note: '',
+    });
+
+    await a.auth.deleteAccount();
+    expect(await a.auth.currentUser()).toBeNull();
+    await expect(a.auth.signIn('fay@example.com', 'a-long-password')).rejects.toMatchObject({
+      code: 'invalid_credentials',
+    });
+    expect(await b.auth.usernameAvailable('fay_f')).toBe(true);
+    const t = await api.b.totals(group, day, day);
+    expect(t.combined.totalNet).toBe(500);
+    // The same email can register again.
+    expect(await a.auth.signUp('fay@example.com', 'a-long-password', 'fay_f')).toBe(
+      'verification-sent',
+    );
+  });
+
   it('shares savings between two phones through the real database rules', async () => {
-    await AsyncStorage.clear();
+    await clearPhoneStorage();
     const a = phone();
     const b = phone();
     const c = phone();
@@ -207,13 +256,13 @@ describe('the local test server', () => {
     expect(await api.c.myGroups()).toEqual([]);
     await expect(api.c.entries(group)).rejects.toThrow(/not a member/);
     // Calls without signing in are refused.
-    await AsyncStorage.clear(); // a phone with nobody signed in
+    await clearPhoneStorage(); // a phone with nobody signed in
     const stranger = phone();
     await expect(createSharingApi(stranger.rpc).myGroups()).rejects.toThrow();
   });
 
   it('tells the phones when something in a group changed', async () => {
-    await AsyncStorage.clear();
+    await clearPhoneStorage();
     const a = phone();
     await register(a, 'dan@example.com', 'dan_d');
     let changes = 0;

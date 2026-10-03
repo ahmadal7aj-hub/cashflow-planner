@@ -17,6 +17,9 @@ export default function Account() {
   const router = useRouter();
   const account = useAccount();
   const [asking, setAsking] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteWord, setDeleteWord] = useState('');
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [nameInput, setNameInput] = useState('');
@@ -61,6 +64,20 @@ export default function Account() {
       setSaved(true);
     } catch {
       setContactErrors({ form: t.account.contactFailed });
+    }
+  };
+
+  const deleteAccount = async () => {
+    if (account.status !== 'signedIn') return;
+    if (deleteWord.trim() !== t.account.deleteWord) {
+      setDeleteError(t.account.deleteMismatch);
+      return;
+    }
+    setDeleteError(null);
+    try {
+      await account.deleteAccount(account.user.id);
+    } catch {
+      setDeleteError(t.account.deleteFailed);
     }
   };
 
@@ -166,6 +183,38 @@ export default function Account() {
         />
       )}
       {error ? <Body>{error}</Body> : null}
+      {deleting ? (
+        <Card tone="danger" testID="delete-ask">
+          <Heading>{t.account.deleteTitle}</Heading>
+          <Body>{t.account.deleteIntro}</Body>
+          <Body muted>{t.account.deleteDetails}</Body>
+          <Field
+            label={t.account.deleteTypeLabel}
+            testID="delete-word"
+            value={deleteWord}
+            onChangeText={setDeleteWord}
+          />
+          {deleteError ? <Body testID="delete-error">{deleteError}</Body> : null}
+          <Button label={t.account.deleteConfirm} onPress={deleteAccount} testID="delete-confirm" />
+          <Button
+            label={t.account.deleteCancel}
+            variant="secondary"
+            onPress={() => {
+              setDeleting(false);
+              setDeleteWord('');
+              setDeleteError(null);
+            }}
+            testID="delete-cancel"
+          />
+        </Card>
+      ) : (
+        <Button
+          label={t.account.deleteStart}
+          variant="secondary"
+          onPress={() => setDeleting(true)}
+          testID="delete-start"
+        />
+      )}
     </Screen>
   );
 }

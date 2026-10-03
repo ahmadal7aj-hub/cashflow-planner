@@ -1,6 +1,5 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
 import type { RpcClient, RpcName } from './contract';
+import { secureStorage } from './secureStorage';
 import {
   AuthError,
   type AuthErrorCode,
@@ -49,13 +48,13 @@ export function createDevBackend(
   const listeners = new Set<(u: AuthUser | null) => void>();
 
   const getToken = async (): Promise<string | null> => {
-    if (token === undefined) token = await AsyncStorage.getItem(TOKEN_KEY);
+    if (token === undefined) token = await secureStorage.getItem(TOKEN_KEY);
     return token;
   };
   const setToken = async (value: string | null) => {
     token = value;
-    if (value) await AsyncStorage.setItem(TOKEN_KEY, value);
-    else await AsyncStorage.removeItem(TOKEN_KEY);
+    if (value) await secureStorage.setItem(TOKEN_KEY, value);
+    else await secureStorage.removeItem(TOKEN_KEY);
   };
   const notify = (u: AuthUser | null) => listeners.forEach((l) => l(u));
 
@@ -123,6 +122,11 @@ export function createDevBackend(
     signIn: (email, password) => session('/auth/login', { email, password }),
     signOut: async () => {
       await call('POST', '/auth/logout', {}).catch(() => undefined);
+      await setToken(null);
+      notify(null);
+    },
+    deleteAccount: async () => {
+      await call('POST', '/auth/delete', {});
       await setToken(null);
       notify(null);
     },

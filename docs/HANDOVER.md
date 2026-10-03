@@ -12,11 +12,42 @@ not, and exactly what to do next. Anything that needs a person's decision is mar
 
 ## 0. Start here next session
 
-**State (2026-10-03):** `main` has everything built so far: the five-page app with saving on the phone, the adjustable
-what-if, and accounts with groups and a Shared Savings dashboard. CI is green and the earlier security block is cleared
+**State (2026-10-03):** `main` has everything built so far: the app with saving on the phone, the adjustable what-if, and
+accounts with groups, shared savings and chart dashboards (see "What was added since the first handover" below). CI is green and the earlier security block is cleared
 (an owner-approved exception for the `braces` advisory, expiring **2026-11-01**, next to the `node-forge` one).
 **Nothing in the app has been tried on a real phone by the assistant, and the backend has never run against a live
 Supabase project.**
+
+### What was added since the first handover
+
+- **Accounts:** sign up with username, email and password (email code to confirm), optional name and phone, sign in,
+  reset password, sign out, and **delete my account** (removes the account, profile, memberships and shared savings from
+  the server and this account's records from the phone; groups carry on for the others).
+- **Profile:** a person icon at the top right of the main pages opens "My profile" (username, email, name, phone, send my
+  username). Others find you by **username or email**; the phone number is private (it is not verified, so it is never
+  used for lookup).
+- **Sharing a saving:** on Add money, Take out and Edit saving choose **Keep private** or **Shared**. Shared offers a group
+  you are in or **Someone new** (username or email): the app starts a group with that person, invites them, and they see
+  the saving only after they accept. You can make it private again at any time.
+- **Dashboards tab:** one tab with Overview, Income, Budget, Spending, Savings and (once something is shared) Shared. Each
+  opens with charts, then a Details card. One set of date buttons applies to every section.
+- **Phone reminders:** Settings, Phone reminders (off by default; the phone asks permission when turned on). A notification at 9:00 on the day each bill reminder starts, naming the bill and due date, never an amount. Rebuilt whenever bills change, cancelled when turned off. Tested with a stand-in for the phone; **not yet seen on a real phone** (check that it fires, and that Expo Go on your phone allows local notifications).
+- **Safer storage:** the sign-in session is kept in the phone's secure storage (Keychain or Keystore), split into pieces
+  when long; an older session in plain storage moves over on first read.
+- **Local test server:** `npm run dev:server` in `mobile/` runs the real database rules on the computer so two accounts
+  can be tried without Supabase (`docs/TEST-WITH-TWO-ACCOUNTS.md`). Testing only: the code is always 123456.
+- **Database migrations (run in file-name order):** `20261003000000_accounts_and_shared_savings`,
+  `20261004000000_profile_name_phone`, `20261005000000_delete_my_account`. Each has a tested rollback in
+  `supabase/rollback/`.
+- **Checkpoint tags:** `checkpoint/pre-restructure-2026-10-03`, `checkpoint/pre-accounts-2026-10-03`,
+  `checkpoint/pre-profile-fields-2026-10-03`, `checkpoint/pre-delete-account-2026-10-03`.
+
+### Not done yet (and why)
+
+- **Inviting someone with no account yet:** needs the real email setup (Supabase SMTP) to send the invitation.
+- **Weekly or monthly summary emails:** same dependency.
+- **Encrypting the saved plan on the phone:** only the sign-in session is in secure storage; the records are not encrypted.
+- **Looked at on a real phone by the assistant:** never. The charts and sharing flow are tested by automated tests only.
 
 ### Ask the owner first
 
@@ -28,16 +59,16 @@ Supabase project.**
 
 ### Then, in this order
 
-| #   | Next step                                                   | Owner                    | Notes                                                                                                                              |
-| --- | ----------------------------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **Create the Supabase project and run the two-phone check** | Owner                    | `docs/BACKEND-SETUP.md`. Until then accounts are switched off and the app runs on its own                                          |
-| 2   | **Fix what the live backend and real phones show**          | Claude                   | Likely areas: email codes, rate limits, Realtime delivery, `supabase-js` on a phone, swipe feel                                    |
-| 3   | **Before any real users**                                   | Both                     | Encrypt the saved plan and session token, account deletion, 2FA, own SMTP sender, UAE PDPL review and privacy notice, abuse limits |
-| 4   | **Phone notifications for bill reminders**                  | Claude, after go-ahead   | `expo-notifications`, never show amounts on the lock screen                                                                        |
-| 5   | **Interviews** (five first, then 20 to 30)                  | Owner                    | `docs/INTERVIEW-ONE-PAGER.md`, `docs/PROTOTYPE-WALKTHROUGH.md`; private notes only in `docs/private/`                              |
-| 6   | **Security exception window**                               | Owner decides            | Renew-or-expire decision around 2026-10-26; check `npm view braces version` and `node-forge`                                       |
-| 7   | **Run the Maestro flow** on a USB-connected Android phone   | Owner provides the phone | Written and updated, never run. It replaces saved data, so use a test phone                                                        |
-| 8   | **Ideas, only if interviews support them**                  | Both                     | Import from bank statements, multi-currency, email summaries (weekly or monthly), personal records on a second phone               |
+| #   | Next step                                                   | Owner                    | Notes                                                                                                                                                 |
+| --- | ----------------------------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Create the Supabase project and run the two-phone check** | Owner                    | `docs/BACKEND-SETUP.md`. Until then accounts are switched off and the app runs on its own                                                             |
+| 2   | **Fix what the live backend and real phones show**          | Claude                   | Likely areas: email codes, rate limits, Realtime delivery, `supabase-js` on a phone, swipe feel                                                       |
+| 3   | **Before any real users**                                   | Both                     | Encrypt the saved plan, 2FA, own SMTP sender, UAE PDPL review and privacy notice, abuse limits (account deletion and secure session storage are done) |
+| 4   | **Check phone reminders on a real phone**                   | Owner                    | Settings, Phone reminders, then set a bill reminder for tomorrow and see it arrive at 9:00                                                            |
+| 5   | **Interviews** (five first, then 20 to 30)                  | Owner                    | `docs/INTERVIEW-ONE-PAGER.md`, `docs/PROTOTYPE-WALKTHROUGH.md`; private notes only in `docs/private/`                                                 |
+| 6   | **Security exception window**                               | Owner decides            | Renew-or-expire decision around 2026-10-26; check `npm view braces version` and `node-forge`                                                          |
+| 7   | **Run the Maestro flow** on a USB-connected Android phone   | Owner provides the phone | Written and updated, never run. It replaces saved data, so use a test phone                                                                           |
+| 8   | **Ideas, only if interviews support them**                  | Both                     | Import from bank statements, multi-currency, email summaries (weekly or monthly), personal records on a second phone                                  |
 
 ### Ready-to-paste prompt to resume
 
@@ -55,7 +86,7 @@ Supabase project.**
 - **Tests:** `openApp` for screens, `openAccountsApp` and `accountScenario` for accounts, `startTestDb` for real-SQL tests.
   The router test library can carry a previous test's route into the next one after long journeys: keep those in their own file.
 - **Money:** integer fils only; all maths in `mobile/src/domain/`; the database computes shared totals (`group_savings_summary`).
-- **Checkpoints and rollback:** `docs/ROLLBACK.md` (tags `checkpoint/pre-restructure-2026-10-03`, `checkpoint/pre-accounts-2026-10-03`).
+- **Checkpoints and rollback:** `docs/ROLLBACK.md` (tags `checkpoint/pre-restructure-2026-10-03`, `checkpoint/pre-accounts-2026-10-03`, `checkpoint/pre-profile-fields-2026-10-03`, `checkpoint/pre-delete-account-2026-10-03`).
 - **Public repo:** never commit the BRD/PRD, interview notes, secrets or the Supabase keys (`.env.local` is git-ignored).
 
 ---
@@ -72,7 +103,7 @@ Supabase project.**
   owner still has to create (`docs/BACKEND-SETUP.md`); checkpoint `checkpoint/pre-accounts-2026-10-03`.
 - **The gate:** the BRD says **do not build Phase 2 (accounts, database, real engine) until 20 to 30 interviews show
   recurring demand.** Those interviews have **not started**. That is the single most important next step.
-- **Engineering health:** all work went through pull requests with CI. `main` is protected. 619 automated tests pass.
+- **Engineering health:** all work went through pull requests with CI. `main` is protected. 670 automated tests pass.
 - **One time-limited risk:** a security exception (node-forge) **expires 2026-11-01** (section 7).
 
 ---
@@ -244,8 +275,7 @@ Work in this order. Do not skip ahead: Phase 2 is gated on step 4.
 
 ### E. Housekeeping and backlog (Claude can do these on request)
 
-- **Phone notifications for bill reminders** (the agreed next step after the in-app reminders): needs one new
-  component (`expo-notifications`) and a permission prompt; notifications will never show amounts on the lock screen.
+- Phone reminders are built (Settings); only a real-phone check is left (section 0).
 
 - Run the Maestro E2E flow once on a USB-connected Android phone.
 - Add screenshots and an accessibility pass; check small-screen layout.
