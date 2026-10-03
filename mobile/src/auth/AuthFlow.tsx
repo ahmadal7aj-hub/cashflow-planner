@@ -5,8 +5,12 @@ import { Body, Button, Heading, Screen } from '../components/ui';
 import {
   codeProblem,
   emailProblem,
+  nameProblem,
   normalizeCode,
   normalizeEmail,
+  normalizeName,
+  normalizePhone,
+  phoneProblem,
   normalizeUsername,
   passwordProblem,
   usernameProblem,
@@ -106,6 +110,8 @@ export function AuthFlow() {
   const account = useAccount();
   const [step, setStep] = useState<Step>('login');
   const [username, setUsername] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
@@ -156,9 +162,18 @@ export function AuthFlow() {
         username: usernameMessage(username),
         email: emailMessage(email),
         password: passwordMessage(password, { email, username }),
+        fullName: nameProblem(fullName) ? e.nameLength : undefined,
+        phone: phoneProblem(phone) ? e.phoneInvalid : undefined,
       };
       setErrors(next);
-      if (next['username'] || next['email'] || next['password']) return;
+      if (
+        next['username'] ||
+        next['email'] ||
+        next['password'] ||
+        next['fullName'] ||
+        next['phone']
+      )
+        return;
       try {
         if (!(await account.usernameAvailable(normalizeUsername(username)))) {
           setErrors({ username: e.usernameTaken });
@@ -168,6 +183,10 @@ export function AuthFlow() {
           normalizeEmail(email),
           password,
           normalizeUsername(username),
+          {
+            ...(normalizeName(fullName) ? { fullName: normalizeName(fullName) } : {}),
+            ...(normalizePhone(phone) ? { phone: normalizePhone(phone) } : {}),
+          },
         );
         if (result === 'verification-sent') {
           setErrors({});
@@ -260,6 +279,22 @@ export function AuthFlow() {
           error={errors['username']}
         />
         {emailField}
+        <Field
+          label={t.auth.fullName}
+          testID="auth-fullname"
+          value={fullName}
+          onChangeText={setFullName}
+          error={errors['fullName']}
+        />
+        <Field
+          label={t.auth.phone}
+          hint={t.auth.phoneHint}
+          testID="auth-phone"
+          value={phone}
+          onChangeText={setPhone}
+          error={errors['phone']}
+          keyboardType="phone-pad"
+        />
         <Field
           label={t.auth.password}
           hint={t.auth.passwordHint}

@@ -23,18 +23,20 @@ app needs are public by design.
    paste it in, and press **Run**. It should finish with "Success".
 3. This creates the profiles, groups, members, shared entries and history tables, turns on **Row Level Security** on
    every one, and creates the functions the app calls. It does not touch anything else.
+4. Do the same with the second file, `supabase/migrations/20261004000000_profile_name_phone.sql` (optional name and phone
+   on the profile). Always run the migrations in file-name order.
 
 ## 3. Authentication settings
 
 In **Authentication** in the Supabase dashboard:
 
-| Setting | Value | Why |
-|---|---|---|
-| Providers, Email | **On** | Registration and login with email and password |
-| Confirm email | **On** | Email verification is required before sign-in |
-| Minimum password length | **10** | Matches the app's rule |
-| Secure password change / re-authentication | On | Safer password changes |
-| Rate limits | Keep the defaults, or lower them | Limits guessing and email abuse |
+| Setting                                    | Value                            | Why                                            |
+| ------------------------------------------ | -------------------------------- | ---------------------------------------------- |
+| Providers, Email                           | **On**                           | Registration and login with email and password |
+| Confirm email                              | **On**                           | Email verification is required before sign-in  |
+| Minimum password length                    | **10**                           | Matches the app's rule                         |
+| Secure password change / re-authentication | On                               | Safer password changes                         |
+| Rate limits                                | Keep the defaults, or lower them | Limits guessing and email abuse                |
 
 **Email templates.** The app asks people to type the code from the email, so the emails must contain the code. In
 **Authentication, Email templates** edit these two, and make sure each body contains `{{ .Token }}`:
@@ -55,6 +57,7 @@ users, add your own SMTP provider in **Authentication, SMTP settings**.
    EXPO_PUBLIC_SUPABASE_URL=https://YOUR-PROJECT.supabase.co
    EXPO_PUBLIC_SUPABASE_ANON_KEY=YOUR-ANON-KEY
    ```
+
 3. Start the app with a clean cache: `npm.cmd start -- --clear`. Open it in Expo Go. You should now see the **Sign in**
    screen instead of the welcome page.
 

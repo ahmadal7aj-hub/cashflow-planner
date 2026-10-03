@@ -77,12 +77,12 @@ One `Plan` document:
 
 ### Savings (four things kept apart)
 
-| Idea | Meaning |
-|---|---|
-| **Existing balance** | The opening balance plus every movement dated on or after the opening date. Not income, not saved in any period. |
-| **Monthly target** | A plan, never counted as money already saved. |
+| Idea                  | Meaning                                                                                                                                                       |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Existing balance**  | The opening balance plus every movement dated on or after the opening date. Not income, not saved in any period.                                              |
+| **Monthly target**    | A plan, never counted as money already saved.                                                                                                                 |
 | **Projected savings** | An estimate for an unfinished month, always labelled projected: all scheduled income, and spending of whichever is larger, the plan or what is already spent. |
-| **Actual movements** | Deposits, withdrawals, month results and corrections. Transfers are never income or spending. |
+| **Actual movements**  | Deposits, withdrawals, month results and corrections. Transfers are never income or spending.                                                                 |
 
 At month end, with `result = income received - actual spending`: **added = max(0, min(result, target))** and
 **taken from existing savings = max(0, -result)**. So overspending first reduces that month's planned saving, and only

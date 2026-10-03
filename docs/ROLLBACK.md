@@ -5,13 +5,13 @@ reversible. This page records the checkpoint, how to restore it, and the one una
 
 ## The checkpoint
 
-| What | Value |
-|---|---|
-| **Tag** | `checkpoint/pre-restructure-2026-10-03` (annotated, pushed to GitHub) |
-| **Commit** | `e62af1c` |
-| **Backup branch** | `backup/pre-restructure-2026-10-03` (same commit, pushed) |
+| What               | Value                                                                                                                                                                                                                                                                                                      |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Tag**            | `checkpoint/pre-restructure-2026-10-03` (annotated, pushed to GitHub)                                                                                                                                                                                                                                      |
+| **Commit**         | `e62af1c`                                                                                                                                                                                                                                                                                                  |
+| **Backup branch**  | `backup/pre-restructure-2026-10-03` (same commit, pushed)                                                                                                                                                                                                                                                  |
 | **State captured** | The working tree was clean, so nothing uncommitted existed. It contains the monthly plan, zero amounts, delete confirmation and the Shared dashboard preview (PR #44 and #45 content). It does **not** contain the adjustable what-if (PR #42), the sharing spec (PR #43) or the handover update (PR #41). |
-| **Verified** | The tag was checked out into a separate worktree and its full test suite ran: 31 suites, 506 tests, all passing. The worktree was then removed. |
+| **Verified**       | The tag was checked out into a separate worktree and its full test suite ran: 31 suites, 506 tests, all passing. The worktree was then removed.                                                                                                                                                            |
 
 ## "Reverse these changes": the procedure
 
@@ -51,7 +51,6 @@ results.** So after a rollback:
 - Deleting an item never deletes history: deleted budgets, bills and income move to a retired list, and past spending
   is never removed by deleting a budget. See `docs/ARCHITECTURE.md` and ADR 0005.
 
-
 ---
 
 # Rollback: removing accounts and shared savings
@@ -60,12 +59,12 @@ Accounts and shared savings (ADR 0006) are also reversible.
 
 ## The checkpoint
 
-| What | Value |
-|---|---|
-| **Tag** | `checkpoint/pre-accounts-2026-10-03` (annotated, pushed to GitHub) |
-| **Commit** | `a2eb797` (the five-page app of PR #46, on-device saving, 500 passing tests) |
-| **Backup branch** | `backup/pre-accounts-2026-10-03` (same commit, pushed) |
-| **State captured** | The working tree was clean, so nothing uncommitted existed. |
+| What               | Value                                                                        |
+| ------------------ | ---------------------------------------------------------------------------- |
+| **Tag**            | `checkpoint/pre-accounts-2026-10-03` (annotated, pushed to GitHub)           |
+| **Commit**         | `a2eb797` (the five-page app of PR #46, on-device saving, 500 passing tests) |
+| **Backup branch**  | `backup/pre-accounts-2026-10-03` (same commit, pushed)                       |
+| **State captured** | The working tree was clean, so nothing uncommitted existed.                  |
 
 ## "Reverse the accounts and shared savings": the procedure
 
@@ -84,6 +83,8 @@ Nothing here is destructive by default. Do **not** use `git reset --hard`, force
 5. **Only if you also want the backend gone:** after exporting, run `supabase/rollback/20261003000000_down.sql` in the
    Supabase SQL Editor. It deletes every group, membership and shared entry **for everybody** and keeps the sign-in
    accounts. This is tested (`rollback.db.test.ts`) but cannot be undone, so it is never part of the default rollback.
+   To undo only the optional name and phone (and keep everything else), run `supabase/rollback/20261004000000_down.sql`
+   instead; it deletes just those two values. Checkpoint before that change: `checkpoint/pre-profile-fields-2026-10-03`.
 
 ## What happens to people's records
 

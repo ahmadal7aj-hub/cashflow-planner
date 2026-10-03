@@ -156,7 +156,12 @@ const routes = {
       throw fail(409, 'email_taken');
     if ((await callRpc(null, 'username_available', { p_username: username })) !== true)
       throw fail(409, 'username_taken');
-    pending.set(email, { password: String(body.password), username });
+    pending.set(email, {
+      password: String(body.password),
+      username,
+      fullName: body.fullName ? String(body.fullName) : undefined,
+      phone: body.phone ? String(body.phone) : undefined,
+    });
     console.log(`[dev-server] confirmation code for ${email}: ${CODE}`);
     return { status: 'verification-sent' };
   },
@@ -168,7 +173,14 @@ const routes = {
     try {
       rows = await admin(
         'insert into auth.users (email, raw_user_meta_data) values ($1, $2::jsonb) returning id',
-        [email, JSON.stringify({ username: entry.username })],
+        [
+          email,
+          JSON.stringify({
+            username: entry.username,
+            full_name: entry.fullName,
+            phone: entry.phone,
+          }),
+        ],
       );
     } catch {
       throw fail(409, 'username_taken');

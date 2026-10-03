@@ -28,16 +28,16 @@ Supabase project.**
 
 ### Then, in this order
 
-| # | Next step | Owner | Notes |
-|---|---|---|---|
-| 1 | **Create the Supabase project and run the two-phone check** | Owner | `docs/BACKEND-SETUP.md`. Until then accounts are switched off and the app runs on its own |
-| 2 | **Fix what the live backend and real phones show** | Claude | Likely areas: email codes, rate limits, Realtime delivery, `supabase-js` on a phone, swipe feel |
-| 3 | **Before any real users** | Both | Encrypt the saved plan and session token, account deletion, 2FA, own SMTP sender, UAE PDPL review and privacy notice, abuse limits |
-| 4 | **Phone notifications for bill reminders** | Claude, after go-ahead | `expo-notifications`, never show amounts on the lock screen |
-| 5 | **Interviews** (five first, then 20 to 30) | Owner | `docs/INTERVIEW-ONE-PAGER.md`, `docs/PROTOTYPE-WALKTHROUGH.md`; private notes only in `docs/private/` |
-| 6 | **Security exception window** | Owner decides | Renew-or-expire decision around 2026-10-26; check `npm view braces version` and `node-forge` |
-| 7 | **Run the Maestro flow** on a USB-connected Android phone | Owner provides the phone | Written and updated, never run. It replaces saved data, so use a test phone |
-| 8 | **Ideas, only if interviews support them** | Both | Import from bank statements, multi-currency, email summaries (weekly or monthly), personal records on a second phone |
+| #   | Next step                                                   | Owner                    | Notes                                                                                                                              |
+| --- | ----------------------------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Create the Supabase project and run the two-phone check** | Owner                    | `docs/BACKEND-SETUP.md`. Until then accounts are switched off and the app runs on its own                                          |
+| 2   | **Fix what the live backend and real phones show**          | Claude                   | Likely areas: email codes, rate limits, Realtime delivery, `supabase-js` on a phone, swipe feel                                    |
+| 3   | **Before any real users**                                   | Both                     | Encrypt the saved plan and session token, account deletion, 2FA, own SMTP sender, UAE PDPL review and privacy notice, abuse limits |
+| 4   | **Phone notifications for bill reminders**                  | Claude, after go-ahead   | `expo-notifications`, never show amounts on the lock screen                                                                        |
+| 5   | **Interviews** (five first, then 20 to 30)                  | Owner                    | `docs/INTERVIEW-ONE-PAGER.md`, `docs/PROTOTYPE-WALKTHROUGH.md`; private notes only in `docs/private/`                              |
+| 6   | **Security exception window**                               | Owner decides            | Renew-or-expire decision around 2026-10-26; check `npm view braces version` and `node-forge`                                       |
+| 7   | **Run the Maestro flow** on a USB-connected Android phone   | Owner provides the phone | Written and updated, never run. It replaces saved data, so use a test phone                                                        |
+| 8   | **Ideas, only if interviews support them**                  | Both                     | Import from bank statements, multi-currency, email summaries (weekly or monthly), personal records on a second phone               |
 
 ### Ready-to-paste prompt to resume
 
@@ -81,33 +81,33 @@ Supabase project.**
 
 ### Foundation (Phase 0)
 
-| Item | Status | Where |
-|---|---|---|
-| Public GitHub repo, docs skeleton, agent rules | **Done** | `AGENTS.md`, `docs/` |
-| Expo SDK 57 + strict TypeScript app, lint, format, tests | **Done** (PR #1) | `mobile/` |
-| CI: format, lint, typecheck, tests + coverage, `expo-doctor`, bundle build, dependency audit and review, CodeQL | **Done** (PR #2) | `.github/workflows/` |
-| Dependabot, secret scanning with push protection | **Done** | repo settings, `.github/dependabot.yml` |
-| Branch protection on `main` and `staging` (PR required, 3 checks, admins included, linear history, no force push) | **Done**, verified with a test PR (PR #3) | repo settings |
-| Environment config with a visible non-production banner | **Done** (PR #14), code half only | `mobile/src/config/environment.ts` |
-| Separate Supabase projects (dev, staging, production) | **Not done. OWNER.** Wait for the gate | not created |
-| E2E smoke test (Maestro) | **Written, never run** (needs a phone or emulator) | `mobile/.maestro/smoke.yaml` |
+| Item                                                                                                              | Status                                             | Where                                   |
+| ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- | --------------------------------------- |
+| Public GitHub repo, docs skeleton, agent rules                                                                    | **Done**                                           | `AGENTS.md`, `docs/`                    |
+| Expo SDK 57 + strict TypeScript app, lint, format, tests                                                          | **Done** (PR #1)                                   | `mobile/`                               |
+| CI: format, lint, typecheck, tests + coverage, `expo-doctor`, bundle build, dependency audit and review, CodeQL   | **Done** (PR #2)                                   | `.github/workflows/`                    |
+| Dependabot, secret scanning with push protection                                                                  | **Done**                                           | repo settings, `.github/dependabot.yml` |
+| Branch protection on `main` and `staging` (PR required, 3 checks, admins included, linear history, no force push) | **Done**, verified with a test PR (PR #3)          | repo settings                           |
+| Environment config with a visible non-production banner                                                           | **Done** (PR #14), code half only                  | `mobile/src/config/environment.ts`      |
+| Separate Supabase projects (dev, staging, production)                                                             | **Not done. OWNER.** Wait for the gate             | not created                             |
+| E2E smoke test (Maestro)                                                                                          | **Written, never run** (needs a phone or emulator) | `mobile/.maestro/smoke.yaml`            |
 
 ### The prototype (Phase 1)
 
 Five pages plus supporting screens. All numbers are hand-verified in tests.
 
-| Area | What it does |
-|---|---|
-| **Dashboard** | Income, spending against budget and savings for a date range. Default: the current calendar month. Presets: current month, last week, last month, last quarter, last year, and a typed custom range. A toggle shows **period savings** (net added in the range) or **total savings** (cumulative balance at the end of the range, or "not available" before the balance began). The safe-to-spend card, what-if and reminders appear when a spendable balance is set |
-| **Income** | Empty for a new user, with an Add item button. Category, name, amount (zero allowed), frequency, next payment date and predictability. Edit, delete, or swipe left to delete |
-| **Savings planning** | Existing savings with its date, a monthly target (a plan), a projection for the unfinished month (labelled projected), add and take out money (dated), the month-end results, goals, and an Investments screen. Overspending beyond the plan reduces savings (see ARCHITECTURE) |
-| **Budgeting** | **Bills and fixed expenses** (due date, reminder, Mark as paid) and **Everyday budgets** (monthly amount per category). Empty for a new user. Every UAE category stays in the forms, including Other bill |
-| **Actual spending** | Dated purchases per category against the monthly budget: budget, spent and remaining, negative shown as overspending, unbudgeted spending labelled. Month navigation |
-| **Saving and history** | Everything is saved on the device with a backup before any migration. Edits apply from the current month; deleting never removes past spending; each finished month is closed once; export a copy from Settings |
-| **Investments** (opened from Savings) | Type, amount put in, worth now, profit or loss, income, allocation, planned monthly contribution. Tracking only, not advice |
-| **Accounts and Shared Savings** | Register (unique username and email), verify by code, sign in, reset password, sign out. Groups of two or more by invitation (accept or decline). Share a saving with one group; a **Shared Savings** dashboard in every member's account with the combined total, each member's contribution, entry history, period or total savings and the same date filters. Privacy enforced by the database. Needs a Supabase project: `docs/BACKEND-SETUP.md`, how it works: `docs/SHARED-SAVINGS.md` |
-| **Due dates and reminders** | Calendar date picker; bill reminders on the day, 1 day, 3 days, 1 week, 2 weeks before, or an exact date. In-app only; no phone notifications yet |
-| **Look and feel** | Navy and gold theme in light and dark mode, a navy hero card for Safe to spend, icons, a welcome screen |
+| Area                                  | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Dashboard**                         | Income, spending against budget and savings for a date range. Default: the current calendar month. Presets: current month, last week, last month, last quarter, last year, and a typed custom range. A toggle shows **period savings** (net added in the range) or **total savings** (cumulative balance at the end of the range, or "not available" before the balance began). The safe-to-spend card, what-if and reminders appear when a spendable balance is set                         |
+| **Income**                            | Empty for a new user, with an Add item button. Category, name, amount (zero allowed), frequency, next payment date and predictability. Edit, delete, or swipe left to delete                                                                                                                                                                                                                                                                                                                 |
+| **Savings planning**                  | Existing savings with its date, a monthly target (a plan), a projection for the unfinished month (labelled projected), add and take out money (dated), the month-end results, goals, and an Investments screen. Overspending beyond the plan reduces savings (see ARCHITECTURE)                                                                                                                                                                                                              |
+| **Budgeting**                         | **Bills and fixed expenses** (due date, reminder, Mark as paid) and **Everyday budgets** (monthly amount per category). Empty for a new user. Every UAE category stays in the forms, including Other bill                                                                                                                                                                                                                                                                                    |
+| **Actual spending**                   | Dated purchases per category against the monthly budget: budget, spent and remaining, negative shown as overspending, unbudgeted spending labelled. Month navigation                                                                                                                                                                                                                                                                                                                         |
+| **Saving and history**                | Everything is saved on the device with a backup before any migration. Edits apply from the current month; deleting never removes past spending; each finished month is closed once; export a copy from Settings                                                                                                                                                                                                                                                                              |
+| **Investments** (opened from Savings) | Type, amount put in, worth now, profit or loss, income, allocation, planned monthly contribution. Tracking only, not advice                                                                                                                                                                                                                                                                                                                                                                  |
+| **Accounts and Shared Savings**       | Register (unique username and email), verify by code, sign in, reset password, sign out. Groups of two or more by invitation (accept or decline). Share a saving with one group; a **Shared Savings** dashboard in every member's account with the combined total, each member's contribution, entry history, period or total savings and the same date filters. Privacy enforced by the database. Needs a Supabase project: `docs/BACKEND-SETUP.md`, how it works: `docs/SHARED-SAVINGS.md` |
+| **Due dates and reminders**           | Calendar date picker; bill reminders on the day, 1 day, 3 days, 1 week, 2 weeks before, or an exact date. In-app only; no phone notifications yet                                                                                                                                                                                                                                                                                                                                            |
+| **Look and feel**                     | Navy and gold theme in light and dark mode, a navy hero card for Safe to spend, icons, a welcome screen                                                                                                                                                                                                                                                                                                                                                                                      |
 
 Design rules baked in: money as integer fils; centralised strings and design tokens; written status and symbols,
 never colour alone; 48px touch targets; accessible error messages; no shame-based wording; privacy-minimised
@@ -149,16 +149,16 @@ analytics (allow-listed events only, no financial values).
 
 ## 4. Current technical state
 
-| Topic | State |
-|---|---|
-| Repo | `github.com/ahmadal7aj-hub/cashflow-planner` (public), default branch `main` |
-| Branches | `main` (protected), `staging` (protected, **unused and 23 commits behind**, no deploy pipeline yet) |
-| Stack | React Native + Expo SDK 57, TypeScript strict, Expo Router, npm. No backend yet |
-| Entry points | `mobile/src/app/` (screens), `mobile/src/domain/` (pure maths), `mobile/src/state/` (in-memory plan) |
-| Required PR checks | Quality, Security (dependencies), CodeQL |
-| Reviews required | 0 (single maintainer; GitHub does not let you approve your own PR). Raise to 1 when a second person joins |
-| Release | Nothing is deployed or published. No app-store identifiers chosen, deliberately |
-| Machine notes | Windows. Use `npm.cmd` / `npx.cmd` if PowerShell blocks scripts. Free RAM is low (about 3 GB), so no Android emulator |
+| Topic              | State                                                                                                                 |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| Repo               | `github.com/ahmadal7aj-hub/cashflow-planner` (public), default branch `main`                                          |
+| Branches           | `main` (protected), `staging` (protected, **unused and 23 commits behind**, no deploy pipeline yet)                   |
+| Stack              | React Native + Expo SDK 57, TypeScript strict, Expo Router, npm. No backend yet                                       |
+| Entry points       | `mobile/src/app/` (screens), `mobile/src/domain/` (pure maths), `mobile/src/state/` (in-memory plan)                  |
+| Required PR checks | Quality, Security (dependencies), CodeQL                                                                              |
+| Reviews required   | 0 (single maintainer; GitHub does not let you approve your own PR). Raise to 1 when a second person joins             |
+| Release            | Nothing is deployed or published. No app-store identifiers chosen, deliberately                                       |
+| Machine notes      | Windows. Use `npm.cmd` / `npx.cmd` if PowerShell blocks scripts. Free RAM is low (about 3 GB), so no Android emulator |
 
 See `docs/ARCHITECTURE.md` for the structure and `docs/TESTING.md` for how to run the checks.
 
@@ -189,15 +189,15 @@ See `docs/ARCHITECTURE.md` for the structure and `docs/TESTING.md` for how to ru
 
 ## 5. Decisions
 
-| Decision | Status |
-|---|---|
-| Public repo with private business documents kept outside it | **Decided** |
-| Stack (Expo, TypeScript, npm; Supabase later) | **Decided** (ADR 0002) |
-| Planning horizon for the prototype | **Decided for the prototype** (ADR 0003); revisit after interviews |
+| Decision                                                                                                        | Status                                                                                        |
+| --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Public repo with private business documents kept outside it                                                     | **Decided**                                                                                   |
+| Stack (Expo, TypeScript, npm; Supabase later)                                                                   | **Decided** (ADR 0002)                                                                        |
+| Planning horizon for the prototype                                                                              | **Decided for the prototype** (ADR 0003); revisit after interviews                            |
 | Eight PRD open decisions (name, horizon, safety buffer, accounts, import, pricing, minimum age, hosting region) | **Proposed, awaiting OWNER** (ADR 0004). Item 5 (import) was revised to "likely table stakes" |
-| **Cloud, on-device, or hybrid data storage** | **Open. OWNER.** New, raised by the research. Needed before Phase 2 |
-| Node-forge security exception | **Approved by OWNER 2026-10-02**, expires 2026-11-01 |
-| Product name, pricing, minimum age, data-hosting region | **Open**, deliberately postponed (legal review, evidence) |
+| **Cloud, on-device, or hybrid data storage**                                                                    | **Open. OWNER.** New, raised by the research. Needed before Phase 2                           |
+| Node-forge security exception                                                                                   | **Approved by OWNER 2026-10-02**, expires 2026-11-01                                          |
+| Product name, pricing, minimum age, data-hosting region                                                         | **Open**, deliberately postponed (legal review, evidence)                                     |
 
 ---
 
@@ -207,29 +207,29 @@ Work in this order. Do not skip ahead: Phase 2 is gated on step 4.
 
 ### A. This week (all OWNER)
 
-| # | Action | Done when |
-|---|---|---|
-| 1 | **Click through the prototype in Expo Go** (follow `docs/PROTOTYPE-WALKTHROUGH.md`). Try the newest features: add a bill with a due date and a reminder, the Other bill, the current savings balance, an investment, and dark mode | You have a list of anything confusing, ugly or wrong, with screen names or screenshots |
-| 2 | **Send that list to Claude** | Issues are fixed in small PRs |
-| 3 | **Confirm or change the eight proposals in ADR 0004**, and decide the cloud vs on-device question | Each item marked Accepted or changed |
-| 3b | **Tell Claude when the in-app reminders feel right**, then ask for phone notifications (the next planned step) | A decision on notifications |
+| #   | Action                                                                                                                                                                                                                             | Done when                                                                              |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| 1   | **Click through the prototype in Expo Go** (follow `docs/PROTOTYPE-WALKTHROUGH.md`). Try the newest features: add a bill with a due date and a reminder, the Other bill, the current savings balance, an investment, and dark mode | You have a list of anything confusing, ugly or wrong, with screen names or screenshots |
+| 2   | **Send that list to Claude**                                                                                                                                                                                                       | Issues are fixed in small PRs                                                          |
+| 3   | **Confirm or change the eight proposals in ADR 0004**, and decide the cloud vs on-device question                                                                                                                                  | Each item marked Accepted or changed                                                   |
+| 3b  | **Tell Claude when the in-app reminders feel right**, then ask for phone notifications (the next planned step)                                                                                                                     | A decision on notifications                                                            |
 
 ### B. Weeks 1 to 3: validation (OWNER)
 
-| # | Action | Done when |
-|---|---|---|
-| 4 | **Recruit five people** who are salaried UAE residents with recurring bills (mix: expat and Emirati, single and family, iPhone and Android) | Five sessions booked |
-| 5 | **Run the sessions** using `docs/INTERVIEW-ONE-PAGER.md` and the walkthrough script; record private notes in `docs/private/` only | Five anonymous note sheets |
-| 6 | **Summarise the first five against H1 to H7** (ask Claude to help) and decide whether to continue | A written finding per hypothesis |
-| 7 | **Continue to 20 to 30 interviews and at least 10 usability sessions** | The BRD exit gate is met |
+| #   | Action                                                                                                                                      | Done when                        |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| 4   | **Recruit five people** who are salaried UAE residents with recurring bills (mix: expat and Emirati, single and family, iPhone and Android) | Five sessions booked             |
+| 5   | **Run the sessions** using `docs/INTERVIEW-ONE-PAGER.md` and the walkthrough script; record private notes in `docs/private/` only           | Five anonymous note sheets       |
+| 6   | **Summarise the first five against H1 to H7** (ask Claude to help) and decide whether to continue                                           | A written finding per hypothesis |
+| 7   | **Continue to 20 to 30 interviews and at least 10 usability sessions**                                                                      | The BRD exit gate is met         |
 
 ### C. Dated items
 
-| Date | What | Action |
-|---|---|---|
-| Weekly (Mondays) | Automatic exception watch | Read the GitHub issue if one is opened |
-| **about 2026-10-26** | Exception is within 7 days of expiring | **OWNER** decides: renew 30 days (Claude edits the file only on your explicit approval) or let it expire |
-| **2026-11-01** | **node-forge exception expires; CI fails again** unless fixed or renewed | If a fixed version exists, upgrade and delete the exception |
+| Date                 | What                                                                     | Action                                                                                                   |
+| -------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| Weekly (Mondays)     | Automatic exception watch                                                | Read the GitHub issue if one is opened                                                                   |
+| **about 2026-10-26** | Exception is within 7 days of expiring                                   | **OWNER** decides: renew 30 days (Claude edits the file only on your explicit approval) or let it expire |
+| **2026-11-01**       | **node-forge exception expires; CI fails again** unless fixed or renewed | If a fixed version exists, upgrade and delete the exception                                              |
 
 ### D. After the gate (only if interviews show demand): Phase 2 plan
 
@@ -275,16 +275,16 @@ Work in this order. Do not skip ahead: Phase 2 is gated on step 4.
 
 ## 8. Risks
 
-| Risk | Why it matters | Mitigation |
-|---|---|---|
-| **Manual entry loses to auto-import apps** | Several UAE competitors capture data automatically | Test import demand in every interview (H6); decide import before Phase 3 |
-| **Cloud vs on-device trust** | A competitor markets on-device-only data | Decide deliberately; ask interviewees (H7) |
-| **Building before demand** | The BRD's top risk | Hold Phase 2 until the gate |
-| **Crowded UAE market** | At least five UAE-focused apps | Validate the differentiators in section 3 before building more |
-| **Wrong or advice-like numbers** | Loss of trust, possible regulatory scope | Deterministic tested engine; legal review of wording and the gratuity estimate |
-| **Sensitive data in a public repo** | Public repository | Private docs git-ignored; secret scanning and push protection on; check `git diff --cached` before every commit |
-| **Security exception lapses unnoticed** | CI blocks all work | Weekly watch, dated item in section 6C |
-| **Single maintainer** | No second review | Automated gates; add a reviewer when possible |
+| Risk                                       | Why it matters                                     | Mitigation                                                                                                      |
+| ------------------------------------------ | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| **Manual entry loses to auto-import apps** | Several UAE competitors capture data automatically | Test import demand in every interview (H6); decide import before Phase 3                                        |
+| **Cloud vs on-device trust**               | A competitor markets on-device-only data           | Decide deliberately; ask interviewees (H7)                                                                      |
+| **Building before demand**                 | The BRD's top risk                                 | Hold Phase 2 until the gate                                                                                     |
+| **Crowded UAE market**                     | At least five UAE-focused apps                     | Validate the differentiators in section 3 before building more                                                  |
+| **Wrong or advice-like numbers**           | Loss of trust, possible regulatory scope           | Deterministic tested engine; legal review of wording and the gratuity estimate                                  |
+| **Sensitive data in a public repo**        | Public repository                                  | Private docs git-ignored; secret scanning and push protection on; check `git diff --cached` before every commit |
+| **Security exception lapses unnoticed**    | CI blocks all work                                 | Weekly watch, dated item in section 6C                                                                          |
+| **Single maintainer**                      | No second review                                   | Automated gates; add a reviewer when possible                                                                   |
 
 ---
 
@@ -309,16 +309,16 @@ node scripts/audit-gate.js   # the dependency audit gate
 
 ## 10. Where things are
 
-| Need | Location |
-|---|---|
-| Product and requirements (private) | the BRD and PRD `.docx` files, outside the repo |
-| Rules for coding agents | `AGENTS.md` and `mobile/AGENTS.md` |
-| Architecture, testing, release, security, privacy | `docs/ARCHITECTURE.md`, `TESTING.md`, `RELEASE.md`, `SECURITY.md`, `PRIVACY-DATA-MAP.md` |
-| Decisions | `docs/adr/` (0001 to 0004) |
-| Research and interviews | `docs/VALIDATION.md`, `INTERVIEW-KIT.md`, `INTERVIEW-ONE-PAGER.md`, `PROTOTYPE-WALKTHROUGH.md`, `FEATURE-GAP.md` |
-| Private interview notes | `docs/private/` (git-ignored; never commit) |
-| Change history | `CHANGELOG.md` and the closed pull requests |
-| Security exception | `mobile/audit-exceptions.json`, `mobile/scripts/` |
+| Need                                              | Location                                                                                                         |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| Product and requirements (private)                | the BRD and PRD `.docx` files, outside the repo                                                                  |
+| Rules for coding agents                           | `AGENTS.md` and `mobile/AGENTS.md`                                                                               |
+| Architecture, testing, release, security, privacy | `docs/ARCHITECTURE.md`, `TESTING.md`, `RELEASE.md`, `SECURITY.md`, `PRIVACY-DATA-MAP.md`                         |
+| Decisions                                         | `docs/adr/` (0001 to 0004)                                                                                       |
+| Research and interviews                           | `docs/VALIDATION.md`, `INTERVIEW-KIT.md`, `INTERVIEW-ONE-PAGER.md`, `PROTOTYPE-WALKTHROUGH.md`, `FEATURE-GAP.md` |
+| Private interview notes                           | `docs/private/` (git-ignored; never commit)                                                                      |
+| Change history                                    | `CHANGELOG.md` and the closed pull requests                                                                      |
+| Security exception                                | `mobile/audit-exceptions.json`, `mobile/scripts/`                                                                |
 
 ## 11. Glossary
 

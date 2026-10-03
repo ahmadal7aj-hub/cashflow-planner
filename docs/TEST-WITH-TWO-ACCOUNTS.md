@@ -48,13 +48,18 @@ server, open `http://YOUR-IP:8787/health` in the phone's browser: it should show
 You can use **two phones**, or **one phone** and switch accounts (Settings, **Account and groups**, **Sign out**).
 
 **Account A**
+
 1. **Create an account**: a unique username (for example `sara_a`), an email (any address, for example `a@test.com`) and a
-   password of at least 10 characters. Type the code **123456**.
+   password of at least 10 characters. Name and phone are optional. Type the code **123456**.
+   Tap the person icon at the top right any time to see your profile (username, email, name, phone). Give your
+   **username or email** to the other person: they use it to invite you. The phone number is only for you; it is not used
+   to find people because it is not verified.
 2. Tap **Get started** and answer the savings questions (0 is fine).
 3. Settings, **Account and groups**, **Groups and shared savings**, **Start a group** (for example "Home"). On the group
    screen type the other person's **username** under **Invite someone** and send.
 
 **Account B** (the other phone, or after signing out on this one)
+
 1. **Create an account** with a different username and email, code **123456**, **Get started**, savings questions.
 2. Settings, **Account and groups**, **Groups and shared savings**: you see the invitation. Nothing is shared until you
    **Accept**.
@@ -72,12 +77,12 @@ You can use **two phones**, or **one phone** and switch accounts (Settings, **Ac
 
 ## If something does not work
 
-| Problem | What to do |
-|---|---|
-| The app still opens on the welcome page | `.env.local` is missing or wrong. Check the name and the line, then restart with `npm.cmd start -- --clear` |
-| "Cannot reach the test server" | Same Wi-Fi? Server window still open? Right IP? Allow Node in Windows Firewall (private networks) |
-| The phone browser cannot open `http://YOUR-IP:8787/health` | A firewall or a different network (guest Wi-Fi) is blocking it |
-| You want a clean start | Stop the server (Ctrl+C), delete the folder `mobile\.dev-data`, start it again |
-| You are done testing | Delete `.env.local` and restart the app: it goes back to local-only |
+| Problem                                                    | What to do                                                                                                  |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| The app still opens on the welcome page                    | `.env.local` is missing or wrong. Check the name and the line, then restart with `npm.cmd start -- --clear` |
+| "Cannot reach the test server"                             | Same Wi-Fi? Server window still open? Right IP? Allow Node in Windows Firewall (private networks)           |
+| The phone browser cannot open `http://YOUR-IP:8787/health` | A firewall or a different network (guest Wi-Fi) is blocking it                                              |
+| You want a clean start                                     | Stop the server (Ctrl+C), delete the folder `mobile\.dev-data`, start it again                              |
+| You are done testing                                       | Delete `.env.local` and restart the app: it goes back to local-only                                         |
 
 The real thing (Supabase, real emails) is set up with `docs/BACKEND-SETUP.md` when you are ready.

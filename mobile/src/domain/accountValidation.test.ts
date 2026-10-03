@@ -1,10 +1,14 @@
 import {
   codeProblem,
   emailProblem,
+  nameProblem,
   normalizeCode,
   normalizeEmail,
+  normalizeName,
+  normalizePhone,
   normalizeUsername,
   passwordProblem,
+  phoneProblem,
   usernameProblem,
 } from './accountValidation';
 
@@ -66,5 +70,23 @@ describe('email codes', () => {
     expect(codeProblem('')).toBe('empty');
     expect(codeProblem('12ab56')).toBe('invalid');
     expect(codeProblem('123')).toBe('invalid');
+  });
+});
+
+describe('optional name and phone', () => {
+  it('allows empty, tidies spaces, and limits the name to 80 characters', () => {
+    expect(normalizeName('  Sara   Ahmed ')).toBe('Sara Ahmed');
+    expect(nameProblem('')).toBeNull();
+    expect(nameProblem('x'.repeat(80))).toBeNull();
+    expect(nameProblem('x'.repeat(81))).toBe('length');
+  });
+
+  it('accepts digits with an optional leading plus, and refuses anything else', () => {
+    expect(phoneProblem('')).toBeNull();
+    expect(phoneProblem('+971 50 123 4567')).toBeNull();
+    expect(phoneProblem('050-123-4567')).toBeNull();
+    expect(phoneProblem('12345')).toBe('invalid');
+    expect(phoneProblem('call me')).toBe('invalid');
+    expect(normalizePhone(' +971501234567 ')).toBe('+971501234567');
   });
 });

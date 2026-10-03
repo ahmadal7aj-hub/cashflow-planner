@@ -135,6 +135,23 @@ describe('the local test server', () => {
     await b.auth.signIn('bob@example.com', 'brand-new-password');
   });
 
+  it('keeps the optional name and phone from sign-up and lets the owner change them', async () => {
+    await AsyncStorage.clear();
+    const a = phone();
+    expect(
+      await a.auth.signUp('eve@example.com', 'a-long-password', 'eve_e', {
+        fullName: 'Eve E',
+        phone: '+971501234567',
+      }),
+    ).toBe('verification-sent');
+    await a.auth.verifySignUp('eve@example.com', '123456');
+    const first = await a.rpc.rpc<{ full_name: string; phone: string }[]>('my_profile');
+    expect(first[0]).toMatchObject({ full_name: 'Eve E', phone: '+971501234567' });
+    await a.rpc.rpc('update_my_contact', { p_full_name: '', p_phone: '' });
+    const cleared = await a.rpc.rpc<{ full_name: string | null }[]>('my_profile');
+    expect(cleared[0]!.full_name).toBeNull();
+  });
+
   it('shares savings between two phones through the real database rules', async () => {
     await AsyncStorage.clear();
     const a = phone();
