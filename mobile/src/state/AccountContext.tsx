@@ -9,7 +9,8 @@ import {
   type ReactNode,
 } from 'react';
 
-import { readBackendConfig } from '../backend/config';
+import { readBackendConfig, readDevServerUrl } from '../backend/config';
+import { createDevBackend } from '../backend/devBackend';
 import { createSupabaseBackend } from '../backend/supabaseBackend';
 import type { AuthUser, Backend } from '../backend/types';
 import { getTestBackend } from './testBackend';
@@ -53,7 +54,8 @@ function resolveBackend(): Backend | null {
   if (injected !== undefined) return injected;
   if (realBackend === undefined) {
     const config = readBackendConfig();
-    realBackend = config ? createSupabaseBackend(config) : null;
+    const devUrl = readDevServerUrl();
+    realBackend = config ? createSupabaseBackend(config) : devUrl ? createDevBackend(devUrl) : null;
   }
   return realBackend;
 }

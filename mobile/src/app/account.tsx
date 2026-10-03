@@ -37,6 +37,11 @@ export default function Account() {
         <Heading>{t.account.signedInAs(account.user.username || account.user.email)}</Heading>
         <Body muted>{t.account.emailLine(account.user.email)}</Body>
       </Card>
+      {account.backend?.kind === 'dev-server' ? (
+        <Body muted testID="dev-server-note">
+          {t.account.devServer}
+        </Body>
+      ) : null}
       <Button
         label={t.account.groups}
         onPress={() => router.push('/groups')}
