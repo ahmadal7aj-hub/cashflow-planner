@@ -1,6 +1,6 @@
 # Testing
 
-**Current state:** 612 tests in 47 suites, all passing. Jest's per-test timeout is 20 seconds to avoid false failures on a cold start. Run them with one command (below).
+**Current state:** 615 tests in 48 suites, all passing. Jest's per-test timeout is 20 seconds to avoid false failures on a cold start. Run them with one command (below).
 
 ## Layers
 
