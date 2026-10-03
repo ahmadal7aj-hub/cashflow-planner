@@ -58,7 +58,8 @@ describe('syncing: edit, make private, delete and offline never double count', (
 
     await fireEvent.press(screen.getByTestId('movement-edit-mv-1'));
     await waitFor(() => expect(getPathname()).toBe('/edit/savings-edit/mv-1'));
-    await fireEvent.press(screen.getByTestId(`share-${w.group}`));
+    await fireEvent.press(screen.getByTestId('share-shared'));
+    await fireEvent.press(screen.getByTestId(`share-with-${w.group}`));
     await fireEvent.press(screen.getByTestId('edit-save'));
     await waitFor(() => expect(getPathname()).toBe('/savings'));
     await settle(w.db);

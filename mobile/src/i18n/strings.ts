@@ -720,6 +720,19 @@ export const t = {
   shareChoice: {
     label: 'Share this saving',
     private: 'Keep private',
+    shared: 'Shared',
+    with: 'Share with',
+    newPerson: 'Someone new',
+    personLabel: 'Their username or email',
+    personHint:
+      'The username or email address they registered with. Phone numbers cannot be used yet.',
+    agreement:
+      'They get an invitation and see this saving only after they accept. You can make it private again at any time.',
+    errorPerson: 'Type their username or email address.',
+    errorPhone:
+      'Phone numbers cannot be used to find people yet. Use their username or email address.',
+    errorFailed: 'Could not send the invitation. Check your connection and try again.',
+    groupNameFor: (who: string) => `Shared with ${who}`,
     hint: 'Private by default. Sharing shows this same saving to the group. It does not move money or change your personal total.',
     noGroups: 'You are not in a group yet. Start a group to share savings.',
     notSignedIn: 'Sign in to share savings with other people.',
