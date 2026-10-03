@@ -191,6 +191,48 @@ export const t = {
     openBudget: 'Open budgeting',
   },
 
+  dashboards: {
+    sectionLabel: 'Dashboard',
+    overview: 'Overview',
+    income: {
+      chip: 'Income',
+      title: 'Income dashboard',
+      none: 'No income in these dates. Add your income on the Income page.',
+      trendTitle: 'Income received per month',
+      trendCaption: 'Money that has arrived, month by month, up to today.',
+      sourcesTitle: 'Income by source',
+      sourcesCaption: 'Received plus still expected in these dates.',
+    },
+    budget: {
+      chip: 'Budget',
+      title: 'Budget dashboard',
+      byCategory: 'Budget by category',
+      byCategoryCaption: 'What you planned for these dates.',
+      usage: 'How each budget is being used',
+      usageCaption: 'The marker shows where an even pace would be by today.',
+    },
+    spending: {
+      chip: 'Spending',
+      title: 'Spending dashboard',
+      none: 'No spending recorded in these dates.',
+      trendTitle: 'Spending per month',
+      trendCaption: 'What you actually spent, month by month.',
+      byCategory: 'Spending by category',
+      byCategoryCaption: 'Where the money went in these dates.',
+    },
+    savings: {
+      chip: 'Savings',
+      title: 'Savings dashboard',
+      periodLabel: 'Saved in these dates',
+      totalLabel: 'Total savings',
+      none: 'No savings added or taken out in these dates.',
+      trendTitle: 'Net savings added per month',
+      trendCaption: 'Deposits minus withdrawals, month by month.',
+      open: 'Open savings planning',
+    },
+    shared: { chip: 'Shared' },
+  },
+
   onboarding: {
     title: 'Your starting point',
     intro:
@@ -381,7 +423,7 @@ export const t = {
   },
 
   tabs: {
-    dashboard: 'Dashboard',
+    dashboard: 'Dashboards',
     income: 'Income',
     savings: 'Savings planning',
     budget: 'Budgeting',
@@ -733,6 +775,19 @@ export const t = {
   shareChoice: {
     label: 'Share this saving',
     private: 'Keep private',
+    shared: 'Shared',
+    with: 'Share with',
+    newPerson: 'Someone new',
+    personLabel: 'Their username or email',
+    personHint:
+      'The username or email address they registered with. Phone numbers cannot be used yet.',
+    agreement:
+      'They get an invitation and see this saving only after they accept. You can make it private again at any time.',
+    errorPerson: 'Type their username or email address.',
+    errorPhone:
+      'Phone numbers cannot be used to find people yet. Use their username or email address.',
+    errorFailed: 'Could not send the invitation. Check your connection and try again.',
+    groupNameFor: (who: string) => `Shared with ${who}`,
     hint: 'Private by default. Sharing shows this same saving to the group. It does not move money or change your personal total.',
     noGroups: 'You are not in a group yet. Start a group to share savings.',
     notSignedIn: 'Sign in to share savings with other people.',

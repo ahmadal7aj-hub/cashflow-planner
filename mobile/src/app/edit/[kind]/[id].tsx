@@ -5,7 +5,7 @@ import { DateField } from '../../../components/dates';
 import { DeleteButton } from '../../../components/DeleteButton';
 import { ChipGroup, Field } from '../../../components/forms';
 import { ReminderPicker } from '../../../components/ReminderPicker';
-import { ShareToggle } from '../../../components/ShareToggle';
+import { ShareToggle, useShareChoice } from '../../../components/ShareToggle';
 import { Body, Button, Heading, Screen } from '../../../components/ui';
 import {
   FREQUENCIES,
@@ -571,14 +571,14 @@ function EmploymentForm({ existing }: { existing?: Employment | undefined }) {
 function SavingsMoveForm({ direction }: { direction: 'in' | 'out' }) {
   const router = useRouter();
   const { plan, today, addToSavings, takeFromSavings } = usePrototype();
-  const [groupId, setGroupId] = useState<string | null>(null);
+  const choice = useShareChoice(null);
   const [amount, setAmount] = useState('');
   const [note, setNote] = useState('');
   const [date, setDate] = useState<ISODate | null>(today);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
   const balance = balanceAsOf(plan.savings, today);
 
-  const save = () => {
+  const save = async () => {
     const a = parseAmountToFils(amount);
     if (!a.ok || a.fils <= 0) {
       setErrors({ amount: t.savingsPage.errorAmount });
@@ -588,6 +588,9 @@ function SavingsMoveForm({ direction }: { direction: 'in' | 'out' }) {
       setErrors({ date: t.spendForm.errorDate });
       return;
     }
+    const target = await choice.resolve();
+    if (!target) return;
+    const groupId = target.groupId;
     const result =
       direction === 'in'
         ? addToSavings(a.fils, note, date, groupId ?? undefined)
@@ -637,7 +640,7 @@ function SavingsMoveForm({ direction }: { direction: 'in' | 'out' }) {
         error={errors.date}
       />
       <Field label={t.savingsPage.formNote} testID="note" value={note} onChangeText={setNote} />
-      <ShareToggle value={groupId} onChange={setGroupId} />
+      <ShareToggle choice={choice} />
       <Button label={t.edit.save} onPress={save} testID="edit-save" />
     </Screen>
   );
@@ -653,24 +656,26 @@ function SavingsEditForm({ movementId }: { movementId: string | undefined }) {
   const [amount, setAmount] = useState(movement ? toInput(Math.abs(movement.change)) : '');
   const [date, setDate] = useState<ISODate | null>(movement?.date ?? today);
   const [note, setNote] = useState(movement?.note ?? '');
-  const [groupId, setGroupId] = useState<string | null>(movement?.share?.groupId ?? null);
+  const choice = useShareChoice(movement?.share?.groupId ?? null);
   const [errors, setErrors] = useState<Record<string, string | undefined>>({});
 
   if (!movement || !editable) return <NotFound />;
   const group = sharing.groups.find((g) => g.groupId === movement.share?.groupId);
 
-  const save = () => {
+  const save = async () => {
     const a = parseAmountToFils(amount);
     const next: Record<string, string | undefined> = {};
     if (!a.ok || a.fils <= 0) next.amount = t.savingsPage.errorAmount;
     if (date === null) next.date = t.spendForm.errorDate;
     setErrors(next);
     if (Object.keys(next).length > 0 || !a.ok || date === null) return;
+    const target = await choice.resolve();
+    if (!target) return;
     const result = updateSavingsEntry(movement.id, {
       amount: a.fils,
       date,
       note,
-      groupId,
+      groupId: target.groupId,
     });
     if (result === 'insufficient') {
       setErrors({ amount: t.savingsPage.errorInsufficient(formatAed(0)) });
@@ -719,8 +724,8 @@ function SavingsEditForm({ movementId }: { movementId: string | undefined }) {
         error={errors.date}
       />
       <Field label={t.savingsPage.formNote} testID="note" value={note} onChangeText={setNote} />
-      <ShareToggle value={groupId} onChange={setGroupId} />
-      {movement.share && groupId !== movement.share.groupId ? (
+      <ShareToggle choice={choice} />
+      {movement.share && choice.currentGroupId !== movement.share.groupId ? (
         <Body testID="share-change-note">{t.shareChoice.changeNote}</Body>
       ) : null}
       <Button label={t.edit.save} onPress={save} testID="edit-save" />

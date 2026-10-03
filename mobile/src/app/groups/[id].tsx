@@ -176,7 +176,7 @@ export default function GroupDetail() {
 
       <Button
         label={t.shared.title}
-        onPress={() => router.navigate('/shared')}
+        onPress={() => router.navigate({ pathname: '/dashboard', params: { section: 'shared' } })}
         testID="group-open-shared"
       />
 

@@ -128,7 +128,10 @@ export async function addSaving(
   await fireEvent.press(screen.getByTestId(direction === 'in' ? 'savings-add' : 'savings-take'));
   await waitFor(() => expect(getPathname()).toBe(`/edit/savings-${direction}/new`));
   await type('amount', amount);
-  if (opts.groupId) await fireEvent.press(screen.getByTestId(`share-${opts.groupId}`));
+  if (opts.groupId) {
+    await fireEvent.press(screen.getByTestId('share-shared'));
+    await fireEvent.press(screen.getByTestId(`share-with-${opts.groupId}`));
+  }
   await fireEvent.press(screen.getByTestId('edit-save'));
   await waitFor(() => expect(getPathname()).toBe('/savings'));
   await settle(w.db);
@@ -144,5 +147,5 @@ export function sharedRows(db: TestDb) {
 
 export async function openRoute(getPathname: () => string, path: string) {
   await act(async () => router.push(path as never));
-  await waitFor(() => expect(getPathname()).toBe(path));
+  await waitFor(() => expect(getPathname()).toBe(path.split('?')[0]));
 }

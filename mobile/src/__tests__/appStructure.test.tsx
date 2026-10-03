@@ -11,7 +11,7 @@ describe('app structure', () => {
       expect(screen.getByTestId(`tab-${id}`)).toBeTruthy();
     }
     expect(screen.queryByTestId('tab-insights')).toBeNull();
-    expect(screen.queryByTestId('tab-shared')).toBeNull();
+    expect(screen.queryByTestId('dash-section-shared')).toBeNull();
     expect(screen.getAllByText('Savings planning').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Actual spending').length).toBeGreaterThan(0);
   });

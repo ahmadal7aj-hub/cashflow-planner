@@ -46,7 +46,7 @@ money, or add another person's contribution to yours.
 
 ## The Shared Savings dashboard
 
-A **Shared Savings** tab appears in every accepted member's account once any of their groups has a shared saving. It shows,
+A **Shared** section on the **Dashboards** tab appears in every accepted member's account once any of their groups has a shared saving. It shows,
 for the chosen group and dates: the combined **period** or **total** savings, each member's contribution, the shared
 entries, and the group history. Members of several groups choose the group at the top; each group's records and totals are
 kept apart. Every member sees the same numbers, because the totals are worked out once, in the database.

@@ -54,7 +54,7 @@ const combined = () => screen.getByTestId('shared-combined').props.children as s
 
 async function openShared(w: World) {
   const app = await start(w, 'alice');
-  await openRoute(app.getPathname, '/shared');
+  await openRoute(app.getPathname, '/dashboard?section=shared');
   await settle(w.db);
   return app;
 }
@@ -208,7 +208,7 @@ describe('older entries, making private, and group changes keep reports honest',
 
     // Bob makes his own entry private from his account.
     await switchTo(w, getPathname, 'bob');
-    await openRoute(getPathname, '/shared');
+    await openRoute(getPathname, '/dashboard?section=shared');
     await settle(w.db);
     await fireEvent.press(screen.getByTestId('srange-last-month')); // Bob's saving is dated last month
     await settle(w.db);
@@ -218,7 +218,7 @@ describe('older entries, making private, and group changes keep reports honest',
     await settle(w.db, 4);
 
     await switchTo(w, getPathname, 'alice');
-    await openRoute(getPathname, '/shared');
+    await openRoute(getPathname, '/dashboard?section=shared');
     await settle(w.db);
     await fireEvent.press(screen.getByTestId('sview-total'));
     expect(combined()).toBe('AED 12,000.00'); // Bob's 3,000 is gone for Alice too
@@ -262,7 +262,7 @@ describe('groups with three or more people, and several groups at once', () => {
     const seen: string[] = [];
     for (const who of ['alice', 'bob', 'carol'] as const) {
       if (who !== 'alice') await switchTo(w, app.getPathname, who);
-      await openRoute(app.getPathname, '/shared');
+      await openRoute(app.getPathname, '/dashboard?section=shared');
       await settle(w.db);
       // Carol belongs to two groups, so pick Home explicitly.
       if (screen.queryByTestId(`sgroup-${w.group}`))
@@ -285,8 +285,10 @@ describe('groups with three or more people, and several groups at once', () => {
     await put(w, 'carol', 'dC:1', 300, monthDay(0, 1, w.today), 'deposit', trip);
 
     await start(w, 'alice');
-    await waitFor(() => expect(screen.getByTestId('tab-shared')).toBeTruthy());
-    await fireEvent.press(screen.getByTestId('tab-shared'));
+    await fireEvent.press(screen.getByTestId('tab-dashboard'));
+    await waitFor(() => expect(screen.getByTestId('dash-section-shared')).toBeTruthy());
+    await fireEvent.press(screen.getByTestId('tab-dashboard'));
+    await fireEvent.press(screen.getByTestId('dash-section-shared'));
     await settle(w.db);
     // Both groups are listed as separate choices.
     expect(screen.getByTestId(`sgroup-${w.group}`)).toBeTruthy();

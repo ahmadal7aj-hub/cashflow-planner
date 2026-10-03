@@ -74,7 +74,7 @@ Nothing here is destructive by default. Do **not** use `git reset --hard`, force
    open **Shared Savings** and note the totals; the shared entries are also visible in the Supabase **Table editor**
    (`shared_entries`), where they can be exported as CSV.
 2. **Switch the app back to local-only without deleting anything:** remove `EXPO_PUBLIC_SUPABASE_URL` and
-   `EXPO_PUBLIC_SUPABASE_ANON_KEY` from `mobile/.env.local` and restart Expo. The sign-in screens and the Shared Savings tab
+   `EXPO_PUBLIC_SUPABASE_ANON_KEY` from `mobile/.env.local` and restart Expo. The sign-in screens and the Shared section of the Dashboards tab
    disappear; the app runs on its own. The data in Supabase is untouched.
 3. **Undo the code with new commits:** `git switch -c reverse/accounts main`, then `git revert -m 1 <merge commit>` (or revert
    the commit range). Compare with the checkpoint at any time: `git diff checkpoint/pre-accounts-2026-10-03 HEAD`. To look at the

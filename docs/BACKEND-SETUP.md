@@ -68,8 +68,8 @@ users, add your own SMTP provider in **Authentication, SMTP settings**.
 2. **Phone B:** Create an account with the other email, confirm the code. Settings, **Account and groups**: accept the
    invitation.
 3. **Phone A:** Savings planning, **Add money**, AED 5,000, choose the group under **Share this saving**, save. Add another
-   AED 2,000 and leave it on **Keep private**. A **Shared Savings** tab appears.
-4. **Phone B:** a **Shared Savings** tab appears. Add AED 3,000 shared.
+   AED 2,000 and leave it on **Keep private**. A **Shared** section appears on the **Dashboards** tab.
+4. **Phone B:** a **Shared** section appears on the **Dashboards** tab. Add AED 3,000 shared.
 5. **Both phones** show AED 8,000 under **Total savings** (AED 5,000 from A and AED 3,000 from B). Phone A's personal
    total is AED 7,000 and Phone B never sees the private AED 2,000.
 6. Change the dates (Last month, Custom date range) and the **Period / Total savings** toggle on both phones.

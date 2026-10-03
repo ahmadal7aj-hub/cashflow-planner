@@ -66,10 +66,10 @@ You can use **two phones**, or **one phone** and switch accounts (Settings, **Ac
 
 ## 5. Share savings (the example)
 
-1. **Account A**: Savings planning, **Add money**, AED 5,000. Under **Share this saving** pick **Home**. Save.
-   Add AED 2,000 again and leave it on **Keep private**. A **Shared Savings** tab appears.
+1. **Account A**: Savings planning, **Add money**, AED 5,000. Under **Share this saving** pick **Shared**, then **Home** (or **Someone new** and type the other account username or email). Save.
+   Add AED 2,000 again and leave it on **Keep private**. A **Shared** section appears on the **Dashboards** tab.
    Your personal total is AED 7,000; Shared Savings shows only AED 5,000.
-2. **Account B**: a **Shared Savings** tab appears (it can take a few seconds, or tap **Refresh**). Add AED 3,000 with
+2. **Account B**: a **Shared** section appears on the **Dashboards** tab (it can take a few seconds, or tap **Refresh**). Add AED 3,000 with
    **Home** selected.
 3. Both accounts now show **AED 8,000** under **Total savings**: AED 5,000 from A, AED 3,000 from B. B never sees A's
    private AED 2,000 or A's personal total.
