@@ -4,6 +4,7 @@
 
 - `main` = production, `staging` = pre-production, short-lived `feature/*` branches.
 - Staging first; production deploy requires successful staging checks and protected-environment approval.
+
 ## Branch governance (P0-04)
 
 Applied to `main` and `staging`:

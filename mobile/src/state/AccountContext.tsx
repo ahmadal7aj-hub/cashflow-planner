@@ -12,13 +12,15 @@ import {
 import { readBackendConfig, readDevServerUrl } from '../backend/config';
 import { createDevBackend } from '../backend/devBackend';
 import { createSupabaseBackend } from '../backend/supabaseBackend';
-import type { AuthUser, Backend } from '../backend/types';
+import type { AuthUser, Backend, SignUpProfile } from '../backend/types';
 import { getTestBackend } from './testBackend';
 
 export interface AccountUser {
   id: string;
   email: string;
   username: string;
+  fullName: string;
+  phone: string;
 }
 
 export type AccountStatus =
@@ -32,6 +34,7 @@ interface AccountActions {
     email: string,
     password: string,
     username: string,
+    profile?: SignUpProfile,
   ) => Promise<'verification-sent' | 'signed-in'>;
   verifySignUp: (email: string, code: string) => Promise<void>;
   resendCode: (email: string) => Promise<void>;
@@ -40,6 +43,8 @@ interface AccountActions {
   requestReset: (email: string) => Promise<void>;
   resetPassword: (email: string, code: string, newPassword: string) => Promise<void>;
   usernameAvailable: (username: string) => Promise<boolean>;
+  /** Changes your own name and phone (empty clears them) and refreshes the profile. */
+  updateContact: (fullName: string, phone: string) => Promise<void>;
 }
 
 export type AccountState = AccountStatus & { backend: Backend | null } & AccountActions;
@@ -78,16 +83,23 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         return;
       }
       let username = '';
+      let fullName = '';
+      let phone = '';
       try {
-        const rows = await backend.rpc.rpc<{ username: string }[]>('my_profile');
+        const rows =
+          await backend.rpc.rpc<
+            { username: string; full_name: string | null; phone: string | null }[]
+          >('my_profile');
         username = rows?.[0]?.username ?? '';
+        fullName = rows?.[0]?.full_name ?? '';
+        phone = rows?.[0]?.phone ?? '';
       } catch {
         // The profile is read again on the next start; the account still works without the label.
       }
       if (alive.current)
         setState({
           status: 'signedIn',
-          user: { ...u, username },
+          user: { ...u, username, fullName, phone },
           cameFromSignIn: sawSignIn.current,
         });
     },
@@ -120,8 +132,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       return backend;
     };
     return {
-      async signUp(email, password, username) {
-        const r = await need().auth.signUp(email, password, username);
+      async signUp(email, password, username, profile) {
+        const r = await need().auth.signUp(email, password, username, profile);
         if (r === 'verification-sent') return 'verification-sent';
         await establish(r);
         return 'signed-in';
@@ -142,6 +154,17 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         await establish(await need().auth.resetPassword(email, code, newPassword));
       },
       usernameAvailable: (username) => need().auth.usernameAvailable(username),
+      async updateContact(fullName, phone) {
+        await need().rpc.rpc('update_my_contact', { p_full_name: fullName, p_phone: phone });
+        const name = fullName.trim();
+        const number = phone.trim();
+        // Same signed-in state, with the new details (no restart of the app's screens).
+        setState((prev) =>
+          prev.status === 'signedIn'
+            ? { ...prev, user: { ...prev.user, fullName: name, phone: number } }
+            : prev,
+        );
+      },
     };
   }, [backend, establish]);
 

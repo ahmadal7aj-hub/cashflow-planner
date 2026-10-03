@@ -5,6 +5,7 @@ import path from 'node:path';
 import { Client, types as pgTypes } from 'pg';
 
 import { RPC_SHAPES, type RpcClient, type RpcName } from '../backend/contract';
+import type { SignUpProfile } from '../backend/types';
 
 /**
  * A real Postgres for tests (PGlite served over a local socket) with the real migrations applied and a small
@@ -26,7 +27,7 @@ export interface TestDb {
   /** Run SQL as the database owner (bypasses Row Level Security). */
   admin<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<T[]>;
   /** Create an auth user (this fires the profile trigger) and return a session acting as them. */
-  signUp(email: string, username: string): Promise<UserSession>;
+  signUp(email: string, username: string, profile?: SignUpProfile): Promise<UserSession>;
   /** A session acting as the signed-in user with this id, or as an anonymous visitor when null. */
   as(userId: string | null): UserSession;
   close(): Promise<void>;
@@ -150,10 +151,10 @@ export async function startTestDb(): Promise<TestDb> {
   return {
     admin,
     as,
-    async signUp(email: string, username: string) {
+    async signUp(email: string, username: string, profile?: SignUpProfile) {
       const rows = await admin<{ id: string }>(
         'insert into auth.users (email, raw_user_meta_data) values ($1, $2::jsonb) returning id',
-        [email, JSON.stringify({ username })],
+        [email, JSON.stringify({ username, full_name: profile?.fullName, phone: profile?.phone })],
       );
       return as(rows[0]!.id);
     },

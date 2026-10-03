@@ -4,17 +4,17 @@
 
 ## Layers
 
-| Layer | What it covers | Where |
-|---|---|---|
-| **Unit (domain)** | Money, dates and months, effective-dated amounts, occurrences, budget versus actual, the savings engine (month close, corrections, projection), dashboard ranges, saving and loading, forecast, reminders, investments, sharing preview | `mobile/src/domain/*.test.ts` |
-| **Edge cases** | Zero income, shortfall (negative raw safe-to-spend), payday today, commitments larger than balance, one-off items, caps and limits, rounding boundaries | same |
-| **Component** | Charts, accessible labels, table view, shortfall state | `mobile/src/components/charts.test.tsx` |
-| **Journey / integration** | Whole flows through the real navigator: empty states and Add item forms for a new user, the groceries and petrol examples, both deletion methods with Cancel, saving and loading, savings reductions, every date preset and custom range, Period versus Total savings, export | `mobile/src/__tests__/*.test.tsx` |
-| **Provider** | Saving, loading, restart, month rollover and storage safety without any screens | `mobile/src/__tests__/persistence.test.tsx`, helper `src/testing/provider.tsx` |
-| **Tooling** | The dependency audit gate and the weekly exception watch | `mobile/scripts/*.test.js` |
-| **Database / RLS** | The real SQL (migrations in `supabase/`) runs in PostgreSQL (PGlite, over a local socket) with `auth.uid()` simulated. Cross-user denial tests for every table and function, the shared-savings examples, history rules, and the rollback script | `mobile/src/backend/*.db.test.ts` |
-| **Accounts end to end** | The whole app, with sign-in, groups and sharing, against that database. Two accounts on one phone, offline and live updates, every date preset | `mobile/src/__tests__/auth.test.tsx`, `sharedSavings*.test.tsx` |
-| **E2E on a device** | Maestro smoke flow written, **never run** | `mobile/.maestro/smoke.yaml` |
+| Layer                     | What it covers                                                                                                                                                                                                                                                                | Where                                                                          |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| **Unit (domain)**         | Money, dates and months, effective-dated amounts, occurrences, budget versus actual, the savings engine (month close, corrections, projection), dashboard ranges, saving and loading, forecast, reminders, investments, sharing preview                                       | `mobile/src/domain/*.test.ts`                                                  |
+| **Edge cases**            | Zero income, shortfall (negative raw safe-to-spend), payday today, commitments larger than balance, one-off items, caps and limits, rounding boundaries                                                                                                                       | same                                                                           |
+| **Component**             | Charts, accessible labels, table view, shortfall state                                                                                                                                                                                                                        | `mobile/src/components/charts.test.tsx`                                        |
+| **Journey / integration** | Whole flows through the real navigator: empty states and Add item forms for a new user, the groceries and petrol examples, both deletion methods with Cancel, saving and loading, savings reductions, every date preset and custom range, Period versus Total savings, export | `mobile/src/__tests__/*.test.tsx`                                              |
+| **Provider**              | Saving, loading, restart, month rollover and storage safety without any screens                                                                                                                                                                                               | `mobile/src/__tests__/persistence.test.tsx`, helper `src/testing/provider.tsx` |
+| **Tooling**               | The dependency audit gate and the weekly exception watch                                                                                                                                                                                                                      | `mobile/scripts/*.test.js`                                                     |
+| **Database / RLS**        | The real SQL (migrations in `supabase/`) runs in PostgreSQL (PGlite, over a local socket) with `auth.uid()` simulated. Cross-user denial tests for every table and function, the shared-savings examples, history rules, and the rollback script                              | `mobile/src/backend/*.db.test.ts`                                              |
+| **Accounts end to end**   | The whole app, with sign-in, groups and sharing, against that database. Two accounts on one phone, offline and live updates, every date preset                                                                                                                                | `mobile/src/__tests__/auth.test.tsx`, `sharedSavings*.test.tsx`                |
+| **E2E on a device**       | Maestro smoke flow written, **never run**                                                                                                                                                                                                                                     | `mobile/.maestro/smoke.yaml`                                                   |
 
 Every hand-calculated number in the tests is explained in a comment (for example safe to spend
 12,000 - 7,080 - 1,200 - 300 - 1,650 = 1,770). If a sample number changes, update the tests, the walkthrough
@@ -24,13 +24,13 @@ script and the Maestro flow together.
 
 Run in `mobile/` (on Windows PowerShell use `npm.cmd` if scripts are blocked):
 
-| Command | Purpose |
-|---|---|
-| `npm run check` | format check + lint + typecheck + tests with coverage (what CI runs) |
-| `npm test` | Jest only |
-| `npm run test:ci` | Jest with coverage |
-| `node scripts/audit-gate.js` | The dependency audit gate (high / critical block; approved exceptions are printed) |
-| `node scripts/exception-watch.js` | Prints a message only if an exception needs attention |
+| Command                           | Purpose                                                                            |
+| --------------------------------- | ---------------------------------------------------------------------------------- |
+| `npm run check`                   | format check + lint + typecheck + tests with coverage (what CI runs)               |
+| `npm test`                        | Jest only                                                                          |
+| `npm run test:ci`                 | Jest with coverage                                                                 |
+| `node scripts/audit-gate.js`      | The dependency audit gate (high / critical block; approved exceptions are printed) |
+| `node scripts/exception-watch.js` | Prints a message only if an exception needs attention                              |
 
 CI (`.github/workflows/ci.yml`) additionally runs `expo-doctor`, a JS bundle export and dependency review.
 CodeQL runs in `codeql.yml`. Note: `expo-doctor` makes network calls and has failed once from a transient

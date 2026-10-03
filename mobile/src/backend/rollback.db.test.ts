@@ -53,3 +53,30 @@ describe('the backend can be removed again', () => {
     await expect(db.admin(script)).resolves.toBeDefined();
   });
 });
+
+describe('the profile name and phone migration can be undone on its own', () => {
+  it('removes the columns and the new function, restores the old profile shape, and keeps everything else', async () => {
+    const db2 = await startTestDb();
+    try {
+      const alice = await db2.signUp('alice@example.com', 'alice', { fullName: 'Alice' });
+      await alice.rpc<string>('create_group', { p_name: 'Home' });
+      const script = fs.readFileSync(
+        path.resolve(__dirname, '../../../supabase/rollback/20261004000000_down.sql'),
+        'utf8',
+      );
+      await db2.admin(script);
+      const cols = await db2.admin<{ column_name: string }>(
+        "select column_name from information_schema.columns where table_name = 'profiles'",
+      );
+      expect(cols.map((c) => c.column_name).sort()).toEqual(['created_at', 'id', 'username']);
+      const me = await alice.rpc<Record<string, unknown>[]>('my_profile');
+      expect(Object.keys(me[0]!).sort()).toEqual(['email', 'id', 'username']);
+      expect(await alice.rpc('list_my_groups')).toHaveLength(1);
+      // Registration still works with the old trigger, even if a newer app sends a name.
+      await db2.signUp('bob@example.com', 'bob', { fullName: 'Bob' });
+      await expect(db2.admin(script)).resolves.toBeDefined(); // harmless to run twice
+    } finally {
+      await db2.close();
+    }
+  }, 120_000);
+});

@@ -1,5 +1,11 @@
 import type { RpcClient } from './contract';
 
+/** Optional details given at sign-up. They are shown to the owner only and are not used to find people. */
+export interface SignUpProfile {
+  fullName?: string;
+  phone?: string;
+}
+
 export interface AuthUser {
   id: string;
   email: string;
@@ -36,6 +42,7 @@ export interface AuthService {
     email: string,
     password: string,
     username: string,
+    profile?: SignUpProfile,
   ): Promise<AuthUser | 'verification-sent'>;
   verifySignUp(email: string, code: string): Promise<AuthUser>;
   resendSignUpCode(email: string): Promise<void>;

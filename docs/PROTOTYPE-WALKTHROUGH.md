@@ -59,15 +59,15 @@ that is useful for me. Please say what you are thinking out loud."
 
 ## Tasks (read one at a time; do not help)
 
-| Task | Say | Watch for | Success |
-|---|---|---|---|
-| T1 | "Add your salary and a budget for groceries." | Finds Add item; picks a category; understands the date | Both appear as cards |
-| T2 | "You bought groceries for 300 today. Record it and tell me how much is left." | Finds Actual spending; reads Remaining | States the remaining balance |
-| T3 | "Is any category over budget?" | Reads the red status and "Over by" | Names the category |
-| T4 | "How much have you saved so far, and how much did you add this month?" | Total savings versus This month's savings | Tells the two apart |
-| T5 | "Show me last month." | The range chips | Dashboard shows last month's dates |
-| T6 | "Remove a bill you do not have." | Swipe or open the item | Confirms, then it is gone |
-| T7 | "Could you afford a AED 3,000 laptop right now?" | The what-if on the Dashboard | States the outcome; knows the plan is unchanged |
+| Task | Say                                                                           | Watch for                                              | Success                                         |
+| ---- | ----------------------------------------------------------------------------- | ------------------------------------------------------ | ----------------------------------------------- |
+| T1   | "Add your salary and a budget for groceries."                                 | Finds Add item; picks a category; understands the date | Both appear as cards                            |
+| T2   | "You bought groceries for 300 today. Record it and tell me how much is left." | Finds Actual spending; reads Remaining                 | States the remaining balance                    |
+| T3   | "Is any category over budget?"                                                | Reads the red status and "Over by"                     | Names the category                              |
+| T4   | "How much have you saved so far, and how much did you add this month?"        | Total savings versus This month's savings              | Tells the two apart                             |
+| T5   | "Show me last month."                                                         | The range chips                                        | Dashboard shows last month's dates              |
+| T6   | "Remove a bill you do not have."                                              | Swipe or open the item                                 | Confirms, then it is gone                       |
+| T7   | "Could you afford a AED 3,000 laptop right now?"                              | The what-if on the Dashboard                           | States the outcome; knows the plan is unchanged |
 
 ## Follow-up questions (after tasks)
 

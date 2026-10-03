@@ -107,8 +107,13 @@ export function createDevBackend(
       );
       return r['data'] === true;
     },
-    signUp: async (email, password, username) => {
-      await call('POST', '/auth/signup', { email, password, username }, false);
+    signUp: async (email, password, username, profile) => {
+      await call(
+        'POST',
+        '/auth/signup',
+        { email, password, username, fullName: profile?.fullName, phone: profile?.phone },
+        false,
+      );
       return 'verification-sent';
     },
     verifySignUp: (email, code) => session('/auth/verify', { email, code }),

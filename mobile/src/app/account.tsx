@@ -2,7 +2,14 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Share } from 'react-native';
 
+import { Field } from '../components/forms';
 import { Body, Button, Card, Heading, Screen } from '../components/ui';
+import {
+  nameProblem,
+  normalizeName,
+  normalizePhone,
+  phoneProblem,
+} from '../domain/accountValidation';
 import { t } from '../i18n/strings';
 import { useAccount } from '../state/AccountContext';
 
@@ -11,6 +18,15 @@ export default function Account() {
   const account = useAccount();
   const [asking, setAsking] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [nameInput, setNameInput] = useState('');
+  const [phoneInput, setPhoneInput] = useState('');
+  const [contactErrors, setContactErrors] = useState<{
+    name?: string;
+    phone?: string;
+    form?: string;
+  }>({});
+  const [saved, setSaved] = useState(false);
 
   if (account.status !== 'signedIn') {
     return (
@@ -22,6 +38,31 @@ export default function Account() {
       </Screen>
     );
   }
+
+  const startEditing = () => {
+    if (account.status !== 'signedIn') return;
+    setNameInput(account.user.fullName);
+    setPhoneInput(account.user.phone);
+    setContactErrors({});
+    setSaved(false);
+    setEditing(true);
+  };
+
+  const saveContact = async () => {
+    const next = {
+      ...(nameProblem(nameInput) ? { name: t.auth.errors.nameLength } : {}),
+      ...(phoneProblem(phoneInput) ? { phone: t.auth.errors.phoneInvalid } : {}),
+    };
+    setContactErrors(next);
+    if (Object.keys(next).length > 0) return;
+    try {
+      await account.updateContact(normalizeName(nameInput), normalizePhone(phoneInput));
+      setEditing(false);
+      setSaved(true);
+    } catch {
+      setContactErrors({ form: t.account.contactFailed });
+    }
+  };
 
   const signOut = async () => {
     try {
@@ -41,7 +82,49 @@ export default function Account() {
         <Body muted>{t.account.emailLabel}</Body>
         <Body testID="profile-email">{account.user.email}</Body>
         <Body muted>{t.account.usernameHelp}</Body>
-        <Body muted>{t.account.noNamePhone}</Body>
+        {editing ? (
+          <>
+            <Field
+              label={t.auth.fullName}
+              testID="profile-edit-name"
+              value={nameInput}
+              onChangeText={setNameInput}
+              error={contactErrors.name}
+            />
+            <Field
+              label={t.auth.phone}
+              hint={t.auth.phoneHint}
+              testID="profile-edit-phone"
+              value={phoneInput}
+              onChangeText={setPhoneInput}
+              error={contactErrors.phone}
+              keyboardType="phone-pad"
+            />
+            {contactErrors.form ? <Body>{contactErrors.form}</Body> : null}
+            <Button label={t.account.saveContact} onPress={saveContact} testID="profile-save" />
+            <Button
+              label={t.account.cancelContact}
+              variant="secondary"
+              onPress={() => setEditing(false)}
+              testID="profile-cancel"
+            />
+          </>
+        ) : (
+          <>
+            <Body muted>{t.account.nameLabel}</Body>
+            <Body testID="profile-name">{account.user.fullName || t.account.notSet}</Body>
+            <Body muted>{t.account.phoneLabel}</Body>
+            <Body testID="profile-phone">{account.user.phone || t.account.notSet}</Body>
+            <Body muted>{t.account.contactNote}</Body>
+            {saved ? <Body testID="profile-saved">{t.account.contactSaved}</Body> : null}
+            <Button
+              label={t.account.editContact}
+              variant="secondary"
+              onPress={startEditing}
+              testID="profile-edit"
+            />
+          </>
+        )}
         {account.user.username ? (
           <Button
             label={t.account.shareUsername}

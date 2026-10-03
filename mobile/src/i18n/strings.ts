@@ -536,6 +536,9 @@ export const t = {
     registerTitle: 'Create your account',
     registerIntro:
       'Pick a unique username and use your own email address. Your income, budgets, spending and personal savings stay private to you.',
+    fullName: 'Name (optional)',
+    phone: 'Phone number (optional)',
+    phoneHint: 'Only you see it. It is not used to find or invite people.',
     username: 'Username',
     usernameHint: '3 to 20 letters, numbers or underscores. Other people use it to invite you.',
     email: 'Email address',
@@ -568,6 +571,8 @@ export const t = {
       usernameEmpty: 'Choose a username.',
       usernameLength: 'A username has 3 to 20 characters.',
       usernameCharacters: 'Use only letters, numbers and underscores.',
+      nameLength: 'Use at most 80 characters.',
+      phoneInvalid: 'Use digits only, with an optional + at the start (6 to 20 characters).',
       usernameTaken: 'That username is taken. Try another.',
       emailEmpty: 'Enter your email address.',
       emailInvalid: 'That does not look like an email address.',
@@ -614,8 +619,16 @@ export const t = {
     shareUsername: 'Send my username',
     shareMessage: (username: string) =>
       `Invite me to a group in the Cash-Flow Planner with my username: ${username}`,
-    noNamePhone:
-      'Name and phone number are not collected yet. Your username is what other people use to find you.',
+    nameLabel: 'Name',
+    phoneLabel: 'Phone number',
+    notSet: 'Not set',
+    contactNote:
+      'Your name and phone are only shown to you. People find you by your username or email, and nothing is shared until you accept an invitation.',
+    editContact: 'Edit name and phone',
+    saveContact: 'Save',
+    cancelContact: 'Cancel',
+    contactSaved: 'Saved.',
+    contactFailed: 'Could not save. Check your connection and try again.',
   },
 
   groupsPage: {
