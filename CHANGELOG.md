@@ -27,3 +27,10 @@ User-visible changes per release. Format: Keep a Changelog.
 - Investments: track type of investment (stocks, funds and ETFs, gold, crypto, real estate, sukuk/bonds/deposits, business, other), amount put in, what it is worth now, profit or loss, income received (dividends, rent, interest) and a planned monthly contribution that is set aside in the forecast. New Investments screen with allocation by type, summary card on the Savings tab, and investment income counted in the Income tab. Tracking only, not advice.
 - New navy and gold theme with light and dark modes (match phone, light or dark in Settings), icons on the tab bar and buttons, a navy hero card for Safe to spend, a redesigned welcome screen, and softer cards. Every text colour pair is checked for WCAG 4.5:1 contrast and the chart colours were validated for both modes.
 - Documentation refreshed for the dates, reminders, savings balance, investments and theme work; Jest per-test timeout raised to 20 seconds.
+- Accounts and shared savings (ADR 0006): register, confirm by email code, sign in, reset password, groups by invitation, share a saving with a group, a Shared dashboard with combined totals and the same date filters, privacy enforced by row level security. Checkpoints and tested rollback scripts for every database step.
+- Local test server (`npm run dev:server`) so two accounts can be tried on phones without a Supabase project.
+- Header person icon and My profile (username, email, optional name and phone, send my username).
+- Share this saving: Keep private or Shared; Shared picks a group or someone new by username or email, who must accept before seeing anything.
+- One Dashboards tab (Overview, Income, Budget, Spending, Savings, Shared), chart-first, with one set of date buttons for all of them.
+- Delete my account (server data and this account's records on the phone), the sign-in session in the phone's secure storage, and optional phone reminders for bills (no amounts in the text).
+- Handover, privacy map, backend, rollback and testing documents refreshed.

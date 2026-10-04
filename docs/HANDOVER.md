@@ -1,6 +1,6 @@
 # Project handover
 
-**Snapshot date:** 2026-10-03 · **Stage:** Validation / pre-build (BRD) · **App:** working prototype with optional accounts and shared savings
+**Snapshot date:** 2026-10-04 · **Stage:** Validation / pre-build (BRD) · **App:** working prototype with accounts, shared savings, chart dashboards and phone reminders (accounts need a backend the owner has not created yet)
 
 This is the one document to read to pick the project up cold. It says what exists, what is done, what is
 not, and exactly what to do next. Anything that needs a person's decision is marked **OWNER**.
@@ -12,7 +12,7 @@ not, and exactly what to do next. Anything that needs a person's decision is mar
 
 ## 0. Start here next session
 
-**State (2026-10-03):** `main` has everything built so far: the app with saving on the phone, the adjustable what-if, and
+**State (2026-10-04):** `main` has everything built so far: the app with saving on the phone, the adjustable what-if, and
 accounts with groups, shared savings and chart dashboards (see "What was added since the first handover" below). CI is green and the earlier security block is cleared
 (an owner-approved exception for the `braces` advisory, expiring **2026-11-01**, next to the `node-forge` one).
 **Nothing in the app has been tried on a real phone by the assistant, and the backend has never run against a live
@@ -45,9 +45,12 @@ Supabase project.**
 ### Not done yet (and why)
 
 - **Inviting someone with no account yet:** needs the real email setup (Supabase SMTP) to send the invitation.
-- **Weekly or monthly summary emails:** same dependency.
+- **Weekly or monthly summary emails:** same dependency (a scheduled job and an email sender).
 - **Encrypting the saved plan on the phone:** only the sign-in session is in secure storage; the records are not encrypted.
-- **Looked at on a real phone by the assistant:** never. The charts and sharing flow are tested by automated tests only.
+- **Two-step login, a privacy review for UAE law, an email sender in the product's own name, abuse limits.**
+- **Looked at on a real phone by the assistant:** never. The charts, sharing flow, profile, account deletion and phone
+  reminders are covered by automated tests only. The owner has seen the chart dashboards and liked them.
+- **Real Supabase project:** never created, so the backend has only run against the embedded test database.
 
 ### Ask the owner first
 
@@ -59,16 +62,19 @@ Supabase project.**
 
 ### Then, in this order
 
-| #   | Next step                                                   | Owner                    | Notes                                                                                                                                                 |
-| --- | ----------------------------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1   | **Create the Supabase project and run the two-phone check** | Owner                    | `docs/BACKEND-SETUP.md`. Until then accounts are switched off and the app runs on its own                                                             |
-| 2   | **Fix what the live backend and real phones show**          | Claude                   | Likely areas: email codes, rate limits, Realtime delivery, `supabase-js` on a phone, swipe feel                                                       |
-| 3   | **Before any real users**                                   | Both                     | Encrypt the saved plan, 2FA, own SMTP sender, UAE PDPL review and privacy notice, abuse limits (account deletion and secure session storage are done) |
-| 4   | **Check phone reminders on a real phone**                   | Owner                    | Settings, Phone reminders, then set a bill reminder for tomorrow and see it arrive at 9:00                                                            |
-| 5   | **Interviews** (five first, then 20 to 30)                  | Owner                    | `docs/INTERVIEW-ONE-PAGER.md`, `docs/PROTOTYPE-WALKTHROUGH.md`; private notes only in `docs/private/`                                                 |
-| 6   | **Security exception window**                               | Owner decides            | Renew-or-expire decision around 2026-10-26; check `npm view braces version` and `node-forge`                                                          |
-| 7   | **Run the Maestro flow** on a USB-connected Android phone   | Owner provides the phone | Written and updated, never run. It replaces saved data, so use a test phone                                                                           |
-| 8   | **Ideas, only if interviews support them**                  | Both                     | Import from bank statements, multi-currency, email summaries (weekly or monthly), personal records on a second phone                                  |
+| #   | Next step                                                    | Owner                    | Notes                                                                                                                                                                                                                                                                  |
+| --- | ------------------------------------------------------------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Reset the test server and reload the app**                 | Owner                    | Stop the server, delete `mobile\.dev-data`, `npm.cmd run dev:server`, then `npm.cmd start -- --clear`. This picks up the new packages (`expo-secure-store`, `expo-notifications`) and the new database functions. Test accounts are lost; register again (code 123456) |
+| 2   | **Test sharing with two accounts**                           | Owner                    | `docs/TEST-WITH-TWO-ACCOUNTS.md`. Add a saving, choose Shared, type the other username or email, accept, compare the Shared chart on both. Send screenshots of anything wrong                                                                                          |
+| 3   | **Check phone reminders on a phone**                         | Owner                    | Settings, Phone reminders, then give a bill a reminder for tomorrow and see whether it arrives at 9:00. Tell Claude if Expo Go blocks it                                                                                                                               |
+| 4   | **Create the Supabase project and run the three migrations** | Owner                    | `docs/BACKEND-SETUP.md`. Run `supabase/migrations/` in file-name order. Until then the app uses the local test server or runs on its own                                                                                                                               |
+| 5   | **Fix what the live backend and real phones show**           | Claude                   | Likely: email codes and rate limits, Realtime delivery, `supabase-js` on a phone, chart layout on small screens, swipe feel                                                                                                                                            |
+| 6   | **Build the email features**                                 | Claude, after step 4     | Invite someone with no account yet, weekly and monthly summary emails                                                                                                                                                                                                  |
+| 7   | **Before any real users**                                    | Both                     | Encrypt the saved plan, 2FA, own email sender, UAE PDPL review and privacy notice, abuse limits                                                                                                                                                                        |
+| 8   | **Interviews** (five first, then 20 to 30)                   | Owner                    | `docs/INTERVIEW-ONE-PAGER.md`, `docs/PROTOTYPE-WALKTHROUGH.md`; private notes only in `docs/private/`                                                                                                                                                                  |
+| 9   | **Security exception window**                                | Owner decides            | Renew-or-expire decision around 2026-10-26; check `npm view braces version` and `node-forge`                                                                                                                                                                           |
+| 10  | **Run the Maestro flow** on a USB-connected Android phone    | Owner provides the phone | Written, never run. It replaces saved data, so use a test phone. It predates the Dashboards tab and sign-in, so it needs updating first                                                                                                                                |
+| 11  | **Ideas, only if interviews support them**                   | Both                     | Import from bank statements, multi-currency, personal records on a second phone                                                                                                                                                                                        |
 
 ### Ready-to-paste prompt to resume
 
@@ -86,6 +92,8 @@ Supabase project.**
 - **Tests:** `openApp` for screens, `openAccountsApp` and `accountScenario` for accounts, `startTestDb` for real-SQL tests.
   The router test library can carry a previous test's route into the next one after long journeys: keep those in their own file.
 - **Money:** integer fils only; all maths in `mobile/src/domain/`; the database computes shared totals (`group_savings_summary`).
+- **Formatting:** CI runs `prettier --check .` over the whole `mobile/` folder (including `app.json`); run `node node_modules/prettier/bin/prettier.cjs --check .` before pushing, not just `src`.
+- **Test tips:** after a sign-in the app returns to the welcome page on a timer, so tests call `settle(db)` before navigating; `toHaveTextContent("text")` matches the whole text, use a regex for part of it.
 - **Checkpoints and rollback:** `docs/ROLLBACK.md` (tags `checkpoint/pre-restructure-2026-10-03`, `checkpoint/pre-accounts-2026-10-03`, `checkpoint/pre-profile-fields-2026-10-03`, `checkpoint/pre-delete-account-2026-10-03`).
 - **Public repo:** never commit the BRD/PRD, interview notes, secrets or the Supabase keys (`.env.local` is git-ignored).
 
@@ -95,15 +103,16 @@ Supabase project.**
 
 - **What it is:** a mobile-first cash-flow planner for UAE residents. The headline answer is **"how much can I safely
   spend until payday?"**, with every number explainable. It is not primarily an expense tracker.
-- **Where we are:** a **working prototype** runs in Expo Go with five pages (Dashboard, Income, Savings planning,
-  Budgeting, Actual spending). A new user starts empty; what is entered is **saved on the phone only** (nothing is
-  sent; ADR 0005). Sample data is only for demos (Settings, Load sample data). There is no backend, no accounts and no
-  real forecast engine yet. **To undo the restructure see `docs/ROLLBACK.md`** (checkpoint tag
-  `checkpoint/pre-restructure-2026-10-03`). **Accounts and shared savings** (ADR 0006) are built behind a Supabase project the
-  owner still has to create (`docs/BACKEND-SETUP.md`); checkpoint `checkpoint/pre-accounts-2026-10-03`.
+- **Where we are:** a **working prototype** runs in Expo Go. Tabs: **Dashboards** (Overview, Income, Budget, Spending,
+  Savings and, once something is shared, Shared, each with charts), Income, Savings planning, Budgeting and Actual
+  spending. A new user starts empty. **Personal records are saved on the phone only** (ADR 0005); only savings the user
+  chooses to share go to a server (ADR 0006, hybrid). Accounts, groups, sharing by username or email, a profile, account
+  deletion and phone reminders are built. **The backend has never run on a real Supabase project**: the owner still has to
+  create one (`docs/BACKEND-SETUP.md`); meanwhile the local test server (`docs/TEST-WITH-TWO-ACCOUNTS.md`) runs the same
+  database rules on the computer. To undo any step see `docs/ROLLBACK.md` and the checkpoint tags listed in section 0.
 - **The gate:** the BRD says **do not build Phase 2 (accounts, database, real engine) until 20 to 30 interviews show
-  recurring demand.** Those interviews have **not started**. That is the single most important next step.
-- **Engineering health:** all work went through pull requests with CI. `main` is protected. 670 automated tests pass.
+  recurring demand.** Accounts and sharing were built ahead of the gate at the owner's request (ADR 0006). The interviews have **not started**, so demand for the product is still unproven. That remains the most important next step for the business.
+- **Engineering health:** all work went through pull requests with CI. `main` is protected. 680 automated tests in 56 suites pass; 56 pull requests have been merged.
 - **One time-limited risk:** a security exception (node-forge) **expires 2026-11-01** (section 7).
 
 ---
@@ -127,18 +136,18 @@ Supabase project.**
 
 Five pages plus supporting screens. All numbers are hand-verified in tests.
 
-| Area                                  | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Dashboard**                         | Income, spending against budget and savings for a date range. Default: the current calendar month. Presets: current month, last week, last month, last quarter, last year, and a typed custom range. A toggle shows **period savings** (net added in the range) or **total savings** (cumulative balance at the end of the range, or "not available" before the balance began). The safe-to-spend card, what-if and reminders appear when a spendable balance is set                         |
-| **Income**                            | Empty for a new user, with an Add item button. Category, name, amount (zero allowed), frequency, next payment date and predictability. Edit, delete, or swipe left to delete                                                                                                                                                                                                                                                                                                                 |
-| **Savings planning**                  | Existing savings with its date, a monthly target (a plan), a projection for the unfinished month (labelled projected), add and take out money (dated), the month-end results, goals, and an Investments screen. Overspending beyond the plan reduces savings (see ARCHITECTURE)                                                                                                                                                                                                              |
-| **Budgeting**                         | **Bills and fixed expenses** (due date, reminder, Mark as paid) and **Everyday budgets** (monthly amount per category). Empty for a new user. Every UAE category stays in the forms, including Other bill                                                                                                                                                                                                                                                                                    |
-| **Actual spending**                   | Dated purchases per category against the monthly budget: budget, spent and remaining, negative shown as overspending, unbudgeted spending labelled. Month navigation                                                                                                                                                                                                                                                                                                                         |
-| **Saving and history**                | Everything is saved on the device with a backup before any migration. Edits apply from the current month; deleting never removes past spending; each finished month is closed once; export a copy from Settings                                                                                                                                                                                                                                                                              |
-| **Investments** (opened from Savings) | Type, amount put in, worth now, profit or loss, income, allocation, planned monthly contribution. Tracking only, not advice                                                                                                                                                                                                                                                                                                                                                                  |
-| **Accounts and Shared Savings**       | Register (unique username and email), verify by code, sign in, reset password, sign out. Groups of two or more by invitation (accept or decline). Share a saving with one group; a **Shared Savings** dashboard in every member's account with the combined total, each member's contribution, entry history, period or total savings and the same date filters. Privacy enforced by the database. Needs a Supabase project: `docs/BACKEND-SETUP.md`, how it works: `docs/SHARED-SAVINGS.md` |
-| **Due dates and reminders**           | Calendar date picker; bill reminders on the day, 1 day, 3 days, 1 week, 2 weeks before, or an exact date. In-app only; no phone notifications yet                                                                                                                                                                                                                                                                                                                                            |
-| **Look and feel**                     | Navy and gold theme in light and dark mode, a navy hero card for Safe to spend, icons, a welcome screen                                                                                                                                                                                                                                                                                                                                                                                      |
+| Area                                  | What it does                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Dashboards**                        | One tab with a button row: **Overview, Income, Budget, Spending, Savings** and **Shared** (only once something is shared). Each opens with charts then a Details card: money in, spent and saved; budget used with a percentage; month by month columns; savings balance per month; budget and spending by category; income by source. One set of date buttons (this month, last week, last month, last quarter, last year, typed custom range) applies to every section. The Overview keeps the old summary cards, the safe-to-spend card, what-if and reminders                                                                                                             |
+| **Income**                            | Empty for a new user, with an Add item button. Category, name, amount (zero allowed), frequency, next payment date and predictability. Edit, delete, or swipe left to delete                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| **Savings planning**                  | Existing savings with its date, a monthly target (a plan), a projection for the unfinished month (labelled projected), add and take out money (dated), the month-end results, goals, and an Investments screen. Overspending beyond the plan reduces savings (see ARCHITECTURE)                                                                                                                                                                                                                                                                                                                                                                                               |
+| **Budgeting**                         | **Bills and fixed expenses** (due date, reminder, Mark as paid) and **Everyday budgets** (monthly amount per category). Empty for a new user. Every UAE category stays in the forms, including Other bill                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| **Actual spending**                   | Dated purchases per category against the monthly budget: budget, spent and remaining, negative shown as overspending, unbudgeted spending labelled. Month navigation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **Saving and history**                | Everything is saved on the device with a backup before any migration. Edits apply from the current month; deleting never removes past spending; each finished month is closed once; export a copy from Settings                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| **Investments** (opened from Savings) | Type, amount put in, worth now, profit or loss, income, allocation, planned monthly contribution. Tracking only, not advice                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| **Accounts and Shared Savings**       | Register with a unique username and email (optional name and phone), confirm by emailed code, sign in, reset password, sign out, and **delete my account**. A person icon at the top right opens **My profile** (username, email, name, phone, send my username). On Add money, Take out and Edit saving choose **Keep private** or **Shared**: pick a group or **Someone new** (username or email; the app starts a group, invites them and they see it only after accepting). The **Shared** dashboard shows the combined total, each member's contribution, history and the same date filters. Privacy is enforced by the database. How it works: `docs/SHARED-SAVINGS.md` |
+| **Due dates and reminders**           | Calendar date picker; bill reminders on the day, 1 day, 3 days, 1 week, 2 weeks before, or an exact date, shown in the app. **Phone reminders** (Settings, off by default): a notification at 9:00 on the reminder day naming the bill and due date, never an amount                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **Look and feel**                     | Navy and gold theme in light and dark mode, a navy hero card for Safe to spend, icons, a welcome screen                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 Design rules baked in: money as integer fils; centralised strings and design tokens; written status and symbols,
 never colour alone; 48px touch targets; accessible error messages; no shame-based wording; privacy-minimised
@@ -146,8 +155,10 @@ analytics (allow-listed events only, no financial values).
 
 ### Quality and security
 
-- **475 tests in 26 suites:** domain maths (including dates, reminders, savings balance and investments), edit and
-  journey flows through every screen, charts, analytics privacy, the audit gate and the exception watch.
+- **680 tests in 56 suites:** domain maths (dates, reminders, savings, investments, chart data), edit and journey flows through every
+  screen, the dashboards, accounts and sharing against a real embedded database with the real row level security,
+  account deletion and rollback scripts, the local test server over HTTP, secure storage, notifications, analytics privacy,
+  the audit gate and the exception watch.
 - **Theme accessibility:** every text and background pair in both light and dark mode is tested at WCAG AA (4.5:1),
   and the chart colours were validated for both modes.
 - **A code review found and fixed 10 bugs** (PR #34), the worst being that "payday today" showed the whole salary as
@@ -180,22 +191,22 @@ analytics (allow-listed events only, no financial values).
 
 ## 4. Current technical state
 
-| Topic              | State                                                                                                                 |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| Repo               | `github.com/ahmadal7aj-hub/cashflow-planner` (public), default branch `main`                                          |
-| Branches           | `main` (protected), `staging` (protected, **unused and 23 commits behind**, no deploy pipeline yet)                   |
-| Stack              | React Native + Expo SDK 57, TypeScript strict, Expo Router, npm. No backend yet                                       |
-| Entry points       | `mobile/src/app/` (screens), `mobile/src/domain/` (pure maths), `mobile/src/state/` (in-memory plan)                  |
-| Required PR checks | Quality, Security (dependencies), CodeQL                                                                              |
-| Reviews required   | 0 (single maintainer; GitHub does not let you approve your own PR). Raise to 1 when a second person joins             |
-| Release            | Nothing is deployed or published. No app-store identifiers chosen, deliberately                                       |
-| Machine notes      | Windows. Use `npm.cmd` / `npx.cmd` if PowerShell blocks scripts. Free RAM is low (about 3 GB), so no Android emulator |
+| Topic              | State                                                                                                                                                                                                                   |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Repo               | `github.com/ahmadal7aj-hub/cashflow-planner` (public), default branch `main`                                                                                                                                            |
+| Branches           | `main` (protected), `staging` (protected, **unused and far behind**, no deploy pipeline yet)                                                                                                                            |
+| Stack              | React Native + Expo SDK 57, TypeScript strict, Expo Router, npm. Supabase backend written (never run live) plus a local test server                                                                                     |
+| Entry points       | `mobile/src/app/` (screens), `mobile/src/domain/` (pure maths), `mobile/src/state/` (plan, account and sharing state), `mobile/src/backend/` (Supabase and test-server connectors), `supabase/` (migrations, rollbacks) |
+| Required PR checks | Quality, Security (dependencies), CodeQL                                                                                                                                                                                |
+| Reviews required   | 0 (single maintainer; GitHub does not let you approve your own PR). Raise to 1 when a second person joins                                                                                                               |
+| Release            | Nothing is deployed or published. No app-store identifiers chosen, deliberately                                                                                                                                         |
+| Machine notes      | Windows. Use `npm.cmd` / `npx.cmd` if PowerShell blocks scripts. Free RAM is low (about 3 GB), so no Android emulator                                                                                                   |
 
 See `docs/ARCHITECTURE.md` for the structure and `docs/TESTING.md` for how to run the checks.
 
 ### Known limitations (be honest about these)
 
-- **Prototype.** Data is saved on the phone only, unencrypted by the app (ADR 0005); uninstalling erases it. No sync, no accounts, no sharing between phones.
+- **Prototype.** Personal records are saved on the phone only and are not encrypted by the app (ADR 0005); uninstalling erases them. They are not synced between phones. Only the sign-in session is in the phone's secure storage.
 - **The forecast maths is prototype maths** (`prototypeForecast.ts`, version `prototype-0.1`). The real, versioned,
   property-tested engine is Phase 3.
 - **The gratuity estimate is not legally verified.** It is labelled illustrative and must get a UAE legal check.
@@ -204,9 +215,10 @@ See `docs/ARCHITECTURE.md` for the structure and `docs/TESTING.md` for how to ru
 - **Maestro E2E has never been run.**
 - **Competitor data** is vendor marketing; Monarch prices and Wally's own site were not captured.
 - The planning-horizon rule ("until the day before next payday", capped at 62 days) is an assumption, ADR 0003.
-- **The new theme, calendar, savings balance and investments have not been seen on a screen by Claude.** The logic
-  and contrast are tested; spacing, icon sizes and the hero card proportions need the owner's eyes.
-- **Reminders are in-app only.** A reminder shows when the app is open; nothing alerts the phone yet.
+- **The theme, calendar, savings balance, investments, chart dashboards, profile and sharing screens have not been seen on a screen by Claude.** The logic and contrast are tested; spacing, chart proportions on small phones and text wrapping need the owner's eyes (the owner has seen and liked the chart dashboards).
+- **Phone reminders are tested only with a stand-in for the phone.** Whether Expo Go delivers them on the owner's phone is unchecked. They are scheduled only while the app has been opened since the bill changed; a recurring bill's next reminder is scheduled the next time the app opens.
+- **Sharing by phone number is not possible** (unverified numbers could be spoofed); people are found by username or email. The test server's code is always 123456 and it must never be exposed to the internet.
+- **Inviting an email with no account does nothing and says nothing**, to avoid revealing who is registered. Sending a real invitation email needs the email setup.
 - **The end-of-cycle savings result is an estimate** from a typical month (income minus typical spending), not from
   real transactions, which do not exist in the prototype.
 - **Investment values are typed by the user** (no price feed) and nothing here is investment advice. Investment
@@ -220,15 +232,15 @@ See `docs/ARCHITECTURE.md` for the structure and `docs/TESTING.md` for how to ru
 
 ## 5. Decisions
 
-| Decision                                                                                                        | Status                                                                                        |
-| --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Public repo with private business documents kept outside it                                                     | **Decided**                                                                                   |
-| Stack (Expo, TypeScript, npm; Supabase later)                                                                   | **Decided** (ADR 0002)                                                                        |
-| Planning horizon for the prototype                                                                              | **Decided for the prototype** (ADR 0003); revisit after interviews                            |
-| Eight PRD open decisions (name, horizon, safety buffer, accounts, import, pricing, minimum age, hosting region) | **Proposed, awaiting OWNER** (ADR 0004). Item 5 (import) was revised to "likely table stakes" |
-| **Cloud, on-device, or hybrid data storage**                                                                    | **Open. OWNER.** New, raised by the research. Needed before Phase 2                           |
-| Node-forge security exception                                                                                   | **Approved by OWNER 2026-10-02**, expires 2026-11-01                                          |
-| Product name, pricing, minimum age, data-hosting region                                                         | **Open**, deliberately postponed (legal review, evidence)                                     |
+| Decision                                                                                                        | Status                                                                                                                              |
+| --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Public repo with private business documents kept outside it                                                     | **Decided**                                                                                                                         |
+| Stack (Expo, TypeScript, npm; Supabase later)                                                                   | **Decided** (ADR 0002)                                                                                                              |
+| Planning horizon for the prototype                                                                              | **Decided for the prototype** (ADR 0003); revisit after interviews                                                                  |
+| Eight PRD open decisions (name, horizon, safety buffer, accounts, import, pricing, minimum age, hosting region) | **Proposed, awaiting OWNER** (ADR 0004). Item 5 (import) was revised to "likely table stakes"                                       |
+| **Cloud, on-device, or hybrid data storage**                                                                    | **Decided: hybrid** (ADR 0006). Personal records stay on the phone; only savings the user shares are sent. Revisit after interviews |
+| Node-forge security exception                                                                                   | **Approved by OWNER 2026-10-02**, expires 2026-11-01                                                                                |
+| Product name, pricing, minimum age, data-hosting region                                                         | **Open**, deliberately postponed (legal review, evidence)                                                                           |
 
 ---
 
@@ -238,12 +250,13 @@ Work in this order. Do not skip ahead: Phase 2 is gated on step 4.
 
 ### A. This week (all OWNER)
 
-| #   | Action                                                                                                                                                                                                                             | Done when                                                                              |
-| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| 1   | **Click through the prototype in Expo Go** (follow `docs/PROTOTYPE-WALKTHROUGH.md`). Try the newest features: add a bill with a due date and a reminder, the Other bill, the current savings balance, an investment, and dark mode | You have a list of anything confusing, ugly or wrong, with screen names or screenshots |
-| 2   | **Send that list to Claude**                                                                                                                                                                                                       | Issues are fixed in small PRs                                                          |
-| 3   | **Confirm or change the eight proposals in ADR 0004**, and decide the cloud vs on-device question                                                                                                                                  | Each item marked Accepted or changed                                                   |
-| 3b  | **Tell Claude when the in-app reminders feel right**, then ask for phone notifications (the next planned step)                                                                                                                     | A decision on notifications                                                            |
+| #   | Action                                                                                                                                                                                  | Done when                                                                              |
+| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| 1   | **Reset the test server and reload the app** (section 0, step 1)                                                                                                                        | The app opens with the Dashboards tab                                                  |
+| 2   | **Test sharing with two accounts** (`docs/TEST-WITH-TWO-ACCOUNTS.md`) and click through everything new: profile, Shared choice, Dashboards sections, delete my account, phone reminders | You have a list of anything confusing, ugly or wrong, with screen names or screenshots |
+| 3   | **Send that list to Claude**                                                                                                                                                            | Issues are fixed in small PRs                                                          |
+| 4   | **Create the Supabase project** (`docs/BACKEND-SETUP.md`) and repeat the two-account check on it                                                                                        | Real email codes arrive and two phones see the same shared total                       |
+| 5   | **Confirm or change the eight proposals in ADR 0004**                                                                                                                                   | Each item marked Accepted or changed                                                   |
 
 ### B. Weeks 1 to 3: validation (OWNER)
 
@@ -263,6 +276,8 @@ Work in this order. Do not skip ahead: Phase 2 is gated on step 4.
 | **2026-11-01**       | **node-forge exception expires; CI fails again** unless fixed or renewed | If a fixed version exists, upgrade and delete the exception                                              |
 
 ### D. After the gate (only if interviews show demand): Phase 2 plan
+
+Accounts, groups, sharing, the database with row level security and account deletion were built early, at the owner's request, so steps 1 and part of 4 below are partly done. The rest still waits for the gate.
 
 1. **OWNER:** create Supabase dev, staging and production projects; decide the data-hosting region with UAE counsel.
 2. **OWNER:** obtain a UAE legal read on PDPL, privacy wording, the gratuity estimate and whether any insight reads as advice.
@@ -344,9 +359,10 @@ node scripts/audit-gate.js   # the dependency audit gate
 | Product and requirements (private)                | the BRD and PRD `.docx` files, outside the repo                                                                  |
 | Rules for coding agents                           | `AGENTS.md` and `mobile/AGENTS.md`                                                                               |
 | Architecture, testing, release, security, privacy | `docs/ARCHITECTURE.md`, `TESTING.md`, `RELEASE.md`, `SECURITY.md`, `PRIVACY-DATA-MAP.md`                         |
-| Decisions                                         | `docs/adr/` (0001 to 0004)                                                                                       |
+| Decisions                                         | `docs/adr/` (0001 to 0006)                                                                                       |
 | Research and interviews                           | `docs/VALIDATION.md`, `INTERVIEW-KIT.md`, `INTERVIEW-ONE-PAGER.md`, `PROTOTYPE-WALKTHROUGH.md`, `FEATURE-GAP.md` |
 | Private interview notes                           | `docs/private/` (git-ignored; never commit)                                                                      |
+| Backend, sharing, rollback, local testing         | `docs/BACKEND-SETUP.md`, `SHARED-SAVINGS.md`, `ROLLBACK.md`, `TEST-WITH-TWO-ACCOUNTS.md`, `supabase/`            |
 | Change history                                    | `CHANGELOG.md` and the closed pull requests                                                                      |
 | Security exception                                | `mobile/audit-exceptions.json`, `mobile/scripts/`                                                                |
 
