@@ -1,5 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { Share } from 'react-native';
 
 import type { GroupEvent, GroupMember } from '../../backend/sharingApi';
 import { Field } from '../../components/forms';
@@ -32,6 +33,7 @@ export default function GroupDetail() {
   const [identifier, setIdentifier] = useState('');
   const [identifierError, setIdentifierError] = useState<string | undefined>();
   const [notice, setNotice] = useState<string | null>(null);
+  const [invitedEmail, setInvitedEmail] = useState<string | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
   const [leaving, setLeaving] = useState(false);
   const [removing, setRemoving] = useState<GroupMember | null>(null);
@@ -84,6 +86,7 @@ export default function GroupDetail() {
     try {
       await sharing.invite(id, value);
       setIdentifier('');
+      setInvitedEmail(value.includes('@') ? value : null);
       setNotice(t.groupPage.inviteSent);
       await load();
     } catch (e) {
@@ -170,6 +173,21 @@ export default function GroupDetail() {
             error={identifierError}
           />
           {notice ? <Body testID="invite-notice">{notice}</Body> : null}
+          {invitedEmail ? (
+            <>
+              <Body muted testID="invite-waiting-note">
+                {t.groupPage.inviteWaiting(invitedEmail)}
+              </Body>
+              <Button
+                label={t.groupPage.inviteTell}
+                variant="secondary"
+                onPress={() => {
+                  void Share.share({ message: t.groupPage.inviteMessage(invitedEmail) });
+                }}
+                testID="invite-tell"
+              />
+            </>
+          ) : null}
           <Button label={t.groupPage.inviteButton} onPress={invite} testID="invite-send" />
         </Card>
       ) : null}

@@ -34,3 +34,5 @@ User-visible changes per release. Format: Keep a Changelog.
 - One Dashboards tab (Overview, Income, Budget, Spending, Savings, Shared), chart-first, with one set of date buttons for all of them.
 - Delete my account (server data and this account's records on the phone), the sign-in session in the phone's secure storage, and optional phone reminders for bills (no amounts in the text).
 - Handover, privacy map, backend, rollback and testing documents refreshed.
+- Invite an email address that has no account yet: the invitation waits 30 days (stored as a hash) and appears when they register; Tell them about the app button.
+- `npm run backend:check` to verify a Supabase project is set up correctly; Maestro smoke flow updated for the Dashboards tab.

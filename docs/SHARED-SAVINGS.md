@@ -31,6 +31,9 @@ money, or add another person's contribution to yours.
 - An admin **invites** someone by username or email. The invitation does nothing until the person **accepts**. A pending
   invitee sees only the group name and who invited them; nothing else, and no shared savings.
 - The app never says whether an invited username or email has an account.
+- An invitation to an **email address with no account yet** waits for 30 days (at most 20 per group). It is stored under a
+  hash of the address, never the address itself. When somebody registers with that email it becomes a normal pending
+  invitation, which they still have to accept. The inviter can tap **Tell them about the app** to send a message.
 - A member can **leave** at any time. An admin can **remove** a member or cancel an invitation. Both ask first and explain
   the effect.
 
@@ -71,5 +74,5 @@ kept apart. Every member sees the same numbers, because the totals are worked ou
 ## Limits of this version
 
 - Personal records are on one phone: signing in on a second phone does not bring them over (shared savings do show).
-- No account deletion, no invitations to people who have not registered, no two-factor sign-in.
+- No two-factor sign-in. (Account deletion and invitations to people who have not registered yet are built.)
 - Not yet tested against a live Supabase project (see `BACKEND-SETUP.md`), and not yet reviewed under UAE PDPL.

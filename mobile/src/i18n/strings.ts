@@ -731,6 +731,11 @@ export const t = {
     inviteHint:
       'They must accept before they can see anything. If nobody has that username or email, nothing is sent and we do not say which.',
     inviteButton: 'Send invitation',
+    inviteWaiting: (email: string) =>
+      `If ${email} has no account yet, the invitation waits for 30 days and appears when they register with that address. Nothing is shared until they accept.`,
+    inviteTell: 'Tell them about the app',
+    inviteMessage: (email: string) =>
+      `Join me on the Cash-Flow Planner. Create your account with this email address (${email}) and you will see my invitation.`,
     inviteSent: 'If that person has an account, they have been invited.',
     errorIdentifier: 'Enter a username or an email address.',
     remove: 'Remove',

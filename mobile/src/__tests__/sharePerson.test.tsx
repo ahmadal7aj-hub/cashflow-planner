@@ -1,7 +1,9 @@
+import { Share } from 'react-native';
 import { fireEvent, screen, waitFor } from 'expo-router/testing-library';
 
 import {
   aed,
+  openRoute,
   settle,
   sharedRows,
   start,
@@ -114,5 +116,49 @@ describe('Shared: link a saving to another person by username or email', () => {
     await waitFor(() => expect(getPathname()).toBe('/savings'));
     await settle(w.db);
     expect(await sharedRows(db())).toEqual([]);
+  });
+});
+
+describe('inviting an email address with no account yet', () => {
+  it('says the invitation waits, offers to tell them about the app, and shows nothing extra for a username', async () => {
+    const share = jest.spyOn(Share, 'share').mockResolvedValue({ action: 'sharedAction' });
+    const w = await world(db());
+    const { getPathname } = await start(w, 'alice');
+    await openRoute(getPathname, `/groups/${w.group}`);
+    await settle(w.db);
+
+    await type('invite-identifier', 'carol');
+    await fireEvent.press(screen.getByTestId('invite-send'));
+    await settle(w.db);
+    expect(screen.queryByTestId('invite-waiting-note')).toBeNull();
+
+    await type('invite-identifier', 'newperson@example.com');
+    await fireEvent.press(screen.getByTestId('invite-send'));
+    await settle(w.db);
+    expect(screen.getByTestId('invite-waiting-note').props.children).toMatch(
+      /newperson@example.com has no account yet.*30 days/,
+    );
+    await fireEvent.press(screen.getByTestId('invite-tell'));
+    expect(share).toHaveBeenCalledWith({
+      message: expect.stringContaining('newperson@example.com'),
+    });
+    // Nothing else was created: no group, no member, only a waiting invitation.
+    expect(await db().admin('select 1 from public.pending_invites')).toHaveLength(1);
+    share.mockRestore();
+  });
+
+  it('turns into an invitation the new person sees only after they register, and needs accepting', async () => {
+    const w = await world(db());
+    const { getPathname } = await start(w, 'alice');
+    await openRoute(getPathname, `/groups/${w.group}`);
+    await settle(w.db);
+    await type('invite-identifier', 'dina@example.com');
+    await fireEvent.press(screen.getByTestId('invite-send'));
+    await settle(w.db);
+
+    const dina = await db().signUp('dina@example.com', 'dina');
+    const invites = await dina.rpc<{ group_name: string }[]>('my_invitations');
+    expect(invites.map((i) => i.group_name)).toEqual(['Home']);
+    expect(await dina.rpc('list_my_groups')).toEqual([]);
   });
 });
