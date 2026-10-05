@@ -18,6 +18,7 @@ end $$;
 drop trigger if exists on_auth_user_created on auth.users;
 
 drop function if exists public.update_my_contact(text, text); -- from 20261004000000, if applied
+drop function if exists public.email_hash(text); -- from 20261006000000, if applied
 drop function if exists public.delete_my_account(); -- from 20261005000000, if applied
 drop function if exists public.group_savings_summary(uuid, date, date);
 drop function if exists public.list_my_shared_entries();
@@ -37,6 +38,7 @@ drop function if exists public.my_profile();
 drop function if exists public.username_available(text);
 drop function if exists public.require_user();
 
+drop table if exists public.pending_invites; -- from 20261006000000, if applied
 drop table if exists public.group_events;
 drop table if exists public.shared_entries;
 drop table if exists public.group_members;

@@ -26,6 +26,11 @@ app needs are public by design.
 4. Do the same with the second file, `supabase/migrations/20261004000000_profile_name_phone.sql` (optional name and phone
    on the profile). Always run the migrations in file-name order.
 5. Then `supabase/migrations/20261005000000_delete_my_account.sql` (lets a person delete their own account).
+6. Then `supabase/migrations/20261006000000_pending_email_invites.sql` (an invitation to an email with no account yet waits
+   for 30 days and appears when somebody registers with that address).
+7. **Check it.** Put the project URL and anon key in `mobile/.env.local`, then run `npm.cmd run backend:check` in `mobile/`.
+   It signs nothing in and writes nothing. It tells you in plain words which migration is missing, whether email
+   confirmation is on, and whether any data is readable without signing in (that must never happen).
 
 ## 3. Authentication settings
 

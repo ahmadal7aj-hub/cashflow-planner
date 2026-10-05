@@ -87,6 +87,9 @@ Nothing here is destructive by default. Do **not** use `git reset --hard`, force
    instead; it deletes just those two values. Checkpoint before that change: `checkpoint/pre-profile-fields-2026-10-03`.
    `supabase/rollback/20261005000000_down.sql` removes only the delete-my-account function (accounts already deleted stay
    deleted). Checkpoint: `checkpoint/pre-delete-account-2026-10-03`.
+   `supabase/rollback/20261006000000_down.sql` forgets invitations waiting for an email to register and restores the two
+   functions as they were (invitations already turned into normal ones are kept). Checkpoint:
+   `checkpoint/pre-pending-invites-2026-10-05`.
 
 ## What happens to people's records
 

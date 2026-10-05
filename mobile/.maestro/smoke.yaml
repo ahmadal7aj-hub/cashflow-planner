@@ -5,6 +5,9 @@
 # WARNING: this flow REPLACES the saved data on the device with the sample data (Settings > Load sample data).
 # Run it only on a test phone or emulator, on a fresh install (the first-run questions appear once).
 #
+# It tests the app on its own: there must be NO mobile/.env.local (no sign-in screens). Sign-in and sharing are covered
+# by the automated tests (npm test) and by docs/TEST-WITH-TWO-ACCOUNTS.md.
+#
 # Run (see docs/TESTING.md):
 #   1. cd mobile && npm start            # open the project in Expo Go on the emulator/device
 #   2. maestro test .maestro/smoke.yaml
@@ -41,18 +44,47 @@ appId: host.exp.exponent
 - assertVisible: 'Sample data loaded.'
 - back
 
-# Dashboard with the hand-verified sample result
+# Dashboards open with charts; the hand-verified safe-to-spend card is lower on the Overview
 - assertVisible:
     id: 'dashboard-screen'
+- assertVisible:
+    id: 'dash-section-overview'
+- assertVisible:
+    id: 'chart-in-out'
+- scrollUntilVisible:
+    element:
+      id: 'safe-to-spend-card'
 - assertVisible: 'AED 1,770.00'
 
+# Every section has its own dashboard
+- scrollUntilVisible:
+    element:
+      id: 'dash-section-spending'
+    direction: UP
+- tapOn:
+    id: 'dash-section-spending'
+- assertVisible:
+    id: 'spending-dashboard'
+- tapOn:
+    id: 'dash-section-savings'
+- assertVisible:
+    id: 'savings-dashboard'
+- tapOn:
+    id: 'dash-section-overview'
+
 # Explanation is reachable from the headline number
+- scrollUntilVisible:
+    element:
+      id: 'metric-safe'
 - tapOn:
     id: 'metric-safe'
 - assertVisible: 'What went in'
 - back
 
 # What-if shows a shortfall and leaves the real plan alone
+- scrollUntilVisible:
+    element:
+      id: 'open-scenario'
 - tapOn:
     id: 'open-scenario'
 - tapOn:

@@ -29,6 +29,8 @@ Supabase project.**
 - **Sharing a saving:** on Add money, Take out and Edit saving choose **Keep private** or **Shared**. Shared offers a group
   you are in or **Someone new** (username or email): the app starts a group with that person, invites them, and they see
   the saving only after they accept. You can make it private again at any time.
+- **Invite by email before they register:** inviting an email with no account stores a hash of it for 30 days; when somebody registers with that address it becomes a normal pending invitation they must accept. The inviter sees the same quiet answer either way.
+- **Backend check:** `npm run backend:check` in `mobile/` (after putting the Supabase URL and anon key in `.env.local`) says which migrations are missing and warns if data is readable without signing in.
 - **Dashboards tab:** one tab with Overview, Income, Budget, Spending, Savings and (once something is shared) Shared. Each
   opens with charts, then a Details card. One set of date buttons applies to every section.
 - **Phone reminders:** Settings, Phone reminders (off by default; the phone asks permission when turned on). A notification at 9:00 on the day each bill reminder starts, naming the bill and due date, never an amount. Rebuilt whenever bills change, cancelled when turned off. Tested with a stand-in for the phone; **not yet seen on a real phone** (check that it fires, and that Expo Go on your phone allows local notifications).
@@ -37,14 +39,14 @@ Supabase project.**
 - **Local test server:** `npm run dev:server` in `mobile/` runs the real database rules on the computer so two accounts
   can be tried without Supabase (`docs/TEST-WITH-TWO-ACCOUNTS.md`). Testing only: the code is always 123456.
 - **Database migrations (run in file-name order):** `20261003000000_accounts_and_shared_savings`,
-  `20261004000000_profile_name_phone`, `20261005000000_delete_my_account`. Each has a tested rollback in
+  `20261004000000_profile_name_phone`, `20261005000000_delete_my_account`, `20261006000000_pending_email_invites`. Each has a tested rollback in
   `supabase/rollback/`.
 - **Checkpoint tags:** `checkpoint/pre-restructure-2026-10-03`, `checkpoint/pre-accounts-2026-10-03`,
-  `checkpoint/pre-profile-fields-2026-10-03`, `checkpoint/pre-delete-account-2026-10-03`.
+  `checkpoint/pre-profile-fields-2026-10-03`, `checkpoint/pre-delete-account-2026-10-03`, `checkpoint/pre-pending-invites-2026-10-05`.
 
 ### Not done yet (and why)
 
-- **Inviting someone with no account yet:** needs the real email setup (Supabase SMTP) to send the invitation.
+- **An invitation email actually sent to someone with no account:** the invitation now waits for them (30 days) and the app offers a message to send, but the app itself cannot email them without the real email setup (Supabase SMTP).
 - **Weekly or monthly summary emails:** same dependency (a scheduled job and an email sender).
 - **Encrypting the saved plan on the phone:** only the sign-in session is in secure storage; the records are not encrypted.
 - **Two-step login, a privacy review for UAE law, an email sender in the product's own name, abuse limits.**
@@ -69,11 +71,11 @@ Supabase project.**
 | 3   | **Check phone reminders on a phone**                         | Owner                    | Settings, Phone reminders, then give a bill a reminder for tomorrow and see whether it arrives at 9:00. Tell Claude if Expo Go blocks it                                                                                                                               |
 | 4   | **Create the Supabase project and run the three migrations** | Owner                    | `docs/BACKEND-SETUP.md`. Run `supabase/migrations/` in file-name order. Until then the app uses the local test server or runs on its own                                                                                                                               |
 | 5   | **Fix what the live backend and real phones show**           | Claude                   | Likely: email codes and rate limits, Realtime delivery, `supabase-js` on a phone, chart layout on small screens, swipe feel                                                                                                                                            |
-| 6   | **Build the email features**                                 | Claude, after step 4     | Invite someone with no account yet, weekly and monthly summary emails                                                                                                                                                                                                  |
+| 6   | **Weekly and monthly summary emails**                        | Claude, after step 4     | Needs a scheduled job and the email sender                                                                                                                                                                                                                             |
 | 7   | **Before any real users**                                    | Both                     | Encrypt the saved plan, 2FA, own email sender, UAE PDPL review and privacy notice, abuse limits                                                                                                                                                                        |
 | 8   | **Interviews** (five first, then 20 to 30)                   | Owner                    | `docs/INTERVIEW-ONE-PAGER.md`, `docs/PROTOTYPE-WALKTHROUGH.md`; private notes only in `docs/private/`                                                                                                                                                                  |
 | 9   | **Security exception window**                                | Owner decides            | Renew-or-expire decision around 2026-10-26; check `npm view braces version` and `node-forge`                                                                                                                                                                           |
-| 10  | **Run the Maestro flow** on a USB-connected Android phone    | Owner provides the phone | Written, never run. It replaces saved data, so use a test phone. It predates the Dashboards tab and sign-in, so it needs updating first                                                                                                                                |
+| 10  | **Run the Maestro flow** on a USB-connected Android phone    | Owner provides the phone | Written, never run. It replaces saved data, so use a test phone. Updated 2026-10-05 for the Dashboards tab; it runs with accounts off (no `.env.local`)                                                                                                                |
 | 11  | **Ideas, only if interviews support them**                   | Both                     | Import from bank statements, multi-currency, personal records on a second phone                                                                                                                                                                                        |
 
 ### Ready-to-paste prompt to resume

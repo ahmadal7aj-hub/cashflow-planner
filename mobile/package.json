@@ -52,7 +52,8 @@
     "test:ci": "jest --ci --coverage",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm run test:ci",
     "audit:gate": "node scripts/audit-gate.js",
-    "dev:server": "node scripts/dev-server.mjs"
+    "dev:server": "node scripts/dev-server.mjs",
+    "backend:check": "node scripts/backend-check.mjs"
   },
   "private": true,
   "jest": {
