@@ -1,6 +1,6 @@
 # Project handover
 
-**Snapshot date:** 2026-10-04 · **Stage:** Validation / pre-build (BRD) · **App:** working prototype with accounts, shared savings, chart dashboards and phone reminders (accounts need a backend the owner has not created yet)
+**Snapshot date:** 2026-10-07 · **Stage:** Validation / pre-build (BRD) · **App:** working prototype with accounts, shared savings, chart dashboards and phone reminders (accounts need a backend the owner has not created yet)
 
 This is the one document to read to pick the project up cold. It says what exists, what is done, what is
 not, and exactly what to do next. Anything that needs a person's decision is marked **OWNER**.
@@ -12,11 +12,25 @@ not, and exactly what to do next. Anything that needs a person's decision is mar
 
 ## 0. Start here next session
 
-**State (2026-10-04):** `main` has everything built so far: the app with saving on the phone, the adjustable what-if, and
+**State (2026-10-07):** `main` has everything built so far: the app with saving on the phone, the adjustable what-if, and
 accounts with groups, shared savings and chart dashboards (see "What was added since the first handover" below). CI is green and the earlier security block is cleared
 (an owner-approved exception for the `braces` advisory, expiring **2026-11-01**, next to the `node-forge` one).
 **Nothing in the app has been tried on a real phone by the assistant, and the backend has never run against a live
 Supabase project.**
+
+### Where things stand (2026-10-07)
+
+- **Built and merged:** everything in the list below, through pull request #58. `main` is clean: no open pull requests or issues, 695 automated tests pass, all four required checks pass.
+- **Verified by the owner on a phone (Expo Go and the local test server):** sharing between two accounts, the dashboards and the main flows, with no problems found. **Phone reminders were not reported as tested.**
+- **Never done:** a real Supabase project (so no real emails and no live-backend check), interviews, a run of the Maestro flow.
+- **The single next step is the owner creating the Supabase project** (`docs/BACKEND-SETUP.md`: run the four migrations in file order, put the URL and public key in `mobile/.env.local`, then `npm.cmd run backend:check`). Everything Claude can build next (fixes from the live project, weekly and monthly summary emails) depends on it.
+
+### How to open the app on a phone (quick)
+
+1. PowerShell: `cd C:UsersahmadProjectsBudgetingcashflow-plannermobile`, then `git pull`, then `npm.cmd start -- --clear`.
+2. Wait for the QR code. iPhone: scan it with the Camera app. Android: Expo Go, Scan QR code. Same Wi-Fi (not guest Wi-Fi); Expo Go and the computer signed in to the same Expo account.
+3. Only for two-account testing: in a second PowerShell window run `npm.cmd run dev:server` first and follow `docs/TEST-WITH-TWO-ACCOUNTS.md` (confirmation code is always 123456). Reload with a shake, then Reload.
+4. If it will not connect: `npm.cmd start -- --tunnel`, or `npx.cmd expo login`.
 
 ### What was added since the first handover
 
