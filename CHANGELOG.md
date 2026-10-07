@@ -37,3 +37,4 @@ User-visible changes per release. Format: Keep a Changelog.
 - Invite an email address that has no account yet: the invitation waits 30 days (stored as a hash) and appears when they register; Tell them about the app button.
 - `npm run backend:check` to verify a Supabase project is set up correctly; Maestro smoke flow updated for the Dashboards tab.
 - Handover refreshed with the current state (everything merged through PR #58, what the owner has verified, what has never been done) and quick steps to open the app in Expo Go.
+- Handover: a one-table summary of next steps (who does what and when), and a note on Expo patch updates and the Jest resolver.
