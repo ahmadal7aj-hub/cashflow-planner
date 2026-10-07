@@ -18,6 +18,19 @@ accounts with groups, shared savings and chart dashboards (see "What was added s
 **Nothing in the app has been tried on a real phone by the assistant, and the backend has never run against a live
 Supabase project.**
 
+### Summary of next steps (read this first)
+
+| When                                | Who    | What                                                                                                                                                                                                                                                                            |
+| ----------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Now**                             | Owner  | **Create the Supabase project.** Follow `docs/BACKEND-SETUP.md`: run the four migrations in file order, put the URL and public key in `mobile/.env.local`, restart the app with `npm.cmd start -- --clear`, run `npm.cmd run backend:check` in `mobile` and fix every FAIL line |
+| **Now**                             | Owner  | **Check phone reminders on a phone** (Settings, Phone reminders, then a bill reminder for tomorrow)                                                                                                                                                                             |
+| **After the project exists**        | Claude | Fix what the live project and real phones show, then build weekly and monthly summary emails                                                                                                                                                                                    |
+| **This month**                      | Owner  | **Start five interviews** (`docs/INTERVIEW-ONE-PAGER.md`); notes stay in `docs/private/`. Demand is still unproven                                                                                                                                                              |
+| **About 2026-10-26**                | Owner  | Decide whether to renew the `braces` and `node-forge` security exceptions (both expire **2026-11-01**; no fixed versions exist yet). Claude renews only with explicit approval                                                                                                  |
+| **Before real users**               | Both   | Encrypt the saved records on the phone, two-step login, an email sender in the product's name, UAE privacy review and notice, abuse limits                                                                                                                                      |
+| **Later, if interviews support it** | Both   | Import from bank statements, multi-currency, records synced between phones                                                                                                                                                                                                      |
+| **Anytime**                         | Owner  | Run the Maestro flow on a spare Android phone (updated, never run)                                                                                                                                                                                                              |
+
 ### Where things stand (2026-10-07)
 
 - **Built and merged:** everything in the list below, through pull request #58. `main` is clean: no open pull requests or issues, 695 automated tests pass, all four required checks pass.
@@ -108,6 +121,7 @@ Supabase project.**
 - **Tests:** `openApp` for screens, `openAccountsApp` and `accountScenario` for accounts, `startTestDb` for real-SQL tests.
   The router test library can carry a previous test's route into the next one after long journeys: keep those in their own file.
 - **Money:** integer fils only; all maths in `mobile/src/domain/`; the database computes shared totals (`group_savings_summary`).
+- **Dependency checks can start failing overnight:** Expo publishes patch releases and CI runs `expo-doctor`. If the Quality check fails on package versions, run `node node_modules/expo/bin/cli install <the packages it lists>`, then `npm.cmd ci`, then the full checks. The 2026-10-07 update also needed `mobile/jest.resolver.js`, because the new Expo release keeps `expo-modules-core` inside the `expo` package where jest-expo cannot find it; delete the resolver once jest-expo no longer needs it.
 - **Formatting:** CI runs `prettier --check .` over the whole `mobile/` folder (including `app.json`); run `node node_modules/prettier/bin/prettier.cjs --check .` before pushing, not just `src`.
 - **Test tips:** after a sign-in the app returns to the welcome page on a timer, so tests call `settle(db)` before navigating; `toHaveTextContent("text")` matches the whole text, use a regex for part of it.
 - **Checkpoints and rollback:** `docs/ROLLBACK.md` (tags `checkpoint/pre-restructure-2026-10-03`, `checkpoint/pre-accounts-2026-10-03`, `checkpoint/pre-profile-fields-2026-10-03`, `checkpoint/pre-delete-account-2026-10-03`).
