@@ -22,7 +22,7 @@
     "react-native-screens": "~4.26.0"
   },
   "devDependencies": {
-    "@electric-sql/pglite": "^0.5.8",
+    "@electric-sql/pglite": "^0.5.9",
     "@electric-sql/pglite-socket": "^0.2.11",
     "@testing-library/react-native": "^14.0.1",
     "@types/jest": "29.5.14",
